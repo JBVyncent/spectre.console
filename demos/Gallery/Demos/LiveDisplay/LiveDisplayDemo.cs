@@ -75,5 +75,36 @@ public sealed class LiveDisplayDemo : IDemoModule
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[green]All steps completed.[/]");
+        AnsiConsole.WriteLine();
+
+        // Targeted erase operations (#1570)
+        // Demonstrate the new partial-erase methods:
+        //   ClearLine()       ESC[2K — erase entire current line
+        //   ClearLineToEnd()  ESC[0K — erase from cursor to end of line
+        //   ClearLineToStart() ESC[1K — erase from start of line to cursor
+        //   ClearToBottom()   ESC[0J — erase from cursor to bottom
+        //   ClearToTop()      ESC[1J — erase from cursor to top
+        AnsiConsole.MarkupLine("[bold underline blue]Targeted Erase Operations[/]");
+        AnsiConsole.MarkupLine("[grey](ESC[2K / ESC[0K / ESC[1K / ESC[0J / ESC[1J)[/]");
+        AnsiConsole.WriteLine();
+
+        // Write a line, pause, then erase it and replace with clean content
+        AnsiConsole.Markup("[yellow]Loading...[/]");
+        Thread.Sleep(600);
+
+        // Move cursor back to the start of the line and erase it
+        AnsiConsole.Cursor.MoveLeft(10);
+        AnsiConsole.ClearLine();
+        AnsiConsole.MarkupLine("[green]Done.      [/]");
+
+        AnsiConsole.MarkupLine("[grey]ClearLine() erased the 'Loading...' text in place.[/]");
+        AnsiConsole.WriteLine();
+
+        // Write several lines then erase below cursor
+        AnsiConsole.MarkupLine("[cyan]Line one[/]");
+        AnsiConsole.MarkupLine("[cyan]Line two[/]");
+        AnsiConsole.Markup("[cyan]Line thr");
+        AnsiConsole.ClearToBottom();   // erase from here to bottom
+        AnsiConsole.MarkupLine("[green]ree (ClearToBottom erased the rest of the line)[/]");
     }
 }
