@@ -1,4 +1,5 @@
 using Gallery.Demos;
+using Gallery.Demos.Charts;
 using Gallery.Demos.Exceptions;
 using Gallery.Demos.LiveDisplay;
 using Gallery.Demos.Markup;
@@ -16,6 +17,7 @@ var modules = new IDemoModule[]
     new MarkupDemo(),
     new PromptsDemo(),
     new LiveDisplayDemo(),
+    new ChartsDemo(),
     new ProgressDemo(),
     new StatusDemo(),
     new RulesDemo(),
