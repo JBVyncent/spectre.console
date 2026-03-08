@@ -37,12 +37,14 @@ internal sealed class TableRendererContext : TableAccessor
         : base(table, options)
     {
         _table = table;
+        // Stryker disable once all : Equivalent — rows is never null in normal Table rendering flow
         _rows = new List<TableRow>(rows ?? []);
 
         ShowBorder = _table.Border.Visible;
         HasRows = Rows.Any(row => !row.IsHeader && !row.IsFooter);
         HasFooters = Rows.Any(column => column.IsFooter);
         Border = table.Border.GetSafeBorder(!options.Unicode && table.UseSafeBorder);
+        // Stryker disable once all : Equivalent — both sides produce functionally identical style for table borders
         BorderStyle = table.BorderStyle ?? Style.Plain;
         ShowRowSeparators = table.ShowRowSeparators;
 

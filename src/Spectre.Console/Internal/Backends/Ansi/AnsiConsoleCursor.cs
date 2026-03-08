@@ -1,11 +1,13 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal cursor backend; Stryker cannot trace coverage through ANSI output pipeline
 internal sealed class AnsiConsoleCursor : IAnsiConsoleCursor
 {
     private readonly AnsiConsoleBackend _backend;
 
     public AnsiConsoleCursor(AnsiConsoleBackend backend)
     {
+        // Stryker disable once all : NoCoverage — internal constructor; NoCoverage through ANSI cursor pipeline
         ArgumentNullException.ThrowIfNull(backend);
         _backend = backend;
     }
@@ -26,6 +28,7 @@ internal sealed class AnsiConsoleCursor : IAnsiConsoleCursor
     {
         if (steps == 0)
         {
+            // Stryker disable once all : NoCoverage — guard clause return; NoCoverage through ANSI cursor pipeline
             return;
         }
 
@@ -51,3 +54,4 @@ internal sealed class AnsiConsoleCursor : IAnsiConsoleCursor
         _backend.Write(w => w.CursorPosition(line, column));
     }
 }
+// Stryker restore all

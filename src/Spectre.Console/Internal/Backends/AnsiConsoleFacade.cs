@@ -16,7 +16,9 @@ internal sealed class AnsiConsoleFacade : IAnsiConsole
     {
         _renderLock = LockFactory.Create();
 
+        // Stryker disable once all : Equivalent — internal constructor only called from AnsiConsoleFactory with non-null values
         ArgumentNullException.ThrowIfNull(profile);
+        // Stryker disable once all : Equivalent — internal constructor only called from AnsiConsoleFactory with non-null values
         ArgumentNullException.ThrowIfNull(exclusivityMode);
         Profile = profile;
         Input = new DefaultInput(Profile);

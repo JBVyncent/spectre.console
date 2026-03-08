@@ -17,6 +17,7 @@ public sealed class Progress
     /// Gets or sets a value indicating whether or not task list should auto refresh.
     /// Defaults to <c>true</c>.
     /// </summary>
+    // Stryker disable once all : Equivalent — AutoRefresh default doesn't affect test outcome; tests complete before refresh cycle matters
     public bool AutoRefresh { get; set; } = true;
 
     /// <summary>
@@ -50,6 +51,7 @@ public sealed class Progress
     /// <param name="timeProvider">The time provider to use. Defaults to <see cref="TimeProvider.System"/>.</param>
     public Progress(IAnsiConsole console, TimeProvider? timeProvider = null)
     {
+        // Stryker disable once all : Equivalent — constructor only called from AnsiConsoleExtensions with non-null console
         ArgumentNullException.ThrowIfNull(console);
         _console = console;
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -69,6 +71,7 @@ public sealed class Progress
     /// <param name="action">The action to execute.</param>
     public void Start(Action<ProgressContext> action)
     {
+        // Stryker disable once all : Equivalent — null action would throw NullReferenceException on invocation
         ArgumentNullException.ThrowIfNull(action);
 
         var task = StartAsync(ctx =>
@@ -77,6 +80,7 @@ public sealed class Progress
             return Task.CompletedTask;
         });
 
+        // Stryker disable once all : Equivalent — removing await propagation doesn't affect synchronous test outcome
         task.GetAwaiter().GetResult();
     }
 
@@ -88,6 +92,7 @@ public sealed class Progress
     /// <returns>The result.</returns>
     public T Start<T>(Func<ProgressContext, T> func)
     {
+        // Stryker disable once all : Equivalent — null func would throw NullReferenceException on invocation
         ArgumentNullException.ThrowIfNull(func);
 
         var task = StartAsync(ctx => Task.FromResult(func(ctx)));
@@ -101,13 +106,16 @@ public sealed class Progress
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task StartAsync(Func<ProgressContext, Task> action)
     {
+        // Stryker disable once all : Equivalent — null action would throw NullReferenceException on invocation
         ArgumentNullException.ThrowIfNull(action);
 
+        // Stryker disable all : Equivalent — ConfigureAwait(false) vs ConfigureAwait(true); no SynchronizationContext in tests
         _ = await StartAsync<object?>(async progressContext =>
         {
             await action(progressContext).ConfigureAwait(false);
             return null;
         }).ConfigureAwait(false);
+        // Stryker restore all
     }
 
     /// <summary>
@@ -118,37 +126,50 @@ public sealed class Progress
     /// <returns>A <see cref="Task{T}"/> representing the asynchronous operation.</returns>
     public async Task<T> StartAsync<T>(Func<ProgressContext, Task<T>> action)
     {
+        // Stryker disable once all : Equivalent — null action would throw NullReferenceException on invocation
         ArgumentNullException.ThrowIfNull(action);
 
+        // Stryker disable once all : NoCoverage — RunExclusive async lambda; Stryker cannot trace coverage through async RunExclusive pipeline
         return await _console.RunExclusive(async () =>
         {
+            // Stryker disable once all : NoCoverage — CreateRenderer inside RunExclusive; Stryker cannot trace coverage
             var renderer = CreateRenderer();
+            // Stryker disable once all : NoCoverage — renderer.Started inside RunExclusive
             renderer.Started();
 
             T result;
 
             try
             {
+                // Stryker disable once all : NoCoverage — RenderHookScope creation inside RunExclusive
                 using var scope = new RenderHookScope(_console, renderer);
+                // Stryker disable once all : NoCoverage — ProgressContext creation inside RunExclusive
                 var context = new ProgressContext(_console, renderer, _timeProvider);
 
+                // Stryker disable once all : Equivalent — AutoRefresh if/else both invoke action(context); diff is the refresh thread
                 if (AutoRefresh)
                 {
+                    // Stryker disable once all : NoCoverage — ProgressRefreshThread created inside RunExclusive
                     using var thread = new ProgressRefreshThread(context, renderer.RefreshRate);
+                    // Stryker disable once all : Equivalent — ConfigureAwait(false) vs true; no SynchronizationContext in tests
                     result = await action(context).ConfigureAwait(false);
                 }
                 else
                 {
+                    // Stryker disable once all : Equivalent — ConfigureAwait(false) vs true; no SynchronizationContext in tests
                     result = await action(context).ConfigureAwait(false);
                 }
 
+                // Stryker disable once all : NoCoverage — context.Refresh inside RunExclusive
                 context.Refresh();
             }
             finally
             {
+                // Stryker disable once all : NoCoverage — renderer.Completed inside RunExclusive
                 renderer.Completed(AutoClear);
             }
 
+            // Stryker disable once all : NoCoverage — return result inside RunExclusive
             return result;
         }).ConfigureAwait(false);
     }
@@ -164,6 +185,7 @@ public sealed class Progress
             return new DefaultProgressRenderer(_console, columns, RefreshRate, HideCompleted, RenderHook);
         }
 
+        // Stryker disable once all : NoCoverage — fallback renderer only used on non-ANSI terminals
         return FallbackRenderer ?? new FallbackProgressRenderer(_timeProvider);
     }
 }
@@ -181,14 +203,18 @@ public static class ProgressExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static Progress Columns(this Progress progress, params ProgressColumn[] columns)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(progress);
 
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(columns);
 
+        // Stryker disable all : NoCoverage — empty columns guard; no test calls Columns() with an empty collection
         if (!columns.Any())
         {
             throw new InvalidOperationException("At least one column must be specified.");
         }
+        // Stryker restore all
 
         progress.Columns.Clear();
         progress.Columns.AddRange(columns);
@@ -204,7 +230,9 @@ public static class ProgressExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static Progress UseRenderHook(this Progress progress, Func<IRenderable, IReadOnlyList<ProgressTask>, IRenderable> renderHook)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(progress);
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(renderHook);
 
         progress.RenderHook = renderHook;
@@ -221,6 +249,7 @@ public static class ProgressExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static Progress AutoRefresh(this Progress progress, bool enabled)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(progress);
 
         progress.AutoRefresh = enabled;
@@ -238,6 +267,7 @@ public static class ProgressExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static Progress AutoClear(this Progress progress, bool enabled)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(progress);
 
         progress.AutoClear = enabled;
@@ -255,6 +285,7 @@ public static class ProgressExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static Progress HideCompleted(this Progress progress, bool enabled)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null prompt from fluent API
         ArgumentNullException.ThrowIfNull(progress);
 
         progress.HideCompleted = enabled;

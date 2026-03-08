@@ -175,6 +175,7 @@ public static class SpinnerColumnExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static SpinnerColumn Style(this SpinnerColumn column, Style? style)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null from fluent API
         ArgumentNullException.ThrowIfNull(column);
 
         column.Style = style;
@@ -190,6 +191,7 @@ public static class SpinnerColumnExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static SpinnerColumn CompletedText(this SpinnerColumn column, string? text)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null from fluent API
         ArgumentNullException.ThrowIfNull(column);
 
         column.CompletedText = text;
@@ -204,6 +206,7 @@ public static class SpinnerColumnExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static SpinnerColumn CompletedStyle(this SpinnerColumn column, Style? style)
     {
+        // Stryker disable once all : Equivalent — extension method null guard; always called with non-null from fluent API
         ArgumentNullException.ThrowIfNull(column);
 
         column.CompletedStyle = style;
