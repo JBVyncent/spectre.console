@@ -3,6 +3,13 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup Label="REMOVE THIS">
+    <InternalsVisibleTo Include="Spectre.Console.Tests" />
+  </ItemGroup>
+
+  <PropertyGroup>
     <Description>A library that extends Spectre.Console with ImageSharp superpowers.</Description>
   </PropertyGroup>
   <PropertyGroup>

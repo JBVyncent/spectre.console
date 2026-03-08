@@ -45,6 +45,12 @@ public sealed class CanvasImage : Renderable
 
     internal SixLabors.ImageSharp.Image<Rgba32> Image { get; }
 
+    // Internal constructor used by SixelImage's block-character fallback path.
+    internal CanvasImage(SixLabors.ImageSharp.Image<Rgba32> image)
+    {
+        Image = image;
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CanvasImage"/> class.
     /// </summary>

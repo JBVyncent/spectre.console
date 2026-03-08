@@ -29,6 +29,13 @@ public class AnsiCapabilities : IReadOnlyAnsiCapabilities
     public bool AlternateBuffer { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether or not the terminal supports
+    /// Sixel image encoding (DCS-based pixel-perfect image rendering).
+    /// Detected automatically from environment variables; can be overridden manually.
+    /// </summary>
+    public bool SupportsSixel { get; set; }
+
+    /// <summary>
     /// Creates a <see cref="AnsiCapabilities"/> instance from the provided arguments.
     /// </summary>
     /// <param name="writer">The text writer to use.</param>
@@ -62,6 +69,7 @@ public class AnsiCapabilities : IReadOnlyAnsiCapabilities
             Ansi = supportsAnsi,
             Links = supportsAnsi && !legacyConsole,
             AlternateBuffer = supportsAnsi && !legacyConsole,
+            SupportsSixel = supportsAnsi && !legacyConsole && SixelDetector.Detect(),
         };
     }
 }
@@ -93,4 +101,10 @@ public interface IReadOnlyAnsiCapabilities
     /// or not the console supports alternate buffers.
     /// </summary>
     public bool AlternateBuffer { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether or not the terminal supports
+    /// Sixel image encoding (DCS-based pixel-perfect image rendering).
+    /// </summary>
+    public bool SupportsSixel { get; }
 }

@@ -38,6 +38,7 @@
     <ProjectReference Include="..\Spectre.Console.Testing\Spectre.Console.Testing.csproj" />
     <ProjectReference Include="..\Spectre.Console\Spectre.Console.csproj" />
     <ProjectReference Include="..\Extensions\Spectre.Console.Json\Spectre.Console.Json.csproj" />
+    <ProjectReference Include="..\Extensions\Spectre.Console.ImageSharp\Spectre.Console.ImageSharp.csproj" />
   </ItemGroup>
 
 </Project>
