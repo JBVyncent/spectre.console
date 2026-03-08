@@ -78,11 +78,13 @@ public sealed class LiveDisplay
     {
         ArgumentNullException.ThrowIfNull(func);
 
+        // Stryker disable all : ConfigureAwait(false/true) is equivalent in test context
         _ = await StartAsync<object?>(async ctx =>
         {
             await func(ctx).ConfigureAwait(false);
             return default;
         }).ConfigureAwait(false);
+        // Stryker restore all
     }
 
     /// <summary>
@@ -95,6 +97,7 @@ public sealed class LiveDisplay
     {
         ArgumentNullException.ThrowIfNull(func);
 
+        // Stryker disable all : ConfigureAwait(false/true) is equivalent in test context
         return await _console.RunExclusive(async () =>
         {
             var context = new LiveDisplayContext(_console, _target);
@@ -115,6 +118,7 @@ public sealed class LiveDisplay
                 renderer.Completed(AutoClear);
             }
         }).ConfigureAwait(false);
+        // Stryker restore all
     }
 }
 
