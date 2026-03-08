@@ -8,7 +8,8 @@ internal sealed class LayoutRender
 
     public LayoutRender(Region region, List<SegmentLine> render)
     {
+        ArgumentNullException.ThrowIfNull(render);
         Region = region;
-        Render = render ?? throw new ArgumentNullException(nameof(render));
+        Render = render;
     }
 }

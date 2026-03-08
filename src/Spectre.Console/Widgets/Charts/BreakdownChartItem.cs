@@ -28,7 +28,8 @@ public sealed class BreakdownChartItem : IBreakdownChartItem
     /// <param name="color">The item color.</param>
     public BreakdownChartItem(string label, double value, Color color)
     {
-        Label = label ?? throw new ArgumentNullException(nameof(label));
+        ArgumentNullException.ThrowIfNull(label);
+        Label = label;
         Value = value;
         Color = color;
     }

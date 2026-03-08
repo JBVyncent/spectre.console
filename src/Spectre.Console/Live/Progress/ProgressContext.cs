@@ -28,11 +28,14 @@ public sealed class ProgressContext
 
     internal ProgressContext(IAnsiConsole console, ProgressRenderer renderer, TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(console);
+        ArgumentNullException.ThrowIfNull(renderer);
+        ArgumentNullException.ThrowIfNull(timeProvider);
         _tasks = [];
         _taskLock = LockFactory.Create();
-        _console = console ?? throw new ArgumentNullException(nameof(console));
-        _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
-        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+        _console = console;
+        _renderer = renderer;
+        _timeProvider = timeProvider;
     }
 
     /// <summary>

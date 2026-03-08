@@ -16,9 +16,11 @@ internal sealed class AnsiConsoleFacade : IAnsiConsole
     {
         _renderLock = LockFactory.Create();
 
-        Profile = profile ?? throw new ArgumentNullException(nameof(profile));
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(exclusivityMode);
+        Profile = profile;
         Input = new DefaultInput(Profile);
-        ExclusivityMode = exclusivityMode ?? throw new ArgumentNullException(nameof(exclusivityMode));
+        ExclusivityMode = exclusivityMode;
         Pipeline = new RenderPipeline();
 
         _ansiBackend = new AnsiConsoleBackend(this);

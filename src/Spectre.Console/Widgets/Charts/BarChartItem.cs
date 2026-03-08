@@ -28,7 +28,8 @@ public sealed class BarChartItem : IBarChartItem
     /// <param name="color">The item color.</param>
     public BarChartItem(string label, double value, Color? color = null)
     {
-        Label = label ?? throw new ArgumentNullException(nameof(label));
+        ArgumentNullException.ThrowIfNull(label);
+        Label = label;
         Value = value;
         Color = color;
     }

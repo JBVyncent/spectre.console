@@ -32,8 +32,10 @@ public sealed class LiveDisplay
     /// <param name="target">The target renderable to update.</param>
     public LiveDisplay(IAnsiConsole console, IRenderable target)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
-        _target = target ?? throw new ArgumentNullException(nameof(target));
+        ArgumentNullException.ThrowIfNull(console);
+        ArgumentNullException.ThrowIfNull(target);
+        _console = console;
+        _target = target;
     }
 
     /// <summary>
@@ -42,6 +44,8 @@ public sealed class LiveDisplay
     /// <param name="action">The action to execute.</param>
     public void Start(Action<LiveDisplayContext> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
+
         var task = StartAsync(ctx =>
         {
             action(ctx);
@@ -59,6 +63,8 @@ public sealed class LiveDisplay
     /// <returns>The result.</returns>
     public T Start<T>(Func<LiveDisplayContext, T> func)
     {
+        ArgumentNullException.ThrowIfNull(func);
+
         var task = StartAsync(ctx => Task.FromResult(func(ctx)));
         return task.GetAwaiter().GetResult();
     }
@@ -99,12 +105,10 @@ public sealed class LiveDisplay
 
             try
             {
-                using (new RenderHookScope(_console, renderer))
-                {
-                    var result = await func(context).ConfigureAwait(false);
-                    context.Refresh();
-                    return result;
-                }
+                using var scope = new RenderHookScope(_console, renderer);
+                var result = await func(context).ConfigureAwait(false);
+                context.Refresh();
+                return result;
             }
             finally
             {

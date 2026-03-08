@@ -21,7 +21,8 @@ public sealed class AnsiWriter
     /// <param name="output">The <see cref="TextWriter"/> to write to.</param>
     public AnsiWriter(TextWriter output)
     {
-        _output = output ?? throw new ArgumentNullException(nameof(output));
+        ArgumentNullException.ThrowIfNull(output);
+        _output = output;
         _codes = [];
         _styleBuffer = [];
 
@@ -35,11 +36,13 @@ public sealed class AnsiWriter
     /// <param name="capabilities">The capabilities.</param>
     public AnsiWriter(TextWriter output, AnsiCapabilities capabilities)
     {
-        _output = output ?? throw new ArgumentNullException(nameof(output));
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(capabilities);
+        _output = output;
         _codes = [];
         _styleBuffer = [];
 
-        Capabilities = capabilities ?? throw new ArgumentNullException(nameof(capabilities));
+        Capabilities = capabilities;
     }
 
     /// <summary>

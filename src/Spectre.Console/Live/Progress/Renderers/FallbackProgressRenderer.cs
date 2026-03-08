@@ -15,9 +15,10 @@ internal sealed class FallbackProgressRenderer : ProgressRenderer
 
     public FallbackProgressRenderer(TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         _taskMilestones = new Dictionary<int, double>();
         _lock = LockFactory.Create();
-        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+        _timeProvider = timeProvider;
     }
 
     public override void Update(ProgressContext context)

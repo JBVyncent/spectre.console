@@ -270,6 +270,10 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
             {
                 text = text.RemoveMarkup().EscapeMarkup();
             }
+            else
+            {
+                text = text.EscapeMarkup();
+            }
 
             var checkbox = item.Node.IsSelected
                 ? ListPromptConstants.GetSelectedCheckbox(item.Node.IsGroup, Mode, HighlightStyle)

@@ -8,7 +8,7 @@ public sealed class SegmentLine : List<Segment>
     /// <summary>
     /// Gets the width of the line.
     /// </summary>
-    public int Length => this.Sum(line => line.Text.Length);
+    public int Length => this.Sum(segment => segment.Text.Length);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SegmentLine"/> class.
@@ -36,7 +36,7 @@ public sealed class SegmentLine : List<Segment>
     }
 
     /// <summary>
-    /// Preprends a segment to the line.
+    /// Prepends a segment to the line.
     /// </summary>
     /// <param name="segment">The segment to prepend.</param>
     public void Prepend(Segment segment)

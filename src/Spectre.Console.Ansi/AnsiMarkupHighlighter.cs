@@ -129,7 +129,8 @@ file sealed class IndexedMarkupSegment
 
     private IndexedMarkupSegment(AnsiMarkupSegment segment, int startIndex)
     {
-        _segment = segment ?? throw new ArgumentNullException(nameof(segment));
+        ArgumentNullException.ThrowIfNull(segment);
+        _segment = segment;
         StartIndex = startIndex;
     }
 

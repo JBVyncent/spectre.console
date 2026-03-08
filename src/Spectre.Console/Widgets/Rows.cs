@@ -25,7 +25,8 @@ public sealed class Rows : Renderable, IExpandable
     /// <param name="children">The items to render as rows.</param>
     public Rows(IEnumerable<IRenderable> children)
     {
-        _children = new List<IRenderable>(children ?? throw new ArgumentNullException(nameof(children)));
+        ArgumentNullException.ThrowIfNull(children);
+        _children = new List<IRenderable>(children);
     }
 
     /// <inheritdoc/>
@@ -35,18 +36,16 @@ public sealed class Rows : Renderable, IExpandable
         {
             return new Measurement(maxWidth, maxWidth);
         }
-        else
-        {
-            var measurements = _children.Select(c => c.Measure(options, maxWidth)).ToArray();
-            if (measurements.Length > 0)
-            {
-                return new Measurement(
-                    measurements.Max(c => c.Min),
-                    measurements.Max(c => c.Max));
-            }
 
-            return new Measurement(0, 0);
+        var measurements = _children.Select(c => c.Measure(options, maxWidth)).ToArray();
+        if (measurements.Length > 0)
+        {
+            return new Measurement(
+                measurements.Max(c => c.Min),
+                measurements.Max(c => c.Max));
         }
+
+        return new Measurement(0, 0);
     }
 
     /// <inheritdoc/>

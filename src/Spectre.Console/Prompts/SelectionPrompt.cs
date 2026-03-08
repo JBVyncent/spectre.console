@@ -212,6 +212,10 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
             {
                 text = text.RemoveMarkup().EscapeMarkup();
             }
+            else
+            {
+                text = text.EscapeMarkup();
+            }
 
             if (searchText.Length > 0 && !(item.Node.IsGroup && Mode == SelectionMode.Leaf))
             {

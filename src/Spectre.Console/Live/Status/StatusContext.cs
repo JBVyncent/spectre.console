@@ -38,9 +38,12 @@ public sealed class StatusContext
 
     internal StatusContext(ProgressContext context, ProgressTask task, SpinnerColumn spinnerColumn)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _task = task ?? throw new ArgumentNullException(nameof(task));
-        _spinnerColumn = spinnerColumn ?? throw new ArgumentNullException(nameof(spinnerColumn));
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(task);
+        ArgumentNullException.ThrowIfNull(spinnerColumn);
+        _context = context;
+        _task = task;
+        _spinnerColumn = spinnerColumn;
     }
 
     /// <summary>

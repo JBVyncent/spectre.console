@@ -5,7 +5,7 @@ internal static class TypeConverterHelper
     internal const DynamicallyAccessedMemberTypes ConverterAnnotation = DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields;
 
     internal static bool IsGetConverterSupported =>
-        !AppContext.TryGetSwitch("Spectre.Console.TypeConverterHelper.IsGetConverterSupported ", out var enabled) || enabled;
+        !AppContext.TryGetSwitch("Spectre.Console.TypeConverterHelper.IsGetConverterSupported", out var enabled) || enabled;
 
     public static string ConvertToString<T>(T input)
     {
@@ -40,10 +40,8 @@ internal static class TypeConverterHelper
             {
                 return TryConvertFromString<T>(input, out result);
             }
-            else
-            {
-                result = (T?)GetTypeConverter<T>().ConvertFromString(null!, info, input);
-            }
+
+            result = (T?)GetTypeConverter<T>().ConvertFromString(null!, info, input);
 
             return true;
         }

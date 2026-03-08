@@ -27,7 +27,8 @@ internal sealed class ListPromptState<T>
         bool skipUnselectableItems,
         bool searchEnabled)
     {
-        _converter = converter ?? throw new ArgumentNullException(nameof(converter));
+        ArgumentNullException.ThrowIfNull(converter);
+        _converter = converter;
         Items = items;
         PageSize = pageSize;
         WrapAround = wrapAround;

@@ -8,8 +8,10 @@ internal sealed class ListPrompt<T>
 
     public ListPrompt(IAnsiConsole console, IListPromptStrategy<T> strategy)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
-        _strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
+        ArgumentNullException.ThrowIfNull(console);
+        ArgumentNullException.ThrowIfNull(strategy);
+        _console = console;
+        _strategy = strategy;
     }
 
     public async Task<ListPromptState<T>> Show(
@@ -47,36 +49,35 @@ internal sealed class ListPrompt<T>
         var state = new ListPromptState<T>(nodes, converter, _strategy.CalculatePageSize(_console, nodes.Count, requestedPageSize), wrapAround, selectionMode, skipUnselectableItems, searchEnabled);
         var hook = new ListPromptRenderHook<T>(_console, () => BuildRenderable(state));
 
-        using (new RenderHookScope(_console, hook))
+        using var scope = new RenderHookScope(_console, hook);
+        _console.Cursor.Hide();
+        hook.Refresh();
+
+        while (true)
         {
-            _console.Cursor.Hide();
-            hook.Refresh();
-
-            while (true)
+            cancellationToken.ThrowIfCancellationRequested();
+            var rawKey = await _console.Input.ReadKeyAsync(true, cancellationToken).ConfigureAwait(false);
+            if (rawKey == null)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var rawKey = await _console.Input.ReadKeyAsync(true, cancellationToken).ConfigureAwait(false);
-                if (rawKey == null)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                var key = rawKey.Value;
-                var result = _strategy.HandleInput(key, state);
-                if (result == ListPromptInputResult.Submit)
-                {
-                    break;
-                }
-                else if (result == ListPromptInputResult.Abort)
-                {
-                    state.Cancel();
-                    break;
-                }
+            var key = rawKey.Value;
+            var result = _strategy.HandleInput(key, state);
+            if (result == ListPromptInputResult.Submit)
+            {
+                break;
+            }
 
-                if (state.Update(key) || result == ListPromptInputResult.Refresh)
-                {
-                    hook.Refresh();
-                }
+            if (result == ListPromptInputResult.Abort)
+            {
+                state.Cancel();
+                break;
+            }
+
+            if (state.Update(key) || result == ListPromptInputResult.Refresh)
+            {
+                hook.Refresh();
             }
         }
 

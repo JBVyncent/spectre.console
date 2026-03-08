@@ -28,7 +28,7 @@ internal readonly struct SegmentShape
             Math.Max(Height, other.Height));
     }
 
-    public void Apply(RenderOptions options, ref List<SegmentLine> lines)
+    public void Apply(ref List<SegmentLine> lines)
     {
         foreach (var line in lines)
         {

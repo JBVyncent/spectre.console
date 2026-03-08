@@ -38,7 +38,8 @@ public sealed class Profile
         get => _out;
         set
         {
-            _out = value ?? throw new InvalidOperationException("Output buffer cannot be null");
+            ArgumentNullException.ThrowIfNull(value);
+            _out = value;
 
             // Reset the width and height if this is a terminal.
             if (value.IsTerminal)
@@ -57,11 +58,7 @@ public sealed class Profile
         get => _encoding;
         set
         {
-            if (value == null)
-            {
-                throw new InvalidOperationException("Encoding cannot be null");
-            }
-
+            ArgumentNullException.ThrowIfNull(value);
             _out.SetEncoding(value);
             _encoding = value;
         }
@@ -109,7 +106,8 @@ public sealed class Profile
         get => _capabilities;
         set
         {
-            _capabilities = value ?? throw new InvalidOperationException("Profile capabilities cannot be null");
+            ArgumentNullException.ThrowIfNull(value);
+            _capabilities = value;
         }
     }
 
@@ -121,10 +119,13 @@ public sealed class Profile
     /// <param name="encoding">The output encoding.</param>
     public Profile(IAnsiConsoleOutput @out, Capabilities capabilities, Encoding encoding)
     {
+        ArgumentNullException.ThrowIfNull(@out);
+        ArgumentNullException.ThrowIfNull(capabilities);
+        ArgumentNullException.ThrowIfNull(encoding);
         _enrichers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        _out = @out ?? throw new ArgumentNullException(nameof(@out));
-        _capabilities = capabilities ?? throw new ArgumentNullException(nameof(capabilities));
-        _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+        _out = @out;
+        _capabilities = capabilities;
+        _encoding = encoding;
     }
 
     /// <summary>

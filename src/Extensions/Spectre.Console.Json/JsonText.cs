@@ -76,7 +76,8 @@ public sealed class JsonText : JustInTimeRenderable
     /// <param name="json">The JSON to render.</param>
     public JsonText(string json)
     {
-        _json = json ?? throw new ArgumentNullException(nameof(json));
+        ArgumentNullException.ThrowIfNull(json);
+        _json = json;
     }
 
     /// <inheritdoc/>

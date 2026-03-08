@@ -50,7 +50,8 @@ public sealed class Progress
     /// <param name="timeProvider">The time provider to use. Defaults to <see cref="TimeProvider.System"/>.</param>
     public Progress(IAnsiConsole console, TimeProvider? timeProvider = null)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
+        ArgumentNullException.ThrowIfNull(console);
+        _console = console;
         _timeProvider = timeProvider ?? TimeProvider.System;
 
         // Initialize with default columns
@@ -68,6 +69,8 @@ public sealed class Progress
     /// <param name="action">The action to execute.</param>
     public void Start(Action<ProgressContext> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
+
         var task = StartAsync(ctx =>
         {
             action(ctx);
@@ -81,10 +84,12 @@ public sealed class Progress
     /// Starts the progress task list and returns a result.
     /// </summary>
     /// <typeparam name="T">The result type.</typeparam>
-    /// <param name="func">he action to execute.</param>
+    /// <param name="func">The action to execute.</param>
     /// <returns>The result.</returns>
     public T Start<T>(Func<ProgressContext, T> func)
     {
+        ArgumentNullException.ThrowIfNull(func);
+
         var task = StartAsync(ctx => Task.FromResult(func(ctx)));
         return task.GetAwaiter().GetResult();
     }
@@ -124,24 +129,20 @@ public sealed class Progress
 
             try
             {
-                using (new RenderHookScope(_console, renderer))
+                using var scope = new RenderHookScope(_console, renderer);
+                var context = new ProgressContext(_console, renderer, _timeProvider);
+
+                if (AutoRefresh)
                 {
-                    var context = new ProgressContext(_console, renderer, _timeProvider);
-
-                    if (AutoRefresh)
-                    {
-                        using (var thread = new ProgressRefreshThread(context, renderer.RefreshRate))
-                        {
-                            result = await action(context).ConfigureAwait(false);
-                        }
-                    }
-                    else
-                    {
-                        result = await action(context).ConfigureAwait(false);
-                    }
-
-                    context.Refresh();
+                    using var thread = new ProgressRefreshThread(context, renderer.RefreshRate);
+                    result = await action(context).ConfigureAwait(false);
                 }
+                else
+                {
+                    result = await action(context).ConfigureAwait(false);
+                }
+
+                context.Refresh();
             }
             finally
             {
@@ -162,10 +163,8 @@ public sealed class Progress
             var columns = new List<ProgressColumn>(Columns);
             return new DefaultProgressRenderer(_console, columns, RefreshRate, HideCompleted, RenderHook);
         }
-        else
-        {
-            return FallbackRenderer ?? new FallbackProgressRenderer(_timeProvider);
-        }
+
+        return FallbackRenderer ?? new FallbackProgressRenderer(_timeProvider);
     }
 }
 
@@ -205,6 +204,9 @@ public static class ProgressExtensions
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static Progress UseRenderHook(this Progress progress, Func<IRenderable, IReadOnlyList<ProgressTask>, IRenderable> renderHook)
     {
+        ArgumentNullException.ThrowIfNull(progress);
+        ArgumentNullException.ThrowIfNull(renderHook);
+
         progress.RenderHook = renderHook;
 
         return progress;

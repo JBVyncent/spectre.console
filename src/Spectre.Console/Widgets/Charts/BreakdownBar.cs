@@ -8,7 +8,8 @@ internal sealed class BreakdownBar : Renderable
 
     public BreakdownBar(List<IBreakdownChartItem> data)
     {
-        _data = data ?? throw new ArgumentNullException(nameof(data));
+        ArgumentNullException.ThrowIfNull(data);
+        _data = data;
     }
 
     protected override Measurement Measure(RenderOptions options, int maxWidth)

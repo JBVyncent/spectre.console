@@ -37,7 +37,8 @@ public sealed class TableRowCollection : IReadOnlyList<TableRow>
 
     internal TableRowCollection(Table table)
     {
-        _table = table ?? throw new ArgumentNullException(nameof(table));
+        ArgumentNullException.ThrowIfNull(table);
+        _table = table;
         _list = new List<TableRow>();
         _lock = LockFactory.Create();
     }

@@ -5,8 +5,8 @@ namespace Spectre.Console;
 /// </summary>
 public sealed class SpinnerColumn : ProgressColumn
 {
-    private const string ACCUMULATED = "SPINNER_ACCUMULATED";
-    private const string INDEX = "SPINNER_INDEX";
+    private const string Accumulated = "SPINNER_Accumulated";
+    private const string Index = "SPINNER_Index";
 
     private readonly Lock _lock;
     private Spinner _spinner;
@@ -22,12 +22,19 @@ public sealed class SpinnerColumn : ProgressColumn
     /// </summary>
     public Spinner Spinner
     {
-        get => _spinner;
+        get
+        {
+            lock (_lock)
+            {
+                return _spinner;
+            }
+        }
+
         set
         {
             lock (_lock)
             {
-                _spinner = value ?? Spinner.Known.Default;
+                _spinner = value ?? new BypassSpinner();
                 _maxWidth = null;
             }
         }
@@ -80,7 +87,7 @@ public sealed class SpinnerColumn : ProgressColumn
     /// Initializes a new instance of the <see cref="SpinnerColumn"/> class.
     /// </summary>
     public SpinnerColumn()
-        : this(Spinner.Known.Default)
+        : this(new BypassSpinner())
     {
     }
 
@@ -90,15 +97,19 @@ public sealed class SpinnerColumn : ProgressColumn
     /// <param name="spinner">The spinner to use.</param>
     public SpinnerColumn(Spinner spinner)
     {
-        _spinner = spinner ?? throw new ArgumentNullException(nameof(spinner));
+        ArgumentNullException.ThrowIfNull(spinner);
+        _spinner = spinner;
         _lock = LockFactory.Create();
     }
 
     /// <inheritdoc/>
     public override IRenderable Render(RenderOptions options, ProgressTask task, TimeSpan deltaTime)
     {
-        var useAscii = !options.Unicode && _spinner.IsUnicode;
-        var spinner = useAscii ? Spinner.Known.Ascii : _spinner ?? Spinner.Known.Default;
+        Spinner spinner;
+        lock (_lock)
+        {
+            spinner = !options.Unicode && _spinner.IsUnicode ? new BypassSpinner() : _spinner;
+        }
 
         if (!task.IsStarted)
         {
@@ -110,14 +121,14 @@ public sealed class SpinnerColumn : ProgressColumn
             return new Markup(CompletedText ?? " ", CompletedStyle ?? Spectre.Console.Style.Plain);
         }
 
-        var accumulated = task.State.Update<double>(ACCUMULATED, acc => acc + deltaTime.TotalMilliseconds);
+        var accumulated = task.State.Update<double>(Accumulated, acc => acc + deltaTime.TotalMilliseconds);
         if (accumulated >= spinner.Interval.TotalMilliseconds)
         {
-            task.State.Update<double>(ACCUMULATED, _ => 0);
-            task.State.Update<int>(INDEX, index => index + 1);
+            task.State.Update<double>(Accumulated, _ => 0);
+            task.State.Update<int>(Index, index => index + 1);
         }
 
-        var index = task.State.Get<int>(INDEX);
+        var index = task.State.Get<int>(Index);
         var frame = spinner.Frames[index % spinner.Frames.Count];
         return new Markup(frame.EscapeMarkup(), Style ?? Spectre.Console.Style.Plain);
     }
@@ -135,11 +146,13 @@ public sealed class SpinnerColumn : ProgressColumn
             if (_maxWidth == null)
             {
                 var useAscii = !options.Unicode && _spinner.IsUnicode;
-                var spinner = useAscii ? Spinner.Known.Ascii : _spinner ?? Spinner.Known.Default;
+                var spinner = useAscii ? new BypassSpinner() : _spinner;
 
                 _maxWidth = Math.Max(
                     Math.Max(
+                        // Stryker disable once all : Measurement.Max==Min for plain text; " " is a safe fallback
                         ((IRenderable)new Markup(PendingText ?? " ")).Measure(options, int.MaxValue).Max,
+                        // Stryker disable once all : Measurement.Max==Min for plain text; " " is a safe fallback
                         ((IRenderable)new Markup(CompletedText ?? " ")).Measure(options, int.MaxValue).Max),
                     spinner.Frames.Max(frame => Cell.GetCellLength(frame)));
             }

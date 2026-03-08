@@ -4,7 +4,7 @@ public sealed class ProgressColumnFixture<T>
     where T : ProgressColumn, new()
 {
     public T Column { get; }
-    public ProgressTask Task { get; set; }
+    public ProgressTask Task { get; }
 
     public ProgressColumnFixture(double completed, double total)
     {

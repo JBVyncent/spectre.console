@@ -9,17 +9,9 @@ internal static class ResourceReader
         var assembly = typeof(ResourceReader).Assembly;
         resourceName = resourceName.ReplaceExact("/", ".");
 
-        using (var stream = assembly.GetManifestResourceStream(resourceName))
-        {
-            if (stream == null)
-            {
-                throw new InvalidOperationException("Could not load manifest resource stream.");
-            }
-
-            using (var reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd().NormalizeNewLines();
-            }
-        }
+        using var stream = assembly.GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException("Could not load manifest resource stream.");
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd().NormalizeNewLines();
     }
 }

@@ -259,8 +259,10 @@ public sealed class Layout : Renderable, IRatioResolvable, IHasVisibility
             throw new InvalidOperationException("Cannot split the same layout twice");
         }
 
-        _splitter = splitter ?? throw new ArgumentNullException(nameof(splitter));
-        _children = layouts ?? throw new ArgumentNullException(nameof(layouts));
+        ArgumentNullException.ThrowIfNull(splitter);
+        ArgumentNullException.ThrowIfNull(layouts);
+        _splitter = splitter;
+        _children = layouts;
     }
 
     private Dictionary<Layout, LayoutRender> MakeRenderMap(RenderOptions options, int maxWidth)

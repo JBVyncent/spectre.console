@@ -29,7 +29,8 @@ public class Recorder : IAnsiConsole, IDisposable
     /// <param name="console">The console to record output for.</param>
     public Recorder(IAnsiConsole console)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
+        ArgumentNullException.ThrowIfNull(console);
+        _console = console;
         _recorded = [];
     }
 

@@ -16,8 +16,9 @@ internal sealed class ListWithCallback<T> : IList<T>, IReadOnlyList<T>
 
     public ListWithCallback(Action callback)
     {
+        ArgumentNullException.ThrowIfNull(callback);
         _list = [];
-        _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+        _callback = callback;
     }
 
     public void Add(T item)

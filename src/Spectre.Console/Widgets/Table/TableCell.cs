@@ -21,7 +21,8 @@ public sealed class TableCell : IRenderable
     /// <param name="content">The cell content.</param>
     public TableCell(IRenderable content)
     {
-        Content = content ?? throw new ArgumentNullException(nameof(content));
+        ArgumentNullException.ThrowIfNull(content);
+        Content = content;
         ColumnSpan = 1;
     }
 

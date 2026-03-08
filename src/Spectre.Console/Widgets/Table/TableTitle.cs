@@ -22,7 +22,8 @@ public sealed class TableTitle
     /// <param name="style">The title style.</param>
     public TableTitle(string text, Style? style = null)
     {
-        Text = text ?? throw new ArgumentNullException(nameof(text));
+        ArgumentNullException.ThrowIfNull(text);
+        Text = text;
         Style = style;
     }
 

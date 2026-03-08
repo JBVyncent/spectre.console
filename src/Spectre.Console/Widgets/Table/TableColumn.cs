@@ -21,7 +21,8 @@ public sealed class TableColumn : IColumn
                 throw new InvalidOperationException("Column spanning is not supported in table header rows.");
             }
 
-            _header = value ?? throw new ArgumentNullException(nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
+        _header = value;
         }
     }
 
@@ -80,7 +81,8 @@ public sealed class TableColumn : IColumn
     /// <param name="header">The <see cref="IRenderable"/> instance to use as the table column header.</param>
     public TableColumn(IRenderable header)
     {
-        Header = header ?? throw new ArgumentNullException(nameof(header));
+        ArgumentNullException.ThrowIfNull(header);
+        Header = header;
         Width = null;
         Padding = new Padding(1, 0, 1, 0);
         NoWrap = false;

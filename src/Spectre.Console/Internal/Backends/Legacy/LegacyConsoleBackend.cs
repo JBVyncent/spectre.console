@@ -9,7 +9,8 @@ internal sealed class LegacyConsoleBackend : IAnsiConsoleBackend
 
     public LegacyConsoleBackend(IAnsiConsole console)
     {
-        _console = console ?? throw new System.ArgumentNullException(nameof(console));
+        ArgumentNullException.ThrowIfNull(console);
+        _console = console;
         _lastStyle = Style.Plain;
 
         Cursor = new LegacyConsoleCursor();

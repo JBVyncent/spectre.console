@@ -65,10 +65,8 @@ public sealed class FigletFont
     /// <returns>The loaded FIGlet font.</returns>
     public static FigletFont Load(Stream stream)
     {
-        using (var reader = new StreamReader(stream))
-        {
-            return Parse(reader.ReadToEnd());
-        }
+        using var reader = new StreamReader(stream);
+        return Parse(reader.ReadToEnd());
     }
 
     /// <summary>

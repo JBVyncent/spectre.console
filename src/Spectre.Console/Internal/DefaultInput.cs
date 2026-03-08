@@ -6,7 +6,8 @@ internal sealed class DefaultInput : IAnsiConsoleInput
 
     public DefaultInput(Profile profile)
     {
-        _profile = profile ?? throw new ArgumentNullException(nameof(profile));
+        ArgumentNullException.ThrowIfNull(profile);
+        _profile = profile;
     }
 
     public bool IsKeyAvailable()

@@ -23,6 +23,7 @@ public sealed class TreeNode : IHasTreeNodes
     /// <param name="renderable">The tree node label.</param>
     public TreeNode(IRenderable renderable)
     {
+        ArgumentNullException.ThrowIfNull(renderable);
         Renderable = renderable;
     }
 }
