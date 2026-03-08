@@ -19,6 +19,13 @@
   <ItemGroup>
     <!-- Exclude the output of source generators from the compilation -->
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <!-- Re-include Emoji and Spinner generated files from disk as fallback.
+         During normal builds, the source generator produces identical in-memory output
+         and MSBuild deduplicates. During Stryker.NET mutation testing, source generators
+         don't run in Roslyn recompilation, so these on-disk files provide the
+         required partial class definitions (_emojis, Spinner.Known, etc.). -->
+    <Compile Include="$(CompilerGeneratedFilesOutputPath)/Spectre.Console.SourceGenerator/Spectre.Console.SourceGenerator.Emojis.EmojiGenerator/*.cs" />
+    <Compile Include="$(CompilerGeneratedFilesOutputPath)/Spectre.Console.SourceGenerator/Spectre.Console.SourceGenerator.Spinners.SpinnerGenerator/*.cs" />
   </ItemGroup>
 
   <ItemGroup Label="Standard Figlet font">
@@ -35,9 +42,12 @@
 
   <ItemGroup Label="Source Generator">
     <ProjectReference Include="..\Spectre.Console.Ansi\Spectre.Console.Ansi.csproj" />
-    <ProjectReference Include="..\Spectre.Console.SourceGenerator\Spectre.Console.SourceGenerator.csproj"
+    <!-- Source generator disabled: using checked-in generated files for Emoji and Spinner.
+         This fixes Stryker.NET compatibility (Stryker's Roslyn recompilation doesn't run generators).
+         To regenerate after data file changes, re-enable this reference temporarily and rebuild. -->
+    <!-- <ProjectReference Include="..\Spectre.Console.SourceGenerator\Spectre.Console.SourceGenerator.csproj"
                       OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+                      ReferenceOutputAssembly="false" /> -->
   </ItemGroup>
 
   <ItemGroup Label="Generator Data Files">

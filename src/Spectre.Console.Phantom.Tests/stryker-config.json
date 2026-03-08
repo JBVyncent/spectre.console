@@ -1,0 +1,11 @@
+{
+  "stryker-config": {
+    "project": "Spectre.Console.Phantom.csproj",
+    "concurrency": 4,
+    "target-framework": "net10.0",
+    "reporters": ["json", "html", "cleartext"],
+    "mutate": [
+      "**/*"
+    ]
+  }
+}

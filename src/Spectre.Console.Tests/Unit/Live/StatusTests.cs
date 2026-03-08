@@ -153,6 +153,26 @@ public sealed class StatusTests
             () => status.StartAsync<int>("test", null!));
     }
 
+    [Fact]
+    public void Start_Throws_When_Action_IsNull()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        Should.Throw<ArgumentNullException>(
+            () => status.Start("test", (Action<StatusContext>)null!));
+    }
+
+    [Fact]
+    public void StartT_Throws_When_Func_IsNull()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        Should.Throw<ArgumentNullException>(
+            () => status.Start<int>("test", (Func<StatusContext, int>)null!));
+    }
+
     // ── SpinnerStyle is applied to SpinnerColumn ─────────────────────────────
 
     [Fact]

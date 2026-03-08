@@ -1,0 +1,36 @@
+{
+  "stryker-config": {
+    "project": "Spectre.Console.csproj",
+    "concurrency": 4,
+    "target-framework": "net10.0",
+    "reporters": ["json", "html", "cleartext"],
+    "mutate": [
+      "**/Widgets/Table/TableAccessor.cs",
+      "**/Widgets/Table/TableCell.cs",
+      "**/Widgets/Table/TableColumn.cs",
+      "**/Widgets/Table/TableRendererContext.cs",
+      "**/Widgets/Table/TableRowCollection.cs",
+      "**/Widgets/Table/TableRowEnumerator.cs",
+      "**/Widgets/Table/TableTitle.cs",
+      "**/Widgets/Charts/BarChartItem.cs",
+      "**/Widgets/Charts/BreakdownBar.cs",
+      "**/Widgets/Charts/BreakdownChartItem.cs",
+      "**/Widgets/Charts/BreakdownTags.cs",
+      "**/Widgets/Figlet/FigletCharacter.cs",
+      "**/Widgets/Figlet/FigletFont.cs",
+      "**/Widgets/Figlet/FigletText.cs",
+      "**/Widgets/Layout/Layout.cs",
+      "**/Widgets/Layout/LayoutPlaceholder.cs",
+      "**/Widgets/Layout/LayoutRender.cs",
+      "**/Internal/Backends/Ansi/AnsiConsoleBackend.cs",
+      "**/Internal/Backends/Ansi/AnsiConsoleCursor.cs",
+      "**/Internal/Backends/AnsiConsoleFacade.cs",
+      "**/Internal/Backends/Legacy/LegacyConsoleBackend.cs",
+      "**/Live/Progress/Progress.cs",
+      "**/Live/Progress/Columns/SpinnerColumn.cs",
+      "!**/Spectre.Console.Tests/**",
+      "!**/Generated/**",
+      "!**/Emoji.cs"
+    ]
+  }
+}

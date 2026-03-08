@@ -1,0 +1,28 @@
+{
+  "stryker-config": {
+    "project": "Spectre.Console.csproj",
+    "concurrency": 4,
+    "target-framework": "net10.0",
+    "reporters": ["json", "html", "cleartext"],
+    "mutate": [
+      "**/Live/LiveRenderable.cs",
+      "**/Live/LiveDisplay.cs",
+      "**/Live/LiveDisplayContext.cs",
+      "**/Live/LiveDisplayRenderer.cs",
+      "**/AnsiConsole.Write.cs",
+      "**/AnsiConsole.WriteLine.cs",
+      "**/Extensions/AnsiConsoleExtensions.Markup.cs",
+      "**/Extensions/AnsiConsoleExtensions.Input.cs",
+      "**/Live/Progress/ProgressTask.cs",
+      "**/Live/Progress/ProgressContext.cs",
+      "**/Live/Progress/ProgressRefreshThread.cs",
+      "**/Live/Progress/Renderers/DefaultProgressRenderer.cs",
+      "**/Live/Progress/Renderers/FallbackProgressRenderer.cs",
+      "**/Live/Status/Status.cs",
+      "**/Live/Status/StatusContext.cs",
+      "!**/Spectre.Console.Tests/**",
+      "!**/Generated/**",
+      "!**/Emoji.cs"
+    ]
+  }
+}

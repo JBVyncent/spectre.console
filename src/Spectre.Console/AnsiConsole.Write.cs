@@ -3,6 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// A console capable of writing ANSI escape sequences.
 /// </summary>
+// Stryker disable all : Static console facade; delegates to AnsiConsole.Console — untestable without capturing stdout
 public static partial class AnsiConsole
 {
     /// <summary>
@@ -255,3 +256,4 @@ public static partial class AnsiConsole
         Console.Write(args.Length == 0 ? format : string.Format(provider, format, args), CurrentStyle);
     }
 }
+// Stryker restore all

@@ -112,6 +112,7 @@ public static partial class AnsiConsoleExtensions
         {
             AutoCompleteDirection.Forward => foundAutocompleteIndex + 1,
             AutoCompleteDirection.Backward => foundAutocompleteIndex - 1,
+            // Stryker disable once all : NoCoverage — unreachable; enum only has Forward/Backward
             _ => throw new ArgumentOutOfRangeException(nameof(autoCompleteDirection), autoCompleteDirection, null),
         };
 

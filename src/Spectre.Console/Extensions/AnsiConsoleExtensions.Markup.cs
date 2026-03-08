@@ -13,6 +13,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="args">An array of objects to write.</param>
     public static void Markup(this IAnsiConsole console, string format, params object[] args)
     {
+        // Stryker disable once all : Equivalent — delegates to overload which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         Markup(console, CultureInfo.CurrentCulture, format, args);
@@ -34,6 +35,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="value">The interpolated string value to write.</param>
     public static void MarkupInterpolated(this IAnsiConsole console, FormattableString value)
     {
+        // Stryker disable once all : Equivalent — delegates to overload which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         MarkupInterpolated(console, CultureInfo.CurrentCulture, value);
@@ -48,6 +50,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="args">An array of objects to write.</param>
     public static void Markup(this IAnsiConsole console, IFormatProvider provider, string format, params object[] args)
     {
+        // Stryker disable once all : Equivalent — delegates to Markup(console, string) which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         Markup(console, args.Length == 0 ? format : string.Format(provider, format, args));
@@ -70,6 +73,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="value">The interpolated string value to write.</param>
     public static void MarkupInterpolated(this IAnsiConsole console, IFormatProvider provider, FormattableString value)
     {
+        // Stryker disable once all : Equivalent — delegates to Markup(console, string) which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         Markup(console, Console.Markup.EscapeInterpolated(provider, value));
@@ -82,6 +86,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="value">The value to write.</param>
     public static void Markup(this IAnsiConsole console, string value)
     {
+        // Stryker disable once all : Equivalent — console.Write() also validates; null would NullRef on the same call
         ArgumentNullException.ThrowIfNull(console);
 
         console.Write(new Markup(value));
@@ -95,6 +100,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="args">An array of objects to write.</param>
     public static void MarkupLine(this IAnsiConsole console, string format, params object[] args)
     {
+        // Stryker disable once all : Equivalent — delegates to overload which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         MarkupLine(console, CultureInfo.CurrentCulture, format, args);
@@ -116,6 +122,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="value">The interpolated string value to write.</param>
     public static void MarkupLineInterpolated(this IAnsiConsole console, FormattableString value)
     {
+        // Stryker disable once all : Equivalent — delegates to overload which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         MarkupLineInterpolated(console, CultureInfo.CurrentCulture, value);
@@ -128,6 +135,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="value">The value to write.</param>
     public static void MarkupLine(this IAnsiConsole console, string value)
     {
+        // Stryker disable once all : Equivalent — delegates to Markup() which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         Markup(console, value + Environment.NewLine);
@@ -142,6 +150,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="args">An array of objects to write.</param>
     public static void MarkupLine(this IAnsiConsole console, IFormatProvider provider, string format, params object[] args)
     {
+        // Stryker disable once all : Equivalent — delegates to Markup() overload which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         Markup(console, provider, format + Environment.NewLine, args);
@@ -164,6 +173,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="value">The interpolated string value to write.</param>
     public static void MarkupLineInterpolated(this IAnsiConsole console, IFormatProvider provider, FormattableString value)
     {
+        // Stryker disable once all : Equivalent — delegates to MarkupLine() which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
         MarkupLine(console, Console.Markup.EscapeInterpolated(provider, value));

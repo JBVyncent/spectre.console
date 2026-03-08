@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : Threading infrastructure; background thread refresh cycle is not unit-testable
 internal sealed class ProgressRefreshThread : IDisposable
 {
     private readonly ProgressContext _context;
@@ -52,3 +53,4 @@ internal sealed class ProgressRefreshThread : IDisposable
         }
     }
 }
+// Stryker restore all

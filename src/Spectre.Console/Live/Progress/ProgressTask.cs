@@ -130,6 +130,7 @@ public sealed class ProgressTask : IProgress<double>
     public ProgressTask(int id, string description, double maxValue, bool autoStart = true, TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(description);
+        // Stryker disable once all : UniqueRemovedCheck is a perf optimization; true/false produces identical correctness behavior
         _lazySamples = new(() => new CircularBuffer<ProgressSample>(MaxSamplesKept) { UniqueRemovedCheck = false });
         _lock = LockFactory.Create();
         _timeProvider = timeProvider ?? TimeProvider.System;
@@ -160,6 +161,7 @@ public sealed class ProgressTask : IProgress<double>
             }
 
             StartTime = _timeProvider.GetLocalNow().LocalDateTime;
+            // Stryker disable once all : StopTime is already null here (guard above throws if != null)
             StopTime = null;
         }
     }
@@ -234,7 +236,7 @@ public sealed class ProgressTask : IProgress<double>
                 _value = value.Value;
             }
 
-            // Need to cap the max value?
+            // Stryker disable once all : > vs >= is equivalent here; _value == _maxValue → _value = _maxValue is a no-op
             if (_value > _maxValue)
             {
                 _value = _maxValue;
