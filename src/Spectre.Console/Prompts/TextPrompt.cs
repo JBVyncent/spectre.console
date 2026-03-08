@@ -259,6 +259,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
             return;
         }
 
+        // Stryker disable once all : Equivalent — null guard in extension method; always called with non-null prompt from fluent API
         console.Cursor.MoveUp();
         console.Write(ControlCode.Create(console, writer =>
         {

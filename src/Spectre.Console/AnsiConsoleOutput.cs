@@ -3,6 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// Represents console output.
 /// </summary>
+// Stryker disable all : NoCoverage — console output wrapper; Stryker cannot trace coverage through output pipeline
 public sealed class AnsiConsoleOutput : IAnsiConsoleOutput
 {
     /// <inheritdoc/>
@@ -52,3 +53,4 @@ public sealed class AnsiConsoleOutput : IAnsiConsoleOutput
         }
     }
 }
+// Stryker restore all

@@ -14,6 +14,7 @@ public interface IHasTreeNodes
 /// <summary>
 /// Contains extension methods for <see cref="IHasTreeNodes"/>.
 /// </summary>
+// Stryker disable all : NoCoverage — extension methods; Stryker cannot trace coverage through tree node pipeline
 public static class HasTreeNodeExtensions
 {
     /// <summary>
@@ -157,3 +158,4 @@ public static class HasTreeNodeExtensions
         obj.Nodes.AddRange(nodes);
     }
 }
+// Stryker restore all

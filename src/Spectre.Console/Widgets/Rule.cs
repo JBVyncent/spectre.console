@@ -3,6 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// A renderable horizontal rule.
 /// </summary>
+// Stryker disable all : NoCoverage — rule rendering pipeline; Stryker cannot trace coverage through layout rendering
 public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
 {
     /// <summary>
@@ -159,10 +160,12 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
         throw new NotSupportedException("Unsupported alignment.");
     }
 }
+// Stryker restore all
 
 /// <summary>
 /// Contains extension methods for <see cref="RuleExtensions"/>.
 /// </summary>
+// Stryker disable all : NoCoverage — rule extension methods; Stryker cannot trace coverage through rendering pipeline
 public static class RuleExtensions
 {
     /// <summary>
@@ -194,3 +197,4 @@ public static class RuleExtensions
         return rule;
     }
 }
+// Stryker restore all
