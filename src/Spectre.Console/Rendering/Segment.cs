@@ -79,7 +79,8 @@ public class Segment
 
     private Segment(string text, Style style, Link? link, bool lineBreak, bool control)
     {
-        Text = text?.NormalizeNewLines() ?? throw new ArgumentNullException(nameof(text));
+        ArgumentNullException.ThrowIfNull(text);
+        Text = text.NormalizeNewLines();
         Style = style;
         Link = link;
         IsLineBreak = lineBreak;
@@ -274,7 +275,7 @@ public class Segment
                             line = [];
                         }
 
-                        text = string.Concat(parts.Skip(1).Take(parts.Length - 1));
+                        text = string.Join('\n', parts.Skip(1).Take(parts.Length - 1));
                     }
                     else
                     {

@@ -13,9 +13,10 @@ internal sealed class ListPromptRenderHook<T> : IRenderHook
         IAnsiConsole console,
         Func<IRenderable> builder)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
-        _builder = builder ?? throw new ArgumentNullException(nameof(builder));
-
+        ArgumentNullException.ThrowIfNull(console);
+        ArgumentNullException.ThrowIfNull(builder);
+        _console = console;
+        _builder = builder;
         _live = new LiveRenderable(console);
         _lock = new();
         _dirty = true;
@@ -49,6 +50,8 @@ internal sealed class ListPromptRenderHook<T> : IRenderHook
                 yield return renderable;
             }
 
+            // Save cursor position before rendering live display
+            yield return ControlCode.Create(options.Capabilities, w => w.SaveCursor());
             yield return _live;
         }
     }

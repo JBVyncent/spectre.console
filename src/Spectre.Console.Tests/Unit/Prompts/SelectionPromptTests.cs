@@ -218,6 +218,59 @@ public sealed class SelectionPromptTests
         // Then
         selection.ShouldBe("A");
     }
+
+    [Fact]
+    public void Should_Return_Correct_Item_With_No_Title_And_Single_Choice()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When / Then — regression for #773: CursorUp(0) was emitted for single-line
+        // renders, which many terminals interpret as "move up 1", corrupting the display
+        var prompt = new SelectionPrompt<string>()
+            .AddChoices("OnlyChoice");
+        var result = prompt.Show(console);
+
+        result.ShouldBe("OnlyChoice");
+    }
+
+    [Fact]
+    public void Should_Not_Throw_When_Non_Current_Item_Contains_Square_Brackets()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When / Then (should not throw — regression for markup injection bug)
+        var prompt = new SelectionPrompt<string>()
+            .Title("Select one")
+            .AddChoices("[01] First item", "[02] Second item");
+        var result = prompt.Show(console);
+
+        result.ShouldBe("[01] First item");
+    }
+
+    [Fact]
+    public void Should_Not_Throw_When_Searching_Items_With_Square_Brackets()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushText("01");
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When / Then (should not throw — regression for markup injection bug #1653)
+        var prompt = new SelectionPrompt<string>()
+            .Title("Select one")
+            .EnableSearch()
+            .AddChoices("[01] First item", "[02] Second item");
+        var result = prompt.Show(console);
+
+        result.ShouldBe("[01] First item");
+    }
 }
 
 file sealed class CustomSelectionItem
@@ -227,7 +280,8 @@ file sealed class CustomSelectionItem
 
     public CustomSelectionItem(int value, string name)
     {
+        ArgumentNullException.ThrowIfNull(name);
         Value = value;
-        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Name = name;
     }
 }

@@ -21,7 +21,7 @@ public static partial class AnsiConsoleExtensions
     /// <summary>
     /// Writes the specified markup to the console.
     /// <para/>
-    /// All interpolation holes which contain a string are automatically escaped.
+    /// All interpolation holes are automatically escaped.
     /// </summary>
     /// <example>
     /// <code>
@@ -50,13 +50,13 @@ public static partial class AnsiConsoleExtensions
     {
         ArgumentNullException.ThrowIfNull(console);
 
-        Markup(console, string.Format(provider, format, args));
+        Markup(console, args.Length == 0 ? format : string.Format(provider, format, args));
     }
 
     /// <summary>
     /// Writes the specified markup to the console.
     /// <para/>
-    /// All interpolation holes which contain a string are automatically escaped.
+    /// All interpolation holes are automatically escaped.
     /// </summary>
     /// <example>
     /// <code>
@@ -103,7 +103,7 @@ public static partial class AnsiConsoleExtensions
     /// <summary>
     /// Writes the specified markup, followed by the current line terminator, to the console.
     /// <para/>
-    /// All interpolation holes which contain a string are automatically escaped.
+    /// All interpolation holes are automatically escaped.
     /// </summary>
     /// <example>
     /// <code>
@@ -150,7 +150,7 @@ public static partial class AnsiConsoleExtensions
     /// <summary>
     /// Writes the specified markup, followed by the current line terminator, to the console.
     /// <para/>
-    /// All interpolation holes which contain a string are automatically escaped.
+    /// All interpolation holes are automatically escaped.
     /// </summary>
     /// <example>
     /// <code>

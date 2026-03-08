@@ -36,5 +36,36 @@ public partial class AnsiConsoleTests
             var pathAsRegEx = Regex.Replace(Path, "([/\\[\\]\\\\])", "\\$1", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             console.Output.ShouldMatch($"\\]8;id=[0-9]+;{pathAsRegEx}\\\\{pathAsRegEx}\\]8;;\\\\");
         }
+
+        [Fact]
+        public void Should_Not_Throw_When_Non_String_Object_Has_Square_Brackets_In_ToString()
+        {
+            // Given
+            var console = new TestConsole();
+            var thing = new ThingWithBracketsInToString();
+
+            // When / Then (should not throw — regression for #1763/#1348)
+            console.MarkupLineInterpolated($"I have a {thing}");
+            console.Output.ShouldContain("This[contains, braces].");
+        }
+
+        [Fact]
+        public void Should_Preserve_Format_Specifiers_On_Non_String_Interpolated_Values()
+        {
+            // Given
+            var console = new TestConsole();
+            var value = 1234.5;
+
+            // When
+            console.MarkupInterpolated(CultureInfo.InvariantCulture, $"Value: {value:F1}");
+
+            // Then
+            console.Output.ShouldBe("Value: 1234.5");
+        }
     }
+}
+
+file sealed class ThingWithBracketsInToString
+{
+    public override string ToString() => "This[contains, braces].";
 }

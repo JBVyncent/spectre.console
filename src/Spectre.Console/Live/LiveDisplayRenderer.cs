@@ -4,8 +4,11 @@ internal sealed class LiveDisplayRenderer : IRenderHook
 {
     private readonly IAnsiConsole _console;
     private readonly LiveDisplayContext _context;
+
     public LiveDisplayRenderer(IAnsiConsole console, LiveDisplayContext context)
     {
+        ArgumentNullException.ThrowIfNull(console);
+        ArgumentNullException.ThrowIfNull(context);
         _console = console;
         _context = context;
     }
@@ -51,6 +54,8 @@ internal sealed class LiveDisplayRenderer : IRenderHook
                 yield return renderable;
             }
 
+            // Save cursor position before rendering live display
+            yield return ControlCode.Create(options.Capabilities, w => w.SaveCursor());
             yield return _context.Live;
         }
     }

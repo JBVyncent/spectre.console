@@ -102,7 +102,8 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     /// <param name="comparer">The comparer used for choices.</param>
     public TextPrompt(string prompt, StringComparer? comparer = null)
     {
-        _prompt = prompt ?? throw new System.ArgumentNullException(nameof(prompt));
+        ArgumentNullException.ThrowIfNull(prompt);
+        _prompt = prompt;
         _comparer = comparer;
     }
 
@@ -164,14 +165,13 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                         ClearPromptLine(console);
                         return result;
                     }
-                    else
-                    {
-                        console.MarkupLine(InvalidChoiceMessage);
-                        WritePrompt(console);
-                        continue;
-                    }
+
+                    console.MarkupLine(InvalidChoiceMessage);
+                    WritePrompt(console);
+                    continue;
                 }
-                else if (!TypeConverterHelper.TryConvertFromStringWithCulture<T>(input, Culture, out result) || result == null)
+                else if (!TypeConverterHelper.TryConvertFromStringWithCulture<T>(input, Culture, out result) ||
+                         (result == null && !string.IsNullOrWhiteSpace(input)))
                 {
                     console.MarkupLine(ValidationErrorMessage);
                     WritePrompt(console);
@@ -179,7 +179,9 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                 }
 
                 // Run all validators
-                if (!ValidateResult(result, out var validationMessage))
+                // result! is safe: null is only possible when T is a nullable type (e.g. Uri?)
+                // and AllowEmpty is set, in which case null is a valid T value.
+                if (!ValidateResult(result!, out var validationMessage))
                 {
                     console.MarkupLine(validationMessage);
                     WritePrompt(console);
@@ -187,7 +189,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                 }
 
                 ClearPromptLine(console);
-                return result;
+                return result!;
             }
         }).ConfigureAwait(false);
     }
@@ -208,7 +210,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
         {
             appendSuffix = true;
             var converter = Converter ?? TypeConverterHelper.ConvertToString;
-            var choices = string.Join("/", Choices.Select(choice => converter(choice)));
+            var choices = string.Join("/", Choices.Select(choice => converter(choice).EscapeMarkup()));
             var choicesStyle = ChoicesStyle?.ToMarkup() ?? "blue";
             builder.AppendFormat(CultureInfo.InvariantCulture, " [{0}][[{1}]][/]", choicesStyle, choices);
         }
@@ -224,7 +226,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                 CultureInfo.InvariantCulture,
                 " [{0}]({1})[/]",
                 defaultValueStyle,
-                IsSecret ? defaultValue.Mask(Mask) : defaultValue);
+                IsSecret ? defaultValue.Mask(Mask) : defaultValue.EscapeMarkup());
         }
 
         var markup = builder.ToString().Trim();

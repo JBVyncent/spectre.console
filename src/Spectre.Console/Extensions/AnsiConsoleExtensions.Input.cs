@@ -52,7 +52,7 @@ public static partial class AnsiConsoleExtensions
                     var lastChar = text.Last();
                     text = text.Substring(0, text.Length - 1);
 
-                    if (mask != null)
+                    if (mask != null || !secret)
                     {
                         if (UnicodeCalculator.GetWidth(lastChar) == 1)
                         {

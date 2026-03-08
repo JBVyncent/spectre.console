@@ -143,6 +143,34 @@ public partial class AnsiConsoleTests
         }
     }
 
+    public sealed class MarkupFormatOverload
+    {
+        [Fact]
+        public void Should_Not_Throw_When_Markup_Format_String_Contains_Curly_Braces_And_No_Args()
+        {
+            // Given
+            var console = new TestConsole();
+
+            // Explicitly invoke the format+args overload with an empty array.
+            // Before the fix, string.Format("{Pt.1}", []) would throw FormatException
+            // because "{Pt.1}" looks like an invalid format placeholder.
+            // Regression test for #1495.
+            Should.NotThrow(() => console.Markup("{Pt.1} (TEST ~ 855D)", Array.Empty<object>()));
+            console.Output.ShouldContain("{Pt.1}");
+        }
+
+        [Fact]
+        public void Should_Not_Throw_When_MarkupLine_Format_String_Contains_Curly_Braces_And_No_Args()
+        {
+            // Given
+            var console = new TestConsole();
+
+            // When / Then
+            Should.NotThrow(() => console.MarkupLine("{Pt.1} (TEST ~ 855D)", Array.Empty<object>()));
+            console.Output.ShouldContain("{Pt.1}");
+        }
+    }
+
     public sealed class WriteException
     {
         [Fact]

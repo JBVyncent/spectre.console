@@ -1000,4 +1000,27 @@ public sealed class TableTests
         // Then
         return Verifier.Verify(console.Output);
     }
+
+    [Fact]
+    public void Should_Align_Borders_When_Cell_Contains_Tab_Character()
+    {
+        // Given
+        var console = new TestConsole().Width(80);
+        var table = new Table();
+        table.AddColumn("Amount");
+        table.AddColumn("Currency");
+        table.AddRow("100\t200", "USD");
+
+        // When
+        console.Write(table);
+
+        // Then — all lines of the rendered table must have the same length (borders aligned)
+        var lines = console.Output
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.TrimEnd('\r'))
+            .ToArray();
+
+        var distinct = lines.Select(l => l.Length).Distinct().ToArray();
+        distinct.Length.ShouldBe(1, $"Expected all table rows to have the same width, but got widths: {string.Join(", ", distinct)}");
+    }
 }

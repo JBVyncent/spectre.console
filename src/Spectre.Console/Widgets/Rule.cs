@@ -39,12 +39,24 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
     /// <param name="title">The rule title markup text.</param>
     public Rule(string title)
     {
-        Title = title ?? throw new ArgumentNullException(nameof(title));
+        ArgumentNullException.ThrowIfNull(title);
+        Title = title;
+    }
+
+    /// <inheritdoc/>
+    protected override Measurement Measure(RenderOptions options, int maxWidth)
+    {
+        return new Measurement(1, maxWidth);
     }
 
     /// <inheritdoc/>
     protected override IEnumerable<Segment> Render(RenderOptions options, int maxWidth)
     {
+        if (maxWidth <= 0)
+        {
+            return [Segment.LineBreak];
+        }
+
         var extraLength = (2 * TitlePadding) + (2 * TitleSpacing);
 
         if (Title == null || maxWidth <= extraLength)
@@ -111,7 +123,7 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
             var left = new Segment(borderPart.Repeat(TitlePadding) + new string(' ', TitleSpacing),
                 Style ?? Spectre.Console.Style.Plain);
 
-            var rightLength = width - titleLength - left.CellCount() - TitleSpacing;
+            var rightLength = Math.Max(0, width - titleLength - left.CellCount() - TitleSpacing);
             var right = new Segment(new string(' ', TitleSpacing) + borderPart.Repeat(rightLength),
                 Style ?? Spectre.Console.Style.Plain);
 
@@ -119,11 +131,11 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
         }
         else if (alignment == Justify.Center)
         {
-            var leftLength = ((width - titleLength) / 2) - TitleSpacing;
+            var leftLength = Math.Max(0, ((width - titleLength) / 2) - TitleSpacing);
             var left = new Segment(borderPart.Repeat(leftLength) + new string(' ', TitleSpacing),
                 Style ?? Spectre.Console.Style.Plain);
 
-            var rightLength = width - titleLength - left.CellCount() - TitleSpacing;
+            var rightLength = Math.Max(0, width - titleLength - left.CellCount() - TitleSpacing);
             var right = new Segment(new string(' ', TitleSpacing) + borderPart.Repeat(rightLength),
                 Style ?? Spectre.Console.Style.Plain);
 
@@ -134,7 +146,7 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
             var right = new Segment(new string(' ', TitleSpacing) + borderPart.Repeat(TitlePadding),
                 Style ?? Spectre.Console.Style.Plain);
 
-            var leftLength = width - titleLength - right.CellCount() - TitleSpacing;
+            var leftLength = Math.Max(0, width - titleLength - right.CellCount() - TitleSpacing);
             var left = new Segment(borderPart.Repeat(leftLength) + new string(' ', TitleSpacing),
                 Style ?? Spectre.Console.Style.Plain);
 

@@ -64,7 +64,8 @@ public sealed class ConfirmationPrompt : IPrompt<bool>
     /// <param name="prompt">The prompt markup text.</param>
     public ConfirmationPrompt(string prompt)
     {
-        _prompt = prompt ?? throw new System.ArgumentNullException(nameof(prompt));
+        ArgumentNullException.ThrowIfNull(prompt);
+        _prompt = prompt;
     }
 
     /// <inheritdoc/>
@@ -76,7 +77,7 @@ public sealed class ConfirmationPrompt : IPrompt<bool>
     /// <inheritdoc/>
     public async Task<bool> ShowAsync(IAnsiConsole console, CancellationToken cancellationToken)
     {
-        var comparer = Comparer ?? StringComparer.CurrentCultureIgnoreCase;
+        var comparer = Comparer;
 
         var prompt = new TextPrompt<char>(_prompt, comparer)
             .InvalidChoiceMessage(InvalidChoiceMessage)

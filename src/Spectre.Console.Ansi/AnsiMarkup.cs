@@ -13,7 +13,8 @@ public sealed class AnsiMarkup
     /// <param name="writer">The ANSI writer to use for writing.</param>
     public AnsiMarkup(AnsiWriter writer)
     {
-        _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+        ArgumentNullException.ThrowIfNull(writer);
+        _writer = writer;
     }
 
     /// <summary>
@@ -198,9 +199,10 @@ public sealed class AnsiMarkupSegment
     /// <inheritdoc />
     public override string ToString()
     {
+        var escaped = Text.EscapeMarkup();
         return !Style.Equals(Style.Plain)
-            ? $"[{Style.ToMarkup()}]{Text}[/]"
-            : Text;
+            ? $"[{Style.ToMarkup()}]{escaped}[/]"
+            : escaped;
     }
 }
 
@@ -219,8 +221,9 @@ file sealed class MarkupToken
 
     public MarkupToken(MarkupTokenKind kind, string value, int position)
     {
+        ArgumentNullException.ThrowIfNull(value);
         Kind = kind;
-        Value = value ?? throw new ArgumentNullException(nameof(value));
+        Value = value;
         Position = position;
     }
 }

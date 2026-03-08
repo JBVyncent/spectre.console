@@ -431,4 +431,53 @@ public sealed class TextPromptTests
         // Then
         return Verifier.Verify(console.Output);
     }
+
+    [Fact]
+    public void Should_Accept_Null_From_Nullable_Type_Converter_When_AllowEmpty()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When / Then (should not show "Invalid input" — regression for #714)
+        var result = console.Prompt(
+            new TextPrompt<Uri?>("Enter URI:")
+                .AllowEmpty());
+
+        result.ShouldBeNull();
+        console.Output.ShouldNotContain("Invalid input");
+    }
+
+    [Fact]
+    public void Should_Not_Throw_When_Choice_Contains_Square_Brackets()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Input.PushTextWithEnter("[01]");
+
+        // When / Then (should not throw — regression for markup injection bug #1181)
+        var result = console.Prompt(
+            new TextPrompt<string>("Pick one:")
+                .AddChoice("[01]")
+                .AddChoice("[02]"));
+
+        result.ShouldBe("[01]");
+    }
+
+    [Fact]
+    public void Should_Not_Throw_When_Default_Value_Contains_Square_Brackets()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When / Then (should not throw — regression for markup injection bug #1181)
+        var result = console.Prompt(
+            new TextPrompt<string>("Pick one:")
+                .AddChoice("[01]")
+                .AddChoice("[02]")
+                .DefaultValue("[01]"));
+
+        result.ShouldBe("[01]");
+    }
 }

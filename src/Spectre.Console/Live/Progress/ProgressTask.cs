@@ -5,7 +5,7 @@ namespace Spectre.Console;
 /// </summary>
 public sealed class ProgressTask : IProgress<double>
 {
-    private readonly Lazy<CircularBuffer<ProgressSample>> lazySamples;
+    private readonly Lazy<CircularBuffer<ProgressSample>> _lazySamples;
     private readonly Lock _lock;
     private readonly TimeProvider _timeProvider;
 
@@ -17,7 +17,7 @@ public sealed class ProgressTask : IProgress<double>
 
     private double? _cachedLastSpeed;
     private DateTime _lastSpeedCalculation = DateTime.MinValue;
-    private CircularBuffer<ProgressSample> Samples => lazySamples.Value;
+    private CircularBuffer<ProgressSample> Samples => _lazySamples.Value;
 
     /// <summary>
     /// Gets the task ID.
@@ -129,13 +129,13 @@ public sealed class ProgressTask : IProgress<double>
     /// <param name="timeProvider">The time provider to use. Defaults to <see cref="TimeProvider.System"/>.</param>
     public ProgressTask(int id, string description, double maxValue, bool autoStart = true, TimeProvider? timeProvider = null)
     {
-        lazySamples = new(() => new CircularBuffer<ProgressSample>(MaxSamplesKept) { UniqueRemovedCheck = false });
+        ArgumentNullException.ThrowIfNull(description);
+        _lazySamples = new(() => new CircularBuffer<ProgressSample>(MaxSamplesKept) { UniqueRemovedCheck = false });
         _lock = LockFactory.Create();
         _timeProvider = timeProvider ?? TimeProvider.System;
         _maxValue = maxValue;
         _value = 0;
-        _description = description?.RemoveNewLines()?.Trim() ??
-                       throw new ArgumentNullException(nameof(description));
+        _description = description.RemoveNewLines()?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(_description))
         {
@@ -210,7 +210,7 @@ public sealed class ProgressTask : IProgress<double>
 
             if (description != null)
             {
-                description = description?.RemoveNewLines()?.Trim();
+                description = description.RemoveNewLines()?.Trim();
                 if (string.IsNullOrWhiteSpace(description))
                 {
                     throw new InvalidOperationException("Task name cannot be empty.");
@@ -279,7 +279,7 @@ public sealed class ProgressTask : IProgress<double>
 
         lock (_lock)
         {
-            if (StartTime == null || !lazySamples.IsValueCreated || Samples.Count == 0 || StopTime != null)
+            if (StartTime == null || !_lazySamples.IsValueCreated || Samples.Count == 0 || StopTime != null)
             {
                 return _cachedLastSpeed;
             }

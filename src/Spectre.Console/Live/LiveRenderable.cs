@@ -17,8 +17,8 @@ internal sealed class LiveRenderable : Renderable
 
     public LiveRenderable(IAnsiConsole console)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
-
+        ArgumentNullException.ThrowIfNull(console);
+        _console = console;
         Overflow = VerticalOverflow.Ellipsis;
         OverflowCropping = VerticalOverflowCropping.Top;
     }
@@ -26,7 +26,8 @@ internal sealed class LiveRenderable : Renderable
     public LiveRenderable(IAnsiConsole console, IRenderable renderable)
         : this(console)
     {
-        _renderable = renderable ?? throw new ArgumentNullException(nameof(renderable));
+        ArgumentNullException.ThrowIfNull(renderable);
+        _renderable = renderable;
     }
 
     public void SetRenderable(IRenderable? renderable)
@@ -59,11 +60,11 @@ internal sealed class LiveRenderable : Renderable
                 });
             }
 
-            var linesToMoveUp = _shape.Value.Height - 1;
+            // Restore cursor to saved position and erase old live content
             return ControlCode.Create(options.Capabilities, w =>
             {
-                w.Write("\r"); // More efficient than CHA (CSI 1 G)?
-                w.CursorUp(linesToMoveUp);
+                w.RestoreCursor();
+                w.EraseInDisplay(0);
             });
         }
     }
@@ -77,17 +78,11 @@ internal sealed class LiveRenderable : Renderable
                 return ControlCode.Empty;
             }
 
-            var linesToClear = _shape.Value.Height - 1;
+            // Restore cursor to saved position and erase old live content
             return ControlCode.Create(_console.Profile.Capabilities, w =>
             {
-                w.Write("\r"); // More efficient than CHA (CSI 1 G)?
-                w.EraseInLine(2);
-
-                for (var count = 0; count < linesToClear; count++)
-                {
-                    w.CursorUp(1);
-                    w.EraseInLine(2);
-                }
+                w.RestoreCursor();
+                w.EraseInDisplay(0);
             });
         }
     }
@@ -101,7 +96,7 @@ internal sealed class LiveRenderable : Renderable
             if (_renderable != null)
             {
                 var segments = _renderable.Render(options, maxWidth);
-                var lines = Segment.SplitLines(segments);
+                var lines = Segment.SplitLines(segments, maxWidth);
 
                 var shape = SegmentShape.Calculate(options, lines);
                 if (shape.Height > _console.Profile.Height)
@@ -152,7 +147,7 @@ internal sealed class LiveRenderable : Renderable
                 }
 
                 _shape = _shape?.Inflate(shape) ?? shape;
-                _shape.Value.Apply(options, ref lines);
+                _shape.Value.Apply(ref lines);
 
                 foreach (var (_, _, last, line) in lines.Enumerate())
                 {

@@ -261,6 +261,6 @@ public static partial class AnsiConsole
     /// <param name="args">An array of objects to write.</param>
     public static void WriteLine(IFormatProvider provider, string format, params object[] args)
     {
-        Console.WriteLine(string.Format(provider, format, args), CurrentStyle);
+        Console.WriteLine(args.Length == 0 ? format : string.Format(provider, format, args), CurrentStyle);
     }
 }

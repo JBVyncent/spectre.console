@@ -250,6 +250,24 @@ public sealed class MultiSelectionPromptTests
         // Then
         selection.ShouldBe([]);
     }
+
+    [Fact]
+    public void Should_Not_Throw_When_Non_Current_Item_Contains_Square_Brackets()
+    {
+        // Given
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Spacebar);
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When / Then (should not throw — regression for markup injection bug)
+        var prompt = new MultiSelectionPrompt<string>()
+            .Title("Select items")
+            .AddChoices("[01] First item", "[02] Second item");
+        var result = prompt.Show(console);
+
+        result.ShouldBe(["[01] First item"]);
+    }
 }
 
 file sealed class CustomItem

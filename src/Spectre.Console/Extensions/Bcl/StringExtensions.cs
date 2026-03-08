@@ -58,8 +58,7 @@ public static class StringExtensions
 
     internal static string[] SplitLines(this string text)
     {
-        var result = text?.NormalizeNewLines()?.Split(['\n'], StringSplitOptions.None);
-        return result ?? [];
+        return text.NormalizeNewLines().Split(['\n'], StringSplitOptions.None);
     }
 
     internal static string[] SplitWords(this string word, StringSplitOptions options = StringSplitOptions.None)
@@ -83,23 +82,21 @@ public static class StringExtensions
             return buffer.ToString();
         }
 
-        using (var reader = new StringBuffer(word))
+        using var reader = new StringBuffer(word);
+        while (!reader.Eof)
         {
-            while (!reader.Eof)
+            var current = reader.Peek();
+            if (char.IsWhiteSpace(current))
             {
-                var current = reader.Peek();
-                if (char.IsWhiteSpace(current))
+                var x = Read(reader, char.IsWhiteSpace);
+                if (options != StringSplitOptions.RemoveEmptyEntries)
                 {
-                    var x = Read(reader, c => char.IsWhiteSpace(c));
-                    if (options != StringSplitOptions.RemoveEmptyEntries)
-                    {
-                        result.Add(x);
-                    }
+                    result.Add(x);
                 }
-                else
-                {
-                    result.Add(Read(reader, c => !char.IsWhiteSpace(c)));
-                }
+            }
+            else
+            {
+                result.Add(Read(reader, c => !char.IsWhiteSpace(c)));
             }
         }
 

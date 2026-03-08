@@ -63,6 +63,14 @@ public sealed class Paragraph : Renderable, IHasJustification, IOverflowable
 
         style ??= Style.Plain;
 
+        // Tab characters have an unpredictable visual width because terminals expand them
+        // to the next tab stop. Replace with a single space so that cell width measurement
+        // and rendering are consistent, which prevents table border misalignment (#1608).
+        if (text.Contains('\t'))
+        {
+            text = text.Replace('\t', ' ');
+        }
+
         var first = true;
         var span = text.AsSpan();
         foreach (var lineSpan in span.EnumerateLines())
@@ -225,13 +233,11 @@ public sealed class Paragraph : Renderable, IHasJustification, IOverflowable
                         segments.ForEach(s => queue.Enqueue(s));
                         continue;
                     }
-                    else
-                    {
-                        // Add the segment and push the rest of them to the queue.
-                        line.Add(segments[0]);
-                        segments.Skip(1).ForEach(s => queue.Enqueue(s));
-                        continue;
-                    }
+
+                    // Add the segment and push the rest of them to the queue.
+                    line.Add(segments[0]);
+                    segments.Skip(1).ForEach(s => queue.Enqueue(s));
+                    continue;
                 }
             }
             else

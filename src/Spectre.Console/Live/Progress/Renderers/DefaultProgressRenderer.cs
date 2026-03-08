@@ -15,8 +15,11 @@ internal sealed class DefaultProgressRenderer : ProgressRenderer
 
     public DefaultProgressRenderer(IAnsiConsole console, List<ProgressColumn> columns, TimeSpan refreshRate, bool hideCompleted, Func<IRenderable, IReadOnlyList<ProgressTask>, IRenderable> renderHook)
     {
-        _console = console ?? throw new ArgumentNullException(nameof(console));
-        _columns = columns ?? throw new ArgumentNullException(nameof(columns));
+        ArgumentNullException.ThrowIfNull(console);
+        ArgumentNullException.ThrowIfNull(columns);
+        ArgumentNullException.ThrowIfNull(renderHook);
+        _console = console;
+        _columns = columns;
         _live = new LiveRenderable(console);
         _lock = new();
         _stopwatch = new Stopwatch();
@@ -125,6 +128,8 @@ internal sealed class DefaultProgressRenderer : ProgressRenderer
                 yield return renderable;
             }
 
+            // Save cursor position before rendering live display
+            yield return ControlCode.Create(options.Capabilities, w => w.SaveCursor());
             yield return _live;
         }
     }

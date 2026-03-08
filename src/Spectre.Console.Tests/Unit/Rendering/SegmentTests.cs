@@ -134,6 +134,37 @@ public sealed class SegmentTests
             lines[3].Count.ShouldBe(1);
             lines[3][0].Text.ShouldBe("Corgi");
         }
+
+        [Fact]
+        public void Should_Respect_Multiple_Linebreaks_Within_Single_Segment()
+        {
+            // Given, When — regression for #1785
+            var lines = Segment.SplitLines(
+            [
+                new Segment("Foo\nBar"),
+                new Segment("Baz"),
+                new Segment("Qux\nTra\nLate"),
+                new Segment("Corgi"),
+            ]);
+
+            // Then — "Qux" precedes the \n so it stays on line 1 with "Bar"+"Baz"
+            lines.Count.ShouldBe(4);
+
+            lines[0].Count.ShouldBe(1);
+            lines[0][0].Text.ShouldBe("Foo");
+
+            lines[1].Count.ShouldBe(3);
+            lines[1][0].Text.ShouldBe("Bar");
+            lines[1][1].Text.ShouldBe("Baz");
+            lines[1][2].Text.ShouldBe("Qux");
+
+            lines[2].Count.ShouldBe(1);
+            lines[2][0].Text.ShouldBe("Tra");
+
+            lines[3].Count.ShouldBe(2);
+            lines[3][0].Text.ShouldBe("Late");
+            lines[3][1].Text.ShouldBe("Corgi");
+        }
     }
 
     public sealed class TheSplitOverflowMethod
