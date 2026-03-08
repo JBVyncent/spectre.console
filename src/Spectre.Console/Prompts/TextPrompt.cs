@@ -70,6 +70,17 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     public bool ClearOnFinish { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the default value should be
+    /// written into the input buffer so the user can edit it before confirming.
+    /// When <see langword="true"/> and a <see cref="DefaultValue"/> is set, the
+    /// default's display string is pre-filled and the cursor is positioned after
+    /// the last character.  The user may backspace over it, append to it, or press
+    /// Enter to accept it unchanged.
+    /// Has no effect when no <see cref="DefaultValue"/> is configured.
+    /// </summary>
+    public bool PrefillDefaultValue { get; set; }
+
+    /// <summary>
     /// Gets or sets the converter to get the display string for a choice. By default
     /// the corresponding <see cref="TypeConverter"/> is used.
     /// </summary>
@@ -142,7 +153,10 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
 
             while (true)
             {
-                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, cancellationToken).ConfigureAwait(false);
+                var prefillText = (PrefillDefaultValue && DefaultValue != null)
+                    ? converter(DefaultValue.Value)
+                    : null;
+                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, prefillText, cancellationToken).ConfigureAwait(false);
 
                 // Nothing entered?
                 if (string.IsNullOrWhiteSpace(input))

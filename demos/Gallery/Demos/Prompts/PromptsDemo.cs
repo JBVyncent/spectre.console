@@ -101,6 +101,21 @@ public sealed class PromptsDemo : IDemoModule
         AnsiConsole.WriteLine();
         AnsiConsole.WriteLine();
 
+        // Editable default value (#595)
+        // PrefillDefaultValue() writes the default into the input buffer.
+        // The user can backspace, edit, or press Enter to accept unchanged.
+        AnsiConsole.MarkupLine("[bold underline blue]Editable Default[/]");
+        AnsiConsole.MarkupLine("[grey]The previous name is pre-filled — edit it or press Enter to confirm.[/]");
+        AnsiConsole.WriteLine();
+
+        var editedName = AnsiConsole.Prompt(
+            new TextPrompt<string>("[green]Your name:[/]")
+                .DefaultValue(name)
+                .PrefillDefaultValue());
+        AnsiConsole.MarkupInterpolated($"Name confirmed: [bold]{editedName}[/]");
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
+
         // Async validator (#230)
         // ValidateAsync accepts a Func<T, Task<ValidationResult>> (or with CancellationToken).
         // The validator can do async I/O (database lookup, API call, etc.) and return
