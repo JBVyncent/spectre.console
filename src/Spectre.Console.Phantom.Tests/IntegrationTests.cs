@@ -272,4 +272,448 @@ public sealed class IntegrationTests
         terminal.CursorRow.ShouldBe(0);
         terminal.CursorCol.ShouldBe(userContentCol);
     }
+
+    // ── Additional Widget Tests ──────────────────────────────────────
+
+    [Fact]
+    public void Should_Render_Table_With_Multiple_Borders()
+    {
+        var (console, output) = PhantomConsole.Create(60, 24);
+
+        var table = new Table().Border(TableBorder.Ascii);
+        table.AddColumn("Col1");
+        table.AddColumn("Col2");
+        table.AddRow("A", "B");
+
+        console.Write(table);
+
+        var screen = output.Terminal;
+        screen.ContainsText("Col1").ShouldBeTrue();
+        screen.ContainsText("A").ShouldBeTrue();
+        screen.ContainsText("B").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Table_With_No_Border()
+    {
+        var (console, output) = PhantomConsole.Create(60, 24);
+
+        var table = new Table().Border(TableBorder.None);
+        table.AddColumn("X");
+        table.AddColumn("Y");
+        table.AddRow("1", "2");
+
+        console.Write(table);
+
+        var screen = output.Terminal;
+        screen.ContainsText("1").ShouldBeTrue();
+        screen.ContainsText("2").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Table_With_Multiple_Rows()
+    {
+        var (console, output) = PhantomConsole.Create(60, 24);
+
+        var table = new Table();
+        table.AddColumn("Name");
+        table.AddColumn("Age");
+        table.AddRow("Alice", "30");
+        table.AddRow("Bob", "25");
+        table.AddRow("Charlie", "35");
+
+        console.Write(table);
+
+        var screen = output.Terminal;
+        screen.ContainsText("Alice").ShouldBeTrue();
+        screen.ContainsText("Bob").ShouldBeTrue();
+        screen.ContainsText("Charlie").ShouldBeTrue();
+        screen.ContainsText("30").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Paragraph()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(new Paragraph("This is a paragraph of text that will wrap across multiple lines in a narrow terminal."));
+
+        var screen = output.Terminal;
+        screen.ContainsText("This is a paragraph").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Rule_Left_Aligned()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(new Rule("[cyan]Left[/]").LeftJustified());
+
+        var screen = output.Terminal;
+        screen.ContainsText("Left").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Rule_Right_Aligned()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(new Rule("[cyan]Right[/]").RightJustified());
+
+        var screen = output.Terminal;
+        screen.ContainsText("Right").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Rule_Without_Title()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(new Rule());
+
+        var screen = output.Terminal;
+        var rowText = screen.GetRowText(0);
+        rowText.Length.ShouldBeGreaterThan(0);
+    }
+
+    [Fact]
+    public void Should_Render_Panel_With_Padding()
+    {
+        var (console, output) = PhantomConsole.Create(60, 24);
+
+        console.Write(new Panel("Padded").Padding(2, 1));
+
+        var screen = output.Terminal;
+        screen.ContainsText("Padded").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Panel_Without_Header()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(new Panel("Content only"));
+
+        var screen = output.Terminal;
+        screen.ContainsText("Content only").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Markup_With_Nested_Styles()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[bold][red]Bold Red[/][/] [italic]Italic[/]");
+
+        var screen = output.Terminal;
+        screen.ContainsText("Bold Red").ShouldBeTrue();
+        screen.ContainsText("Italic").ShouldBeTrue();
+
+        // Verify "Bold Red" has both bold and foreground color
+        var pos = screen.FindText("Bold Red");
+        pos.ShouldNotBeNull();
+        var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
+        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Markup_With_Strikethrough()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[strikethrough]Deleted[/]");
+
+        var screen = output.Terminal;
+        screen.ContainsText("Deleted").ShouldBeTrue();
+
+        var pos = screen.FindText("Deleted");
+        pos.ShouldNotBeNull();
+        var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
+        cell.Decoration.HasFlag(CellDecoration.Strikethrough).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Markup_With_Underline()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[underline]Underlined[/]");
+
+        var screen = output.Terminal;
+        var pos = screen.FindText("Underlined");
+        pos.ShouldNotBeNull();
+        var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
+        cell.Decoration.HasFlag(CellDecoration.Underline).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Markup_With_Dim()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[dim]Dimmed[/]");
+
+        var screen = output.Terminal;
+        var pos = screen.FindText("Dimmed");
+        pos.ShouldNotBeNull();
+        var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
+        cell.Decoration.HasFlag(CellDecoration.Dim).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Multiple_Markup_Lines()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[green]Line 1[/]");
+        console.MarkupLine("[blue]Line 2[/]");
+        console.MarkupLine("[red]Line 3[/]");
+
+        var screen = output.Terminal;
+        screen.ContainsText("Line 1").ShouldBeTrue();
+        screen.ContainsText("Line 2").ShouldBeTrue();
+        screen.ContainsText("Line 3").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Table_In_Table()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        var inner = new Table();
+        inner.AddColumn("Inner");
+        inner.AddRow("Data");
+
+        var outer = new Table();
+        outer.AddColumn("Outer");
+        outer.AddRow(inner);
+
+        console.Write(outer);
+
+        var screen = output.Terminal;
+        screen.ContainsText("Inner").ShouldBeTrue();
+        screen.ContainsText("Data").ShouldBeTrue();
+        screen.ContainsText("Outer").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_FigletText_With_Color()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.Write(new FigletText("AB").Color(Color.Red));
+
+        var screen = output.Terminal;
+        // FigletText renders characters using ASCII art patterns
+        screen.GetScreenText().ShouldNotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public void Should_Render_Rows()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.Write(new Rows(
+            new Markup("[green]Row 1[/]"),
+            new Markup("[blue]Row 2[/]"),
+            new Markup("[red]Row 3[/]")));
+
+        var screen = output.Terminal;
+        screen.ContainsText("Row 1").ShouldBeTrue();
+        screen.ContainsText("Row 2").ShouldBeTrue();
+        screen.ContainsText("Row 3").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_Align_Center()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(Align.Center(new Markup("[cyan]Centered[/]")));
+
+        var screen = output.Terminal;
+        screen.ContainsText("Centered").ShouldBeTrue();
+
+        // The text should have leading spaces (centered in 40 columns)
+        var pos = screen.FindText("Centered");
+        pos.ShouldNotBeNull();
+        pos!.Value.Col.ShouldBeGreaterThan(0);
+    }
+
+    [Fact]
+    public void Should_Render_Align_Right()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        console.Write(Align.Right(new Markup("[cyan]Right[/]")));
+
+        var screen = output.Terminal;
+        screen.ContainsText("Right").ShouldBeTrue();
+
+        var pos = screen.FindText("Right");
+        pos.ShouldNotBeNull();
+        pos!.Value.Col.ShouldBeGreaterThan(10);
+    }
+
+    [Fact]
+    public void Should_Render_WriteLn_Plain_Text()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.WriteLine("Line A");
+        console.WriteLine("Line B");
+
+        var screen = output.Terminal;
+        screen.ContainsText("Line A").ShouldBeTrue();
+        screen.ContainsText("Line B").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Render_MarkupLine_With_Emoji()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[yellow]:warning: Warning![/]");
+
+        var screen = output.Terminal;
+        screen.ContainsText("Warning!").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Handle_Empty_Table()
+    {
+        var (console, output) = PhantomConsole.Create(40, 24);
+
+        var table = new Table();
+        table.AddColumn("Empty");
+
+        console.Write(table);
+
+        var screen = output.Terminal;
+        screen.ContainsText("Empty").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Handle_Wide_Table_With_Wrapping()
+    {
+        var (console, output) = PhantomConsole.Create(30, 24);
+
+        var table = new Table();
+        table.AddColumn("A");
+        table.AddColumn("B");
+        table.AddRow("Short", "This is a much longer text that should wrap within the column");
+
+        console.Write(table);
+
+        var screen = output.Terminal;
+        screen.ContainsText("Short").ShouldBeTrue();
+        screen.ContainsText("This is").ShouldBeTrue();
+    }
+
+    // ── PhantomConsoleOutput integration ──────────────────────────────
+
+    [Fact]
+    public void Should_Capture_Raw_ANSI_Output()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[bold]Test[/]");
+
+        // Raw output should contain ANSI sequences
+        output.RawOutput.ShouldContain("\x1b[");
+        output.RawOutput.ShouldContain("Test");
+    }
+
+    [Fact]
+    public void Should_Reset_And_Reuse_Output()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.WriteLine("First");
+        output.Terminal.ContainsText("First").ShouldBeTrue();
+
+        output.Reset();
+        output.Terminal.ContainsText("First").ShouldBeFalse();
+        output.RawOutput.ShouldBeEmpty();
+
+        console.WriteLine("Second");
+        output.Terminal.ContainsText("Second").ShouldBeTrue();
+    }
+
+    // ── Style verification ───────────────────────────────────────────
+
+    [Fact]
+    public void Should_Verify_Green_Foreground_Color()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[green]Green text[/]");
+
+        var screen = output.Terminal;
+        var pos = screen.FindText("Green text");
+        pos.ShouldNotBeNull();
+        var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
+        cell.Foreground.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Should_Verify_Background_Color_In_Markup()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[white on blue]Highlighted[/]");
+
+        var screen = output.Terminal;
+        var pos = screen.FindText("Highlighted");
+        pos.ShouldNotBeNull();
+        var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
+        cell.Foreground.ShouldNotBeNull();
+        cell.Background.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Should_Verify_Style_Transitions()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.Markup("[bold]Bold[/][italic]Italic[/]");
+
+        var screen = output.Terminal;
+        var boldPos = screen.FindText("Bold");
+        var italicPos = screen.FindText("Italic");
+        boldPos.ShouldNotBeNull();
+        italicPos.ShouldNotBeNull();
+
+        screen.GetCell(boldPos!.Value.Row, boldPos!.Value.Col)
+            .Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+        screen.GetCell(italicPos!.Value.Row, italicPos!.Value.Col)
+            .Decoration.HasFlag(CellDecoration.Italic).ShouldBeTrue();
+    }
+
+    // ── Using assertion helpers ──────────────────────────────────────
+
+    [Fact]
+    public void Should_Use_AssertContainsText_Helper()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.MarkupLine("[green]Success[/]");
+
+        output.Terminal.Screen.AssertContainsText("Success");
+        output.Terminal.Screen.AssertNotContainsText("Failure");
+    }
+
+    [Fact]
+    public void Should_Use_AssertCellDecoration_Helper()
+    {
+        var (console, output) = PhantomConsole.Create(80, 24);
+
+        console.Markup("[bold underline]Styled[/]");
+
+        var pos = output.Terminal.FindText("Styled");
+        pos.ShouldNotBeNull();
+
+        output.Terminal.Screen.AssertCellDecoration(pos!.Value.Row, pos!.Value.Col, CellDecoration.Bold);
+        output.Terminal.Screen.AssertCellDecoration(pos!.Value.Row, pos!.Value.Col, CellDecoration.Underline);
+    }
 }

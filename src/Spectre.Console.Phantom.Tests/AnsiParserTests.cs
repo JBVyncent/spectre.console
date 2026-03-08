@@ -312,4 +312,334 @@ public sealed class AnsiParserTests
         result[1].ShouldBeOfType<AnsiSequence.SaveCursor>();
         result.Last().ShouldBeOfType<AnsiSequence.CursorVisibility>().Visible.ShouldBeTrue();
     }
+
+    // ── Edge Cases: Truncated/Malformed Input ────────────────────────
+
+    [Fact]
+    public void Should_Handle_Truncated_Escape_At_End_Of_Input()
+    {
+        // ESC at end of string with no following char
+        var result = AnsiParser.Parse("Hello\x1b");
+
+        // Should have Text("Hello") and nothing else (ESC consumed but no sequence produced)
+        result.Count.ShouldBe(1);
+        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("Hello");
+    }
+
+    [Fact]
+    public void Should_Handle_Unknown_Escape_Sequence()
+    {
+        // ESC followed by something other than [ or ]
+        var result = AnsiParser.Parse("A\x1bXB");
+
+        // The unknown sequence (\x1bX) is skipped, leaving text "A" and "B"
+        result.Count.ShouldBe(2);
+        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+        result[1].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("B");
+    }
+
+    [Fact]
+    public void Should_Handle_CSI_With_No_Command_Byte()
+    {
+        // ESC [ at end of string (no command)
+        var result = AnsiParser.Parse("A\x1b[");
+
+        result.Count.ShouldBe(1);
+        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+    }
+
+    [Fact]
+    public void Should_Handle_CSI_With_Only_Params_No_Command()
+    {
+        // ESC [ 1;2 at end of string (params but no command)
+        var result = AnsiParser.Parse("A\x1b[1;2");
+
+        result.Count.ShouldBe(1);
+        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+    }
+
+    [Fact]
+    public void Should_Handle_Unknown_CSI_Command()
+    {
+        // Unknown CSI command letter 'Z' — should not produce any sequence
+        var result = AnsiParser.Parse("\x1b[5Z");
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Handle_Unknown_Private_Sequence()
+    {
+        // Unknown DEC private mode param 999 — should not produce any sequence
+        var result = AnsiParser.Parse("\x1b[?999h");
+        result.ShouldBeEmpty();
+    }
+
+    // ── Edge Cases: OSC ──────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Parse_Hyperlink_With_BEL_Terminator()
+    {
+        // BEL (\a) as OSC terminator instead of ST (ESC \)
+        var result = AnsiParser.Parse("\x1b]8;;https://bel.example\aLink\x1b]8;;\a");
+
+        result.Count.ShouldBe(3);
+        result[0].ShouldBeOfType<AnsiSequence.Hyperlink>().Url.ShouldBe("https://bel.example");
+        result[1].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("Link");
+        result[2].ShouldBeOfType<AnsiSequence.Hyperlink>().Url.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Handle_OSC_Without_Terminator()
+    {
+        // OSC sequence that runs to end of input without ST or BEL
+        var result = AnsiParser.Parse("A\x1b]8;;https://unterminated");
+
+        result.Count.ShouldBe(1);
+        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+    }
+
+    [Fact]
+    public void Should_Ignore_Non_Hyperlink_OSC()
+    {
+        // OSC sequence that is NOT 8; (e.g., OSC 0 — set title)
+        var result = AnsiParser.Parse("\x1b]0;My Title\a");
+
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Ignore_OSC_8_Without_Second_Semicolon()
+    {
+        // OSC 8 with params but no second semicolon
+        var result = AnsiParser.Parse("\x1b]8;no-second-semi\a");
+
+        // ParseOscContent finds "8;" prefix but no second ";" in the rest → returns without adding
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Parse_Hyperlink_Close_As_Empty_Url()
+    {
+        // Closing hyperlink: 8;; (empty URL)
+        var result = AnsiParser.Parse("\x1b]8;;\x1b\\");
+
+        var link = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Hyperlink>();
+        link.Url.ShouldBeEmpty();
+        link.Id.ShouldBeNull();
+    }
+
+    // ── Edge Cases: Erase Modes ──────────────────────────────────────
+
+    [Fact]
+    public void Should_Parse_Erase_In_Display_To_Start()
+    {
+        var result = AnsiParser.Parse("\x1b[1J");
+
+        result.ShouldHaveSingleItem()
+            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
+            .Mode.ShouldBe(EraseMode.ToStart);
+    }
+
+    [Fact]
+    public void Should_Parse_Erase_In_Display_Scrollback()
+    {
+        var result = AnsiParser.Parse("\x1b[3J");
+
+        result.ShouldHaveSingleItem()
+            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
+            .Mode.ShouldBe(EraseMode.Scrollback);
+    }
+
+    [Fact]
+    public void Should_Parse_Erase_In_Display_Default_As_ToEnd()
+    {
+        // No parameter defaults to 0 (ToEnd)
+        var result = AnsiParser.Parse("\x1b[J");
+
+        result.ShouldHaveSingleItem()
+            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
+            .Mode.ShouldBe(EraseMode.ToEnd);
+    }
+
+    [Fact]
+    public void Should_Parse_Erase_In_Line_To_End()
+    {
+        var result = AnsiParser.Parse("\x1b[0K");
+
+        result.ShouldHaveSingleItem()
+            .ShouldBeOfType<AnsiSequence.EraseInLine>()
+            .Mode.ShouldBe(EraseMode.ToEnd);
+    }
+
+    [Fact]
+    public void Should_Parse_Erase_In_Line_To_Start()
+    {
+        var result = AnsiParser.Parse("\x1b[1K");
+
+        result.ShouldHaveSingleItem()
+            .ShouldBeOfType<AnsiSequence.EraseInLine>()
+            .Mode.ShouldBe(EraseMode.ToStart);
+    }
+
+    [Fact]
+    public void Should_Parse_Erase_In_Line_Default_As_ToEnd()
+    {
+        // No parameter defaults to 0 (ToEnd)
+        var result = AnsiParser.Parse("\x1b[K");
+
+        result.ShouldHaveSingleItem()
+            .ShouldBeOfType<AnsiSequence.EraseInLine>()
+            .Mode.ShouldBe(EraseMode.ToEnd);
+    }
+
+    // ── Edge Cases: SGR extended colors ──────────────────────────────
+
+    [Fact]
+    public void Should_Parse_SGR_8Bit_Background()
+    {
+        var result = AnsiParser.Parse("\x1b[48;5;42m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 48, 5, 42 });
+    }
+
+    [Fact]
+    public void Should_Parse_SGR_24Bit_Background()
+    {
+        var result = AnsiParser.Parse("\x1b[48;2;10;20;30m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 48, 2, 10, 20, 30 });
+    }
+
+    [Fact]
+    public void Should_Parse_SGR_Default_Foreground()
+    {
+        var result = AnsiParser.Parse("\x1b[39m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 39 });
+    }
+
+    [Fact]
+    public void Should_Parse_SGR_Default_Background()
+    {
+        var result = AnsiParser.Parse("\x1b[49m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 49 });
+    }
+
+    [Fact]
+    public void Should_Parse_All_Decoration_Codes()
+    {
+        // SGR codes 1-9 for decorations
+        var result = AnsiParser.Parse("\x1b[1;2;3;4;5;6;7;8;9m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+    }
+
+    [Fact]
+    public void Should_Parse_Bright_Foreground_Colors()
+    {
+        // SGR 90-97 for bright foreground
+        var result = AnsiParser.Parse("\x1b[91m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 91 });
+    }
+
+    [Fact]
+    public void Should_Parse_Bright_Background_Colors()
+    {
+        // SGR 100-107 for bright background
+        var result = AnsiParser.Parse("\x1b[104m");
+
+        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
+        sgr.Parameters.ShouldBe(new[] { 104 });
+    }
+
+    // ── Null input ───────────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Throw_For_Null_Input()
+    {
+        Should.Throw<ArgumentNullException>(() => AnsiParser.Parse(null!));
+    }
+
+    // ── Cursor Up default ────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Parse_Cursor_Up_Default()
+    {
+        var result = AnsiParser.Parse("\x1b[A");
+
+        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
+        move.Direction.ShouldBe(CursorDirection.Up);
+        move.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public void Should_Parse_Cursor_Left_Default()
+    {
+        var result = AnsiParser.Parse("\x1b[D");
+
+        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
+        move.Direction.ShouldBe(CursorDirection.Left);
+        move.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public void Should_Parse_Cursor_Right_Default()
+    {
+        var result = AnsiParser.Parse("\x1b[C");
+
+        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
+        move.Direction.ShouldBe(CursorDirection.Right);
+        move.Count.ShouldBe(1);
+    }
+
+    // ── Multiple sequences in one string ─────────────────────────────
+
+    [Fact]
+    public void Should_Parse_Multiple_Control_Characters()
+    {
+        var result = AnsiParser.Parse("\n\r\b\n");
+
+        result.Count.ShouldBe(4);
+        result[0].ShouldBeOfType<AnsiSequence.NewLine>();
+        result[1].ShouldBeOfType<AnsiSequence.CarriageReturn>();
+        result[2].ShouldBeOfType<AnsiSequence.Backspace>();
+        result[3].ShouldBeOfType<AnsiSequence.NewLine>();
+    }
+
+    [Fact]
+    public void Should_Parse_Multiple_CSI_Sequences_In_Row()
+    {
+        var result = AnsiParser.Parse("\x1b[1A\x1b[2B\x1b[3C\x1b[4D");
+
+        result.Count.ShouldBe(4);
+        result[0].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Up);
+        result[1].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Down);
+        result[2].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Right);
+        result[3].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Left);
+    }
+
+    // ── Private sequence with unrecognized command ────────────────────
+
+    [Fact]
+    public void Should_Handle_Private_Sequence_With_Unknown_Command()
+    {
+        // ? prefix with recognized param (25) but unrecognized command ('x')
+        var result = AnsiParser.Parse("\x1b[?25x");
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Handle_CSI_Private_With_No_Params()
+    {
+        var result = AnsiParser.Parse("\x1b[?h");
+        result.ShouldBeEmpty();
+    }
 }

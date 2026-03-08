@@ -336,4 +336,460 @@ public sealed class PhantomTerminalTests
         terminal.Screen[0, 3].HyperlinkUrl.ShouldBe("https://example.com");
         // After closing hyperlink, next char has no URL
     }
+
+    // ── SGR: Background Colors ───────────────────────────────────────
+
+    [Fact]
+    public void Should_Track_SGR_Background_Legacy()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[42mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Background.ShouldNotBeNull();
+        cell.Background!.Value.Mode.ShouldBe(ColorMode.Legacy);
+        cell.Background!.Value.Index.ShouldBe(42);
+    }
+
+    [Fact]
+    public void Should_Track_SGR_Background_Bright()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[104mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Background.ShouldNotBeNull();
+        cell.Background!.Value.Index.ShouldBe(104);
+    }
+
+    [Fact]
+    public void Should_Track_SGR_Background_8Bit()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[48;5;220mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Background.ShouldNotBeNull();
+        cell.Background!.Value.Mode.ShouldBe(ColorMode.EightBit);
+        cell.Background!.Value.Index.ShouldBe(220);
+    }
+
+    [Fact]
+    public void Should_Track_SGR_Background_24Bit()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[48;2;10;20;30mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Background.ShouldNotBeNull();
+        cell.Background!.Value.Mode.ShouldBe(ColorMode.TrueColor);
+        cell.Background!.Value.R.ShouldBe((byte)10);
+        cell.Background!.Value.G.ShouldBe((byte)20);
+        cell.Background!.Value.B.ShouldBe((byte)30);
+    }
+
+    // ── SGR: Default Color Reset ─────────────────────────────────────
+
+    [Fact]
+    public void Should_Reset_Foreground_To_Default()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[31mA\x1b[39mB");
+
+        terminal.Screen[0, 0].Foreground.ShouldNotBeNull();
+        terminal.Screen[0, 1].Foreground.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Should_Reset_Background_To_Default()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[42mA\x1b[49mB");
+
+        terminal.Screen[0, 0].Background.ShouldNotBeNull();
+        terminal.Screen[0, 1].Background.ShouldBeNull();
+    }
+
+    // ── SGR: All Decorations ─────────────────────────────────────────
+
+    [Theory]
+    [InlineData(2, CellDecoration.Dim)]
+    [InlineData(5, CellDecoration.SlowBlink)]
+    [InlineData(6, CellDecoration.RapidBlink)]
+    [InlineData(7, CellDecoration.Reverse)]
+    [InlineData(8, CellDecoration.Conceal)]
+    [InlineData(9, CellDecoration.Strikethrough)]
+    public void Should_Track_All_SGR_Decorations(int sgrCode, CellDecoration expected)
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write($"\x1b[{sgrCode}mX");
+
+        terminal.Screen[0, 0].Decoration.HasFlag(expected).ShouldBeTrue();
+    }
+
+    // ── SGR: Extended Color Edge Cases ───────────────────────────────
+
+    [Fact]
+    public void Should_Handle_Truncated_Extended_Foreground_Color()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[38mX");
+
+        terminal.GetRowText(0).ShouldBe("X");
+    }
+
+    [Fact]
+    public void Should_Handle_Extended_Color_Unknown_Mode()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[38;9mX");
+
+        terminal.GetRowText(0).ShouldBe("X");
+    }
+
+    [Fact]
+    public void Should_Handle_Truncated_8Bit_Color()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[38;5mX");
+
+        terminal.GetRowText(0).ShouldBe("X");
+    }
+
+    [Fact]
+    public void Should_Handle_Truncated_24Bit_Color()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[38;2;100;200mX");
+
+        terminal.GetRowText(0).ShouldBe("X");
+    }
+
+    // ── Cursor Movement ──────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Handle_Cursor_Left()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("ABCD\x1b[2DXY");
+
+        terminal.GetRowText(0).ShouldBe("ABXY");
+    }
+
+    [Fact]
+    public void Should_Handle_Cursor_Right()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("A\x1b[3CB");
+
+        terminal.Screen[0, 0].Character.ShouldBe('A');
+        terminal.Screen[0, 4].Character.ShouldBe('B');
+    }
+
+    [Fact]
+    public void Should_Clamp_Cursor_Left_To_Zero()
+    {
+        var terminal = new PhantomTerminal(10, 5);
+        terminal.Write("\x1b[100D");
+        terminal.CursorCol.ShouldBe(0);
+    }
+
+    [Fact]
+    public void Should_Clamp_Cursor_Right_To_Width_Minus_One()
+    {
+        var terminal = new PhantomTerminal(10, 5);
+        terminal.Write("\x1b[100C");
+        terminal.CursorCol.ShouldBe(9);
+    }
+
+    // ── Cursor Position ──────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Handle_Cursor_Home()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Hello\nWorld");
+        terminal.Write("\x1b[H");
+
+        terminal.CursorRow.ShouldBe(0);
+        terminal.CursorCol.ShouldBe(0);
+    }
+
+    [Fact]
+    public void Should_Handle_Cursor_Horizontal_Absolute()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Hello");
+        terminal.Write("\x1b[3G");
+
+        terminal.CursorCol.ShouldBe(2);
+    }
+
+    [Fact]
+    public void Should_Clamp_Cursor_Position_To_Bounds()
+    {
+        var terminal = new PhantomTerminal(10, 5);
+
+        terminal.Write("\x1b[100;3H");
+        terminal.CursorRow.ShouldBe(4);
+
+        terminal.Write("\x1b[1;100H");
+        terminal.CursorCol.ShouldBe(9);
+    }
+
+    [Fact]
+    public void Should_Clamp_Cursor_Horizontal_Absolute_To_Bounds()
+    {
+        var terminal = new PhantomTerminal(10, 5);
+        terminal.Write("\x1b[100G");
+        terminal.CursorCol.ShouldBe(9);
+    }
+
+    // ── Erase Modes ──────────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Handle_Erase_In_Display_All()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Line 1\nLine 2\nLine 3");
+        terminal.Write("\x1b[2J");
+
+        terminal.GetRowText(0).ShouldBeEmpty();
+        terminal.GetRowText(1).ShouldBeEmpty();
+        terminal.GetRowText(2).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Handle_Erase_In_Display_Scrollback()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Content");
+        terminal.Write("\x1b[3J");
+
+        terminal.GetRowText(0).ShouldBeEmpty();
+    }
+
+    // ── Line Wrap With Scroll ────────────────────────────────────────
+
+    [Fact]
+    public void Should_Scroll_When_Line_Wraps_Past_Bottom()
+    {
+        var terminal = new PhantomTerminal(5, 2);
+
+        terminal.Write("1234567890");
+        terminal.GetRowText(0).ShouldBe("12345");
+        terminal.GetRowText(1).ShouldBe("67890");
+
+        terminal.Write("X");
+        terminal.GetRowText(0).ShouldBe("67890");
+        terminal.GetRowText(1).ShouldBe("X");
+    }
+
+    // ── Alternate Screen ─────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Reset_Cursor_When_Entering_Alternate_Screen()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Hello\nWorld");
+
+        terminal.Write("\x1b[?1049h");
+
+        terminal.CursorRow.ShouldBe(0);
+        terminal.CursorCol.ShouldBe(0);
+    }
+
+    [Fact]
+    public void Should_Restore_Main_Cursor_When_Leaving_Alternate_Screen()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Hello\nWorld");
+        var mainRow = terminal.CursorRow;
+        var mainCol = terminal.CursorCol;
+
+        terminal.Write("\x1b[?1049h");
+        terminal.Write("Alt content");
+
+        terminal.Write("\x1b[?1049l");
+        terminal.CursorRow.ShouldBe(mainRow);
+        terminal.CursorCol.ShouldBe(mainCol);
+    }
+
+    [Fact]
+    public void Should_Reuse_Existing_Alternate_Buffer()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+
+        terminal.Write("\x1b[?1049h");
+        terminal.Write("First");
+        terminal.Write("\x1b[?1049l");
+
+        terminal.Write("\x1b[?1049h");
+        terminal.IsAlternateScreen.ShouldBeTrue();
+    }
+
+    // ── GetScreenText / GetCell ───────────────────────────────────────
+
+    [Fact]
+    public void GetScreenText_Should_Return_All_Content()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("Hello\nWorld");
+
+        var text = terminal.GetScreenText();
+        text.ShouldContain("Hello");
+        text.ShouldContain("World");
+    }
+
+    [Fact]
+    public void GetCell_Should_Return_Cell_With_Style()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[1;31mX");
+
+        var cell = terminal.GetCell(0, 0);
+        cell.Character.ShouldBe('X');
+        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+        cell.Foreground.ShouldNotBeNull();
+    }
+
+    // ── Width / Height ───────────────────────────────────────────────
+
+    [Fact]
+    public void Width_And_Height_Should_Match_Constructor()
+    {
+        var terminal = new PhantomTerminal(132, 50);
+        terminal.Width.ShouldBe(132);
+        terminal.Height.ShouldBe(50);
+    }
+
+    [Fact]
+    public void Default_Constructor_Should_Use_80x24()
+    {
+        var terminal = new PhantomTerminal();
+        terminal.Width.ShouldBe(80);
+        terminal.Height.ShouldBe(24);
+    }
+
+    // ── Null Input ───────────────────────────────────────────────────
+
+    [Fact]
+    public void Write_Should_Throw_For_Null()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        Should.Throw<ArgumentNullException>(() => terminal.Write(null!));
+    }
+
+    // ── Backspace at column 0 ────────────────────────────────────────
+
+    [Fact]
+    public void Backspace_At_Column_Zero_Should_Not_Move()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\b");
+        terminal.CursorCol.ShouldBe(0);
+    }
+
+    // ── Hyperlink Tracking ───────────────────────────────────────────
+
+    [Fact]
+    public void Should_Clear_Hyperlink_After_Close()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b]8;;https://example.com\x1b\\AB\x1b]8;;\x1b\\CD");
+
+        terminal.Screen[0, 0].HyperlinkUrl.ShouldBe("https://example.com");
+        terminal.Screen[0, 1].HyperlinkUrl.ShouldBe("https://example.com");
+        terminal.Screen[0, 2].HyperlinkUrl.ShouldBeNull();
+        terminal.Screen[0, 3].HyperlinkUrl.ShouldBeNull();
+    }
+
+    // ── Assertion Helper Integration ─────────────────────────────────
+
+    [Fact]
+    public void AssertCursorAt_Should_Work()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("AB");
+        terminal.AssertCursorAt(0, 2);
+    }
+
+    [Fact]
+    public void AssertCursorVisible_Should_Work()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.AssertCursorVisible(true);
+        terminal.Write("\x1b[?25l");
+        terminal.AssertCursorVisible(false);
+    }
+
+    [Fact]
+    public void AssertAlternateScreen_Should_Work()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.AssertAlternateScreen(false);
+        terminal.Write("\x1b[?1049h");
+        terminal.AssertAlternateScreen(true);
+    }
+
+    [Fact]
+    public void AssertHistoryContains_Should_Work()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[s\x1b[u");
+        terminal.AssertHistoryContains<AnsiSequence.SaveCursor>();
+        terminal.AssertHistoryContains<AnsiSequence.RestoreCursor>();
+        terminal.AssertHistoryCount<AnsiSequence.SaveCursor>(1);
+    }
+
+    // ── Combined foreground and background ───────────────────────────
+
+    [Fact]
+    public void Should_Track_Combined_Foreground_And_Background()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[31;42mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Foreground!.Value.Index.ShouldBe(31);
+        cell.Background!.Value.Index.ShouldBe(42);
+    }
+
+    [Fact]
+    public void Should_Track_Combined_Decoration_And_Color()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write("\x1b[1;3;31mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Italic).ShouldBeTrue();
+        cell.Foreground!.Value.Index.ShouldBe(31);
+    }
+
+    // ── SGR foreground range ─────────────────────────────────────────
+
+    [Theory]
+    [InlineData(90)]
+    [InlineData(91)]
+    [InlineData(97)]
+    public void Should_Track_Bright_Foreground_Colors(int sgrCode)
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write($"\x1b[{sgrCode}mX");
+
+        terminal.Screen[0, 0].Foreground!.Value.Index.ShouldBe(sgrCode);
+    }
+
+    [Theory]
+    [InlineData(100)]
+    [InlineData(101)]
+    [InlineData(107)]
+    public void Should_Track_Bright_Background_Colors(int sgrCode)
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write($"\x1b[{sgrCode}mX");
+
+        terminal.Screen[0, 0].Background!.Value.Index.ShouldBe(sgrCode);
+    }
 }
