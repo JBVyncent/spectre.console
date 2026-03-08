@@ -48,16 +48,17 @@ internal sealed class DefaultProgressRenderer : ProgressRenderer
             }
             else
             {
-                // Stryker disable all : NoCoverage — DidOverflow path requires terminal height overflow during
-                // Progress rendering; cannot be triggered via TestConsole in unit tests
+                // Stryker disable once all : NoCoverage — DidOverflow path requires terminal height overflow during Progress rendering
                 if (_live.HasRenderable && _live.DidOverflow)
                 {
                     // Redraw the whole live renderable
+                    // Stryker disable once all : NoCoverage — DidOverflow only triggered by terminal height overflow
                     _console.Write(_live.RestoreCursor());
+                    // Stryker disable once all : NoCoverage — DidOverflow only triggered by terminal height overflow
                     _live.Overflow = VerticalOverflow.Visible;
+                    // Stryker disable once all : NoCoverage — DidOverflow only triggered by terminal height overflow
                     _console.Write(_live.Target);
                 }
-                // Stryker restore all
 
                 _console.WriteLine();
             }

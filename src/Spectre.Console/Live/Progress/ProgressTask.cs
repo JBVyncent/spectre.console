@@ -280,14 +280,12 @@ public sealed class ProgressTask : IProgress<double>
     private double? GetSpeed()
     {
         var now = _timeProvider.GetLocalNow().LocalDateTime;
-        // Stryker disable all : Equivalent — speed cache is a performance optimization; all mutations
-        // (logical connective, negation, comparison operators, early-return removal) produce identical results
-        // because recalculating produces the same speed value as the cached one
+        // Stryker disable once all : Equivalent — cache optimization; skipping cache just recalculates identical result
         if (!_samplesChanged && (now - _lastSpeedCalculation) < MaxTimeForSpeedCache)
         {
+            // Stryker disable once all : Equivalent — returning cached value vs recalculating produces same result
             return _cachedLastSpeed;
         }
-        // Stryker restore all
 
         lock (_lock)
         {
@@ -297,16 +295,12 @@ public sealed class ProgressTask : IProgress<double>
             }
 
             _lastSpeedCalculation = now;
-            // Stryker disable all : Equivalent — setting _samplesChanged to true/false is a cache flag;
-            // either value causes a recalculation at next call producing the same result
+            // Stryker disable once all : Equivalent — cache flag; true causes recalculation which produces same result
             _samplesChanged = false;
-            // Stryker restore all
 
             var threshold = now - MaxSamplingAge;
-            // Stryker disable all : Equivalent — >= vs > boundary at the exact threshold timestamp is negligible;
-            // a sample exactly at the threshold boundary has no practical impact on speed calculation
+            // Stryker disable once all : Equivalent — >= vs > boundary; exact threshold match is negligible
             var validSamples = Samples.Where(a => a.Timestamp >= threshold).ToList();
-            // Stryker restore all
             if (validSamples.Count == 0)
             {
                 return _cachedLastSpeed = null;
@@ -316,14 +310,11 @@ public sealed class ProgressTask : IProgress<double>
             var newestSampleTime = Samples[Samples.Count - 1].Timestamp;
             if (StopTime == null)
             {
-                // Stryker disable all : Equivalent — > vs >= boundary for speed decay check;
-                // exact equality at boundary is negligible, and the StopTime == null guard is not equivalent
-                // to StopTime != null (StopTime guard is already handled above and prevents reaching here)
+                // Stryker disable once all : Equivalent — > vs >= boundary; exact equality is negligible
                 if (now - newestSampleTime > MaxTimeForSpeedCache)
                 {
                     newestSampleTime = now;
                 }
-                // Stryker restore all
             }
 
             var totalTime = newestSampleTime - first.Timestamp;
