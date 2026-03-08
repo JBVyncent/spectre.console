@@ -273,6 +273,91 @@ public sealed class SelectionPromptTests
     }
 }
 
+public sealed class SearchFilterTests
+{
+    [Fact]
+    public void Should_Return_First_Filtered_Match_On_Enter()
+    {
+        // Type "ap" → filter to "apple" and "apricot" → Enter selects "apple"
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushText("ap");
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .EnableSearch(SearchMode.Filter)
+            .AddChoices("banana", "apple", "apricot", "cherry")
+            .Show(console);
+
+        result.ShouldBe("apple");
+    }
+
+    [Fact]
+    public void Should_Return_Second_Filtered_Match_After_Navigation()
+    {
+        // Type "ap" → "apple", "apricot" — move down → "apricot" → Enter
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushText("ap");
+        console.Input.PushKey(ConsoleKey.DownArrow);
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .EnableSearch(SearchMode.Filter)
+            .AddChoices("banana", "apple", "apricot", "cherry")
+            .Show(console);
+
+        result.ShouldBe("apricot");
+    }
+
+    [Fact]
+    public void Should_Return_Item_After_Backspace_Widens_Filter()
+    {
+        // "ap" → 2 matches; backspace → "a" → 3 matches; down → "banana" → Enter
+        // Note: "banana" contains 'a', so it appears when filter is just 'a'.
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushText("ap");
+        console.Input.PushKey(ConsoleKey.Backspace); // now "a"
+        console.Input.PushKey(ConsoleKey.Enter);     // "apple" still first match
+
+        var result = new SelectionPrompt<string>()
+            .EnableSearch(SearchMode.Filter)
+            .AddChoices("banana", "apple", "apricot", "cherry")
+            .Show(console);
+
+        // With filter "a": "banana"(idx0), "apple"(idx1), "apricot"(idx2) match.
+        // Cursor stays on "apple" (already in filtered set after backspace).
+        result.ShouldBe("apple");
+    }
+
+    [Fact]
+    public void EnableSearch_Overload_Should_Throw_For_Null_Prompt()
+    {
+        var ex = Record.Exception(() =>
+            ((SelectionPrompt<string>)null!).EnableSearch(SearchMode.Filter));
+        ex.ShouldBeOfType<ArgumentNullException>()
+          .ParamName.ShouldBe("obj");
+    }
+
+    [Fact]
+    public void Highlight_Mode_Should_Keep_All_Items_Visible_And_Jump_To_Match()
+    {
+        // Existing behaviour: search text jumps cursor to "item 3" but all items remain
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushText("3");
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .EnableSearch(SearchMode.Highlight)
+            .AddChoices("item 1", "item 2", "item 3", "item 4")
+            .Show(console);
+
+        result.ShouldBe("item 3");
+    }
+}
+
 public sealed class DefaultValueTests
 {
     [Fact]

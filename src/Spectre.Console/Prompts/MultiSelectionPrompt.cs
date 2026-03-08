@@ -104,7 +104,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         // Stryker disable once all : Equivalent — Converter is null in tests so both sides of ?? produce same result
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
         // Stryker disable once all : Equivalent — boolean params and ConfigureAwait; internal pipeline values not observable in tests
-        var result = await prompt.Show(Tree, converter, Mode, false, false, PageSize, WrapAround, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(Tree, converter, Mode, false, false, false, PageSize, WrapAround, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         // Stryker disable once all : Equivalent — && vs || doesn't change outcome: if IsCancelled is true, CancelResult is always set in tests; if CancelResult is null, both evaluate to false
         if (result.IsCancelled && CancelResult is not null)

@@ -159,7 +159,8 @@ public static class SelectionPromptExtensions
     }
 
     /// <summary>
-    /// Enables search for the prompt.
+    /// Enables search for the prompt using the default
+    /// <see cref="SearchMode.Highlight"/> behavior.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
     /// <param name="obj">The prompt.</param>
@@ -170,6 +171,27 @@ public static class SelectionPromptExtensions
         ArgumentNullException.ThrowIfNull(obj);
 
         obj.SearchEnabled = true;
+        return obj;
+    }
+
+    /// <summary>
+    /// Enables search for the prompt with the specified search mode.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="searchMode">
+    /// <see cref="SearchMode.Highlight"/> highlights matches and jumps the cursor
+    /// to the first match while keeping all items visible. <see cref="SearchMode.Filter"/>
+    /// filters the displayed list to show only matching items.
+    /// </param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> EnableSearch<T>(this SelectionPrompt<T> obj, SearchMode searchMode)
+        where T : notnull
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+
+        obj.SearchEnabled = true;
+        obj.SearchMode = searchMode;
         return obj;
     }
 
