@@ -154,6 +154,24 @@ public static class TextPromptExtensions
     }
 
     /// <summary>
+    /// Enables editable default: the default value's display string is written into
+    /// the input buffer so the user can edit it before pressing Enter.
+    /// Backspace, continued typing, and Tab-completion all work as normal.
+    /// Has no effect when no default value has been configured via
+    /// <see cref="DefaultValue{T}(TextPrompt{T}, T)"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> PrefillDefaultValue<T>(this TextPrompt<T> obj)
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+
+        obj.PrefillDefaultValue = true;
+        return obj;
+    }
+
+    /// <summary>
     /// Sets the validation criteria for the prompt.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>

@@ -6,12 +6,20 @@ namespace Spectre.Console;
 public static partial class AnsiConsoleExtensions
 {
     // Stryker disable all : Internal input method; Stryker cannot trace coverage through TextPrompt pipeline
-    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, CancellationToken cancellationToken = default)
+    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, string? initialText = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(console);
 
         style ??= Style.Plain;
-        var text = string.Empty;
+
+        // Pre-fill the buffer when an initial value was requested.  The text is written
+        // immediately so the user sees it and can backspace over it or press Enter to accept.
+        var text = initialText ?? string.Empty;
+        if (!string.IsNullOrEmpty(initialText))
+        {
+            var displayText = (secret && mask != null) ? initialText.Mask(mask) : initialText;
+            console.Write(displayText, style);
+        }
 
         var autocomplete = new List<string>(items ?? []);
 
