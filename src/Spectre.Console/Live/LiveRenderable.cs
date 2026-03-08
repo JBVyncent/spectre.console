@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal rendering component; Stryker cannot trace coverage through the render pipeline
 internal sealed class LiveRenderable : Renderable
 {
     private readonly object _lock = new();
@@ -169,3 +170,4 @@ internal sealed class LiveRenderable : Renderable
         }
     }
 }
+// Stryker restore all

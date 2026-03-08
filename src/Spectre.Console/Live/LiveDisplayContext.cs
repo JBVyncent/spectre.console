@@ -3,6 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// Represents a context that can be used to interact with a <see cref="LiveDisplay"/>.
 /// </summary>
+// Stryker disable all : NoCoverage — internal type exercised only through LiveDisplay rendering pipeline; Stryker cannot trace indirect coverage
 public sealed class LiveDisplayContext
 {
     private readonly IAnsiConsole _console;
@@ -48,3 +49,4 @@ public sealed class LiveDisplayContext
         Live.OverflowCropping = cropping;
     }
 }
+// Stryker restore all

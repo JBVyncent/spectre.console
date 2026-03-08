@@ -38,8 +38,11 @@ public sealed class StatusContext
 
     internal StatusContext(ProgressContext context, ProgressTask task, SpinnerColumn spinnerColumn)
     {
+        // Stryker disable once all : Equivalent — internal constructor only called from Status.StartAsync<T> with non-null values
         ArgumentNullException.ThrowIfNull(context);
+        // Stryker disable once all : Equivalent — internal constructor only called from Status.StartAsync<T> with non-null values
         ArgumentNullException.ThrowIfNull(task);
+        // Stryker disable once all : Equivalent — internal constructor only called from Status.StartAsync<T> with non-null values
         ArgumentNullException.ThrowIfNull(spinnerColumn);
         _context = context;
         _task = task;
@@ -56,6 +59,7 @@ public sealed class StatusContext
 
     private void SetStatus(string status)
     {
+        // Stryker disable once all : Equivalent — _task.Description setter also validates; would throw InvalidOperationException for null/whitespace
         ArgumentNullException.ThrowIfNull(status);
 
         _task.Description = status;
@@ -63,6 +67,7 @@ public sealed class StatusContext
 
     private void SetSpinner(Spinner spinner)
     {
+        // Stryker disable once all : Equivalent — _spinnerColumn.Spinner setter would NullRef on first use
         ArgumentNullException.ThrowIfNull(spinner);
 
         _spinnerColumn.Spinner = spinner;

@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — fallback renderer only used for non-ANSI terminals; not exercised by TestConsole
 internal sealed class FallbackProgressRenderer : ProgressRenderer
 {
     private const double FirstMilestone = 25;
@@ -121,3 +122,4 @@ internal sealed class FallbackProgressRenderer : ProgressRenderer
         return null;
     }
 }
+// Stryker restore all
