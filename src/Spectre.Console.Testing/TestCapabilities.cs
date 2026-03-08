@@ -26,6 +26,9 @@ public sealed class TestCapabilities : IReadOnlyCapabilities
     /// <inheritdoc/>
     public bool AlternateBuffer { get; set; }
 
+    /// <inheritdoc/>
+    public bool SupportsSixel { get; set; }
+
     /// <summary>
     /// Creates a <see cref="RenderOptions"/> with the same capabilities as this instance.
     /// </summary>

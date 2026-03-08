@@ -60,6 +60,7 @@ public sealed class Capabilities : AnsiCapabilities, IReadOnlyCapabilities
             Interactive = InteractionDetector.IsInteractive(settings.Interactive),
             Unicode = encoding.EncodingName.ContainsExact("Unicode"),
             AlternateBuffer = ansiCaps.AlternateBuffer,
+            SupportsSixel = ansiCaps.SupportsSixel,
         };
     }
 }
