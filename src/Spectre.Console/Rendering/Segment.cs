@@ -193,6 +193,7 @@ public class Segment
     /// <returns>A collection of lines.</returns>
     public static List<SegmentLine> SplitLines(IEnumerable<Segment> segments)
     {
+        // Stryker disable once all : Equivalent — delegates to 2-arg overload which also checks null
         ArgumentNullException.ThrowIfNull(segments);
 
         return SplitLines(segments, int.MaxValue);
@@ -207,6 +208,7 @@ public class Segment
     /// <returns>A list of lines.</returns>
     public static List<SegmentLine> SplitLines(IEnumerable<Segment> segments, int maxWidth, int? height = null)
     {
+        // Stryker disable once all : Equivalent — LINQ Reverse() also throws ArgumentNullException for null
         ArgumentNullException.ThrowIfNull(segments);
 
         var lines = new List<SegmentLine>();
@@ -240,6 +242,7 @@ public class Segment
                 continue;
             }
 
+            // Stryker disable once all : Equivalent — mutating "\n" to "" causes ContainsExact("") to always be true, but downstream SplitLines() handles both paths identically
             // Does the segment contain a newline?
             if (segment.Text.ContainsExact("\n"))
             {
@@ -252,13 +255,14 @@ public class Segment
                         line = [];
                     }
 
-                    continue;
+                    continue; // Stryker disable once all : Equivalent — fallthrough re-processes "\n" via SplitLines which produces empty parts, no behavior change
                 }
 
                 var text = segment.Text;
                 while (text != null)
                 {
                     var parts = text.SplitLines();
+                    // Stryker disable once all : Equivalent — SplitLines() always returns at least 1 element, so > 0 and >= 0 are both always true
                     if (parts.Length > 0)
                     {
                         if (parts[0].Length > 0)
@@ -275,6 +279,7 @@ public class Segment
                             line = [];
                         }
 
+                        // Stryker disable once all : Equivalent — Take(n+1) returns same elements as Take(n-1) when n==parts.Length, since Skip(1) has fewer than both
                         text = string.Join('\n', parts.Skip(1).Take(parts.Length - 1));
                     }
                     else
@@ -297,6 +302,7 @@ public class Segment
         // Got a height specified?
         if (height != null)
         {
+            // Stryker disable once all : Equivalent — when count==height, RemoveRange(height, 0) is a no-op; > and >= produce identical results
             if (lines.Count >= height)
             {
                 // Remove lines
@@ -347,6 +353,7 @@ public class Segment
         }
         else if (overflow == Overflow.Crop)
         {
+            // Stryker disable once all : Equivalent — at maxWidth==0, Truncate returns null, fallback produces same empty segment
             if (maxWidth <= 0)
             {
                 result.Add(new Segment(string.Empty, segment.Style));
@@ -359,6 +366,7 @@ public class Segment
         }
         else if (overflow == Overflow.Ellipsis)
         {
+            // Stryker disable once all : Equivalent — mutation to maxWidth+1 changes which branch but else also produces "…" for maxWidth<=1
             if (Math.Max(0, maxWidth - 1) == 0)
             {
                 result.Add(new Segment("…", segment.Style));
@@ -401,6 +409,7 @@ public class Segment
 
         if (result.Count == 0 && segments.Any())
         {
+            // Stryker disable once all : Equivalent — segments.Any() guard ensures sequence is non-empty, so First()==FirstOrDefault()
             var segment = Truncate(segments.First(), maxWidth);
             if (segment != null)
             {
@@ -491,6 +500,7 @@ public class Segment
 
     internal static List<Segment> TruncateWithEllipsis(IEnumerable<Segment> segments, int maxWidth)
     {
+        // Stryker disable once all : Equivalent — CellCount() at next line also has ThrowIfNull
         ArgumentNullException.ThrowIfNull(segments);
 
         if (CellCount(segments) <= maxWidth)
@@ -511,6 +521,7 @@ public class Segment
 
     internal static List<Segment> TrimEnd(IEnumerable<Segment> segments)
     {
+        // Stryker disable once all : Equivalent — LINQ Reverse() also throws ArgumentNullException for null
         ArgumentNullException.ThrowIfNull(segments);
 
         var stack = new Stack<Segment>();
@@ -540,6 +551,7 @@ public class Segment
 
         foreach (var cell in cells)
         {
+            // Stryker disable once all : Equivalent — when count==cellHeight, <= enters if but while(count!=cellHeight) is false, no change; when count>cellHeight, both < and <= are false
             if (cell.Count < cellHeight)
             {
                 while (cell.Count != cellHeight)

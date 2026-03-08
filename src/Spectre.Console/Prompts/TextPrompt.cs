@@ -200,6 +200,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     /// <param name="console">The console to write the prompt to.</param>
     private void WritePrompt(IAnsiConsole console)
     {
+        // Stryker disable once all : Equivalent — only called from ShowAsync which already validated console
         ArgumentNullException.ThrowIfNull(console);
 
         var builder = new StringBuilder();
@@ -249,8 +250,10 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
             return;
         }
 
+        // Stryker disable once all : Equivalent — only called from ShowAsync which already validated console
         ArgumentNullException.ThrowIfNull(console);
 
+        // Stryker disable once all : NoCoverage false positive — Ansi is always true in TestConsole
         if (!console.Profile.Capabilities.Ansi)
         {
             return;

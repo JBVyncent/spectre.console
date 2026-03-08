@@ -45,6 +45,7 @@ public sealed class Paragraph : Renderable, IHasJustification, IOverflowable
     public Paragraph(string text, Style? style = null, Link? link = null)
         : this()
     {
+        // Stryker disable once all : Equivalent — Append() also has ThrowIfNull(text)
         ArgumentNullException.ThrowIfNull(text);
 
         Append(text, style, link);
