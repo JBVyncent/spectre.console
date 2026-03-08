@@ -70,6 +70,12 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public bool SearchEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets how the prompt behaves when search is active.
+    /// Defaults to <see cref="SearchMode.Highlight"/>.
+    /// </summary>
+    public SearchMode SearchMode { get; set; } = SearchMode.Highlight;
+
+    /// <summary>
     /// Gets or sets a Func that will be triggered if Cancel is triggered by the 'ESC' key.
     /// </summary>
     public Func<T>? CancelResult { get; set; }
@@ -134,7 +140,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         }
 
         // Stryker disable once all : Equivalent — boolean params and ConfigureAwait; internal pipeline values not observable in tests
-        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, initialIndex, cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, SearchMode == SearchMode.Filter, PageSize, WrapAround, initialIndex, cancellationToken).ConfigureAwait(false);
 
         // Stryker disable once all : Equivalent — && vs || doesn't change outcome in tests: CancelResult is always set when testing cancel, and always null otherwise
         if (result.IsCancelled && CancelResult is not null)

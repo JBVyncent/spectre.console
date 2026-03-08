@@ -22,6 +22,7 @@ internal sealed class ListPrompt<T>
         SelectionMode selectionMode,
         bool skipUnselectableItems,
         bool searchEnabled,
+        bool filterEnabled,
         int requestedPageSize,
         bool wrapAround,
         int? initialIndex = null,
@@ -49,7 +50,7 @@ internal sealed class ListPrompt<T>
             throw new InvalidOperationException("Cannot show an empty selection prompt. Please call the AddChoice() method to configure the prompt.");
         }
 
-        var state = new ListPromptState<T>(nodes, converter, _strategy.CalculatePageSize(_console, nodes.Count, requestedPageSize), wrapAround, selectionMode, skipUnselectableItems, searchEnabled, initialIndex);
+        var state = new ListPromptState<T>(nodes, converter, _strategy.CalculatePageSize(_console, nodes.Count, requestedPageSize), wrapAround, selectionMode, skipUnselectableItems, searchEnabled, filterEnabled, initialIndex);
         var hook = new ListPromptRenderHook<T>(_console, () => BuildRenderable(state));
 
         using var scope = new RenderHookScope(_console, hook);
@@ -95,15 +96,22 @@ internal sealed class ListPrompt<T>
         var pageSize = state.PageSize;
         var middleOfList = pageSize / 2;
 
-        var skip = 0;
-        var take = state.ItemCount;
-        var cursorIndex = state.Index;
+        // When filter mode is active and search text is non-empty, render only the
+        // matching items. The filtered cursor index is the position of the selected
+        // item within that subset. When the filter is inactive (no search text, or
+        // filter not enabled), we fall back to the full Items list.
+        var displayItems = state.GetDisplayItems();
+        var displayCount = displayItems.Count;
+        var cursorIndex = state.GetDisplayIndex();
 
-        var scrollable = state.ItemCount > pageSize;
+        var skip = 0;
+        var take = displayCount;
+
+        var scrollable = displayCount > pageSize;
         if (scrollable)
         {
-            skip = Math.Max(0, state.Index - middleOfList);
-            take = Math.Min(pageSize, state.ItemCount - skip);
+            skip = Math.Max(0, cursorIndex - middleOfList);
+            take = Math.Min(pageSize, displayCount - skip);
 
             if (take < pageSize)
             {
@@ -124,7 +132,7 @@ internal sealed class ListPrompt<T>
         return _strategy.Render(
             _console,
             scrollable, cursorIndex,
-            state.Items.Skip(skip).Take(take)
+            displayItems.Skip(skip).Take(take)
                 .Select((node, index) => (index, node)),
             state.SkipUnselectableItems,
             state.SearchText);
