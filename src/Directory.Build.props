@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup Label="Settings">
     <Deterministic>true</Deterministic>
     <LangVersion>14</LangVersion>
@@ -6,7 +6,7 @@
     <DebugType>embedded</DebugType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <MinVerSkip Condition="'$(Configuration)' == 'Debug'">true</MinVerSkip>
+    <MinVerSkip>true</MinVerSkip>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>

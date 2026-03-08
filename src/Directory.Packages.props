@@ -5,6 +5,14 @@
   <ItemGroup>
     <PackageVersion Include="Backport.System.Threading.Lock" Version="3.1.6" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
+    <PackageVersion Include="coverlet.msbuild" Version="8.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
     <PackageVersion Include="IsExternalInit" Version="1.0.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="10.0.103" />
