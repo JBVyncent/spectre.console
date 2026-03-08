@@ -273,6 +273,133 @@ public sealed class SelectionPromptTests
     }
 }
 
+public sealed class DefaultValueTests
+{
+    [Fact]
+    public void Should_Pre_Position_Cursor_On_Default_Value()
+    {
+        // When Enter is pressed immediately, the selected item should be the default.
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .Title("Pick one")
+            .AddChoices("First", "Second", "Third")
+            .DefaultValue("Second")
+            .Show(console);
+
+        result.ShouldBe("Second");
+    }
+
+    [Fact]
+    public void Should_Pre_Position_Cursor_On_Last_Item()
+    {
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .AddChoices("A", "B", "C")
+            .DefaultValue("C")
+            .Show(console);
+
+        result.ShouldBe("C");
+    }
+
+    [Fact]
+    public void Should_Allow_Navigation_Away_From_Default()
+    {
+        // Start at "Second", move up once → land on "First".
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.UpArrow);
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .AddChoices("First", "Second", "Third")
+            .DefaultValue("Second")
+            .Show(console);
+
+        result.ShouldBe("First");
+    }
+
+    [Fact]
+    public void Should_Fall_Back_To_First_Item_When_Default_Not_Found()
+    {
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .AddChoices("A", "B", "C")
+            .DefaultValue("NotInList")
+            .Show(console);
+
+        result.ShouldBe("A");
+    }
+
+    [Fact]
+    public void Should_Skip_Group_Default_In_Leaf_Mode_And_Use_First_Leaf()
+    {
+        // If the default value is a group header in Leaf mode, the cursor should
+        // fall back to the first leaf so that Enter works immediately.
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .Mode(SelectionMode.Leaf)
+            .AddChoiceGroup("GroupA", "Leaf1", "Leaf2")
+            .AddChoiceGroup("GroupB", "Leaf3", "Leaf4")
+            .DefaultValue("GroupA")      // group, not a leaf
+            .Show(console);
+
+        result.ShouldBe("Leaf1");
+    }
+
+    [Fact]
+    public void Should_Pre_Position_Cursor_On_Leaf_Default_In_Leaf_Mode()
+    {
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<string>()
+            .Mode(SelectionMode.Leaf)
+            .AddChoiceGroup("GroupA", "Leaf1", "Leaf2")
+            .AddChoiceGroup("GroupB", "Leaf3", "Leaf4")
+            .DefaultValue("Leaf3")
+            .Show(console);
+
+        result.ShouldBe("Leaf3");
+    }
+
+    [Fact]
+    public void Should_Work_With_Value_Type_Choices()
+    {
+        var console = new TestConsole();
+        console.Profile.Capabilities.Interactive = true;
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        var result = new SelectionPrompt<int>()
+            .AddChoices(1, 2, 3, 4, 5)
+            .DefaultValue(3)
+            .Show(console);
+
+        result.ShouldBe(3);
+    }
+
+    [Fact]
+    public void DefaultValue_Extension_Should_Throw_For_Null_Prompt()
+    {
+        var ex = Record.Exception(() =>
+            ((SelectionPrompt<string>)null!).DefaultValue("x"));
+        ex.ShouldBeOfType<ArgumentNullException>()
+          .ParamName.ShouldBe("obj");
+    }
+}
+
 file sealed class CustomSelectionItem
 {
     public int Value { get; }

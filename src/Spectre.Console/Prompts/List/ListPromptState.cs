@@ -26,7 +26,8 @@ internal sealed class ListPromptState<T>
         int pageSize, bool wrapAround,
         SelectionMode mode,
         bool skipUnselectableItems,
-        bool searchEnabled)
+        bool searchEnabled,
+        int? initialIndex = null)
     {
         // Stryker disable once all : Equivalent — internal class; converter is always non-null (passed from ListPrompt.Show via SelectionPrompt/MultiSelectionPrompt.ShowAsync)
         ArgumentNullException.ThrowIfNull(converter);
@@ -39,6 +40,8 @@ internal sealed class ListPromptState<T>
         SearchEnabled = searchEnabled;
         SearchText = string.Empty;
 
+        // Always build the leaf index table when needed for navigation, regardless of
+        // whether an explicit initial index was supplied.
         if (SkipUnselectableItems && mode == SelectionMode.Leaf)
         {
             _leafIndexes =
@@ -48,8 +51,25 @@ internal sealed class ListPromptState<T>
                     .Select(x => x.index)
                     .ToList()
                     .AsReadOnly();
+        }
 
-            Index = _leafIndexes.FirstOrDefault();
+        if (initialIndex.HasValue && initialIndex.Value >= 0 && initialIndex.Value < items.Count)
+        {
+            // Honor the caller's requested initial index, unless we are in leaf-only
+            // mode and the item at that index is a group header — in that case fall
+            // back to the first leaf so that Enter works immediately.
+            if (SkipUnselectableItems && mode == SelectionMode.Leaf && items[initialIndex.Value].IsGroup)
+            {
+                Index = _leafIndexes?.FirstOrDefault() ?? 0;
+            }
+            else
+            {
+                Index = initialIndex.Value;
+            }
+        }
+        else if (SkipUnselectableItems && mode == SelectionMode.Leaf)
+        {
+            Index = _leafIndexes?.FirstOrDefault() ?? 0;
         }
         else
         {

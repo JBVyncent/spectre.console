@@ -75,6 +75,13 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     public Func<T>? CancelResult { get; set; }
 
     /// <summary>
+    /// Gets or sets the default value. When set, the cursor is pre-positioned on this
+    /// item when the prompt first renders. If the value is not found in the choices list,
+    /// the cursor starts at the first selectable item as usual.
+    /// </summary>
+    internal DefaultPromptValue<T>? DefaultValue { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="SelectionPrompt{T}"/> class.
     /// </summary>
     public SelectionPrompt()
@@ -107,8 +114,27 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         var prompt = new ListPrompt<T>(console, this);
         // Stryker disable once all : Equivalent — Converter is null in most tests so both sides of ?? produce same result
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
+
+        // Resolve the initial cursor index from DefaultValue, if set.
+        // We traverse the tree here (one extra pass) so the index is available before
+        // ListPromptState is constructed. For typical prompt sizes this is negligible.
+        int? initialIndex = null;
+        if (DefaultValue is not null)
+        {
+            var allItems = _tree.Traverse().ToList();
+            var comparer = EqualityComparer<T>.Default;
+            for (var i = 0; i < allItems.Count; i++)
+            {
+                if (comparer.Equals(allItems[i].Data, DefaultValue.Value))
+                {
+                    initialIndex = i;
+                    break;
+                }
+            }
+        }
+
         // Stryker disable once all : Equivalent — boolean params and ConfigureAwait; internal pipeline values not observable in tests
-        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, cancellationToken).ConfigureAwait(false);
+        var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, initialIndex, cancellationToken).ConfigureAwait(false);
 
         // Stryker disable once all : Equivalent — && vs || doesn't change outcome in tests: CancelResult is always set when testing cancel, and always null otherwise
         if (result.IsCancelled && CancelResult is not null)

@@ -282,4 +282,22 @@ public static class SelectionPromptExtensions
         obj.Converter = displaySelector;
         return obj;
     }
+
+    /// <summary>
+    /// Sets the default value. The cursor will be pre-positioned on this item when
+    /// the prompt first renders. If the value is not found in the choices list the
+    /// cursor starts at the first selectable item as usual.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="defaultValue">The item to pre-select.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static SelectionPrompt<T> DefaultValue<T>(this SelectionPrompt<T> obj, T defaultValue)
+        where T : notnull
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+
+        obj.DefaultValue = new DefaultPromptValue<T>(defaultValue);
+        return obj;
+    }
 }
