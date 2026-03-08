@@ -107,6 +107,89 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         return node;
     }
 
+    /// <summary>
+    /// Creates a static snapshot of this prompt rendered at the given cursor position.
+    /// The returned <see cref="IRenderable"/> can be passed to
+    /// <see cref="IAnsiConsole.Write(IRenderable)"/> or composed with other renderables
+    /// without any user interaction.
+    /// </summary>
+    /// <param name="console">
+    /// The console used for page-size calculation.
+    /// Defaults to <see cref="AnsiConsole.Console"/> when <c>null</c>.
+    /// </param>
+    /// <param name="cursorIndex">
+    /// Zero-based index of the item the cursor should be placed on.
+    /// Clamped to the valid item range automatically.
+    /// </param>
+    /// <returns>An <see cref="IRenderable"/> snapshot of the prompt.</returns>
+    public IRenderable ToRenderable(IAnsiConsole? console = null, int cursorIndex = 0)
+    {
+        console ??= AnsiConsole.Console;
+        var nodes = _tree.Traverse().ToList();
+        if (nodes.Count == 0)
+        {
+            return Text.Empty;
+        }
+
+        // Stryker disable once all : Equivalent — Converter is null in most callers so both sides yield same result
+        var converter = Converter ?? TypeConverterHelper.ConvertToString;
+        var pageSize = ((IListPromptStrategy<T>)this).CalculatePageSize(console, nodes.Count, PageSize);
+        var clampedCursor = cursorIndex.Clamp(0, nodes.Count - 1);
+        var state = new ListPromptState<T>(nodes, converter, pageSize, WrapAround, Mode, true, SearchEnabled, SearchMode == SearchMode.Filter, clampedCursor);
+        return ListPrompt<T>.ComputeRenderable(this, console, state);
+    }
+
+    /// <summary>
+    /// Creates an interactive <see cref="SelectionPromptRenderable{T}"/> that wraps this
+    /// prompt and implements <see cref="IRenderable"/>. Embed it in a
+    /// <see cref="LiveDisplay"/> and call
+    /// <see cref="SelectionPromptRenderable{T}.Update"/> for each key press to drive the
+    /// prompt without blocking the calling thread.
+    /// </summary>
+    /// <param name="console">
+    /// The console used for page-size calculation and rendering.
+    /// Defaults to <see cref="AnsiConsole.Console"/> when <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// A <see cref="SelectionPromptRenderable{T}"/> ready to be rendered and driven
+    /// interactively.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when no choices have been added to the prompt.
+    /// </exception>
+    public SelectionPromptRenderable<T> AsRenderable(IAnsiConsole? console = null)
+    {
+        console ??= AnsiConsole.Console;
+        var nodes = _tree.Traverse().ToList();
+        if (nodes.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Cannot create a renderable from an empty selection prompt. " +
+                "Please call the AddChoice() method to configure the prompt.");
+        }
+
+        // Stryker disable once all : Equivalent — Converter is null in most callers so both sides yield same result
+        var converter = Converter ?? TypeConverterHelper.ConvertToString;
+        var pageSize = ((IListPromptStrategy<T>)this).CalculatePageSize(console, nodes.Count, PageSize);
+
+        int? initialIndex = null;
+        if (DefaultValue is not null)
+        {
+            var comparer = EqualityComparer<T>.Default;
+            for (var i = 0; i < nodes.Count; i++)
+            {
+                if (comparer.Equals(nodes[i].Data, DefaultValue.Value))
+                {
+                    initialIndex = i;
+                    break;
+                }
+            }
+        }
+
+        var state = new ListPromptState<T>(nodes, converter, pageSize, WrapAround, Mode, true, SearchEnabled, SearchMode == SearchMode.Filter, initialIndex);
+        return new SelectionPromptRenderable<T>(this, console, state);
+    }
+
     /// <inheritdoc/>
     public T Show(IAnsiConsole console)
     {

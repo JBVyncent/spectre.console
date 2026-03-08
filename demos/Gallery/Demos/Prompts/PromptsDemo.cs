@@ -179,5 +179,58 @@ public sealed class PromptsDemo : IDemoModule
             AnsiConsole.MarkupInterpolated($"  [cyan]•[/] {tool}");
             AnsiConsole.WriteLine();
         }
+
+        AnsiConsole.WriteLine();
+
+        // ToRenderable — static snapshot (#1281)
+        // ToRenderable() turns a configured SelectionPrompt into a plain IRenderable
+        // snapshot at a given cursor position. No user interaction required.
+        AnsiConsole.MarkupLine("[bold underline blue]Prompt as IRenderable — Static Snapshot[/]");
+        AnsiConsole.MarkupLine("[grey]The same prompt rendered three times at different cursor positions.[/]");
+        AnsiConsole.WriteLine();
+
+        var snapshotPrompt = new SelectionPrompt<string>()
+            .Title("[green]Favorite season?[/]")
+            .AddChoices("Spring", "Summer", "Autumn", "Winter");
+
+        for (var i = 0; i < 4; i++)
+        {
+            AnsiConsole.MarkupInterpolated($"[grey]Cursor at index {i}:[/]");
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(snapshotPrompt.ToRenderable(AnsiConsole.Console, cursorIndex: i));
+            AnsiConsole.WriteLine();
+        }
+
+        // AsRenderable — interactive IRenderable wrapper (#1281)
+        // AsRenderable() returns a SelectionPromptRenderable<T> that implements IRenderable
+        // and can be driven key-by-key — ideal for embedding in a Live display or custom
+        // rendering loops without blocking a thread.
+        AnsiConsole.MarkupLine("[bold underline blue]Prompt as IRenderable — Interactive[/]");
+        AnsiConsole.MarkupLine("[grey]Use arrow keys to navigate, Enter to select.[/]");
+        AnsiConsole.WriteLine();
+
+        var interactivePrompt = new SelectionPrompt<string>()
+            .Title("[green]Pick a planet:[/]")
+            .AddChoices("Mercury", "Venus", "Earth", "Mars", "Jupiter");
+
+        var promptRenderable = interactivePrompt.AsRenderable(AnsiConsole.Console);
+
+        AnsiConsole.Live(promptRenderable)
+            .Start(ctx =>
+            {
+                ctx.Refresh();
+                while (!promptRenderable.IsDone)
+                {
+                    var key = Console.ReadKey(true);
+                    if (promptRenderable.Update(key))
+                    {
+                        ctx.Refresh();
+                    }
+                }
+            });
+
+        AnsiConsole.MarkupInterpolated($"You chose: [bold]{promptRenderable.GetResult()}[/]");
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
     }
 }
