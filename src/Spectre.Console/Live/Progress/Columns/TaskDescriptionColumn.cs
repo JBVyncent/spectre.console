@@ -16,7 +16,8 @@ public sealed class TaskDescriptionColumn : ProgressColumn
     /// <inheritdoc/>
     public override IRenderable Render(RenderOptions options, ProgressTask task, TimeSpan deltaTime)
     {
+        var indent = task.IndentLevel > 0 ? new string(' ', task.IndentLevel * 2) : string.Empty;
         var text = task.Description?.RemoveNewLines()?.Trim();
-        return new Markup(text ?? string.Empty).Overflow(Overflow.Ellipsis).Justify(Alignment);
+        return new Markup(indent + (text ?? string.Empty)).Overflow(Overflow.Ellipsis).Justify(Alignment);
     }
 }

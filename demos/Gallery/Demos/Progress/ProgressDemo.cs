@@ -90,5 +90,79 @@ public sealed class ProgressDemo : IDemoModule
             });
 
         AnsiConsole.WriteLine();
+
+        // Nested progress (#1419)
+        // AddChildTask() creates sub-tasks that display indented under their parent.
+        // Setting AutoCompleteWithChildren = true causes the parent to automatically
+        // complete when all of its children have finished — no manual StopTask() call
+        // needed on the parent.
+        AnsiConsole.MarkupLine("[bold underline blue]Nested Progress[/]");
+        AnsiConsole.MarkupLine("[grey]Parent tasks auto-complete when all children finish.[/]");
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.Progress()
+            .AutoClear(false)
+            .Columns(
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new SpinnerColumn())
+            .Start(ctx =>
+            {
+                // Top-level pipeline task; will auto-complete when both stages finish.
+                var pipeline = ctx.AddTask("[bold]CI Pipeline[/]", maxValue: 100);
+                pipeline.AutoCompleteWithChildren = true;
+
+                // Stage 1 — has its own sub-tasks and also auto-completes.
+                var stage1 = ctx.AddChildTask(pipeline, "[green]Stage 1: Build[/]", maxValue: 100);
+                stage1.AutoCompleteWithChildren = true;
+
+                var compile = ctx.AddChildTask(stage1, "Compile", maxValue: 60);
+                var link = ctx.AddChildTask(stage1, "Link", maxValue: 40);
+
+                // Stage 2 — starts after stage 1 completes.
+                var stage2 = ctx.AddChildTask(pipeline, "[yellow]Stage 2: Test[/]", autoStart: false, maxValue: 100);
+                stage2.AutoCompleteWithChildren = true;
+
+                var random = new Random(42);
+
+                // Drive stage 1.
+                while (!stage1.IsFinished)
+                {
+                    if (!compile.IsFinished)
+                    {
+                        compile.Increment(random.Next(3, 9));
+                    }
+
+                    if (compile.Percentage > 60 && !link.IsFinished)
+                    {
+                        link.Increment(random.Next(4, 10));
+                    }
+
+                    Thread.Sleep(60);
+                }
+
+                // Stage 2 begins.
+                stage2.StartTask();
+                var unitTests = ctx.AddChildTask(stage2, "Unit tests", maxValue: 50);
+                var integration = ctx.AddChildTask(stage2, "Integration tests", maxValue: 50);
+
+                while (!stage2.IsFinished)
+                {
+                    if (!unitTests.IsFinished)
+                    {
+                        unitTests.Increment(random.Next(4, 8));
+                    }
+
+                    if (unitTests.Percentage > 40 && !integration.IsFinished)
+                    {
+                        integration.Increment(random.Next(3, 7));
+                    }
+
+                    Thread.Sleep(60);
+                }
+            });
+
+        AnsiConsole.WriteLine();
     }
 }
