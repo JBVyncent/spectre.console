@@ -101,6 +101,30 @@ public sealed class PromptsDemo : IDemoModule
         AnsiConsole.WriteLine();
         AnsiConsole.WriteLine();
 
+        // Async validator (#230)
+        // ValidateAsync accepts a Func<T, Task<ValidationResult>> (or with CancellationToken).
+        // The validator can do async I/O (database lookup, API call, etc.) and return
+        // ValidationResult.Success() or ValidationResult.Error(message).
+        AnsiConsole.MarkupLine("[bold underline blue]Async Validator[/]");
+        AnsiConsole.MarkupLine("[grey]Enter any name — the validator simulates an async uniqueness check.[/]");
+        AnsiConsole.MarkupLine("[grey]Try 'taken' to see the error, anything else passes.[/]");
+        AnsiConsole.WriteLine();
+
+        var username = AnsiConsole.Prompt(
+            new TextPrompt<string>("[green]Choose a username:[/]")
+                .ValidateAsync(async name =>
+                {
+                    // Simulate an async uniqueness check (e.g., a database query).
+                    await Task.Delay(50);
+                    return name.Equals("taken", StringComparison.OrdinalIgnoreCase)
+                        ? ValidationResult.Error("[red]That username is already taken[/]")
+                        : ValidationResult.Success();
+                }));
+
+        AnsiConsole.MarkupInterpolated($"Welcome, [bold]{username}[/]!");
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
+
         // Multi-selection prompt
         AnsiConsole.MarkupLine("[bold underline blue]Multi-Selection Prompt[/]");
         AnsiConsole.WriteLine();

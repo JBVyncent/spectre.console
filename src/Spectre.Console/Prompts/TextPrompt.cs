@@ -76,9 +76,17 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     public Func<T, string>? Converter { get; set; } = TypeConverterHelper.ConvertToString;
 
     /// <summary>
-    /// Gets or sets the validator.
+    /// Gets or sets the synchronous validator.
     /// </summary>
     public Func<T, ValidationResult>? Validator { get; set; }
+
+    /// <summary>
+    /// Gets or sets the asynchronous validator.
+    /// When set, this takes precedence over <see cref="Validator"/>.
+    /// The <see cref="CancellationToken"/> parameter is the token passed to
+    /// <see cref="ShowAsync"/>, allowing long-running validators to cancel early.
+    /// </summary>
+    public Func<T, CancellationToken, Task<ValidationResult>>? AsyncValidator { get; set; }
 
     /// <summary>
     /// Gets or sets the style in which the default value is displayed. Defaults to green when <see langword="null"/>.
@@ -178,12 +186,13 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                     continue;
                 }
 
-                // Run all validators
+                // Run validators — async takes precedence over sync.
                 // result! is safe: null is only possible when T is a nullable type (e.g. Uri?)
                 // and AllowEmpty is set, in which case null is a valid T value.
-                if (!ValidateResult(result!, out var validationMessage))
+                var (valid, message) = await ValidateResultAsync(result!, cancellationToken).ConfigureAwait(false);
+                if (!valid)
                 {
-                    console.MarkupLine(validationMessage);
+                    console.MarkupLine(message!);
                     WritePrompt(console);
                     continue;
                 }
@@ -268,19 +277,32 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
         }));
     }
 
-    private bool ValidateResult(T value, [NotNullWhen(false)] out string? message)
+    /// <summary>
+    /// Runs whichever validator is configured, async first.
+    /// Returns <c>(true, null)</c> on success, or <c>(false, errorMessage)</c> on failure.
+    /// </summary>
+    private async Task<(bool Valid, string? Message)> ValidateResultAsync(T value, CancellationToken cancellationToken)
     {
+        if (AsyncValidator != null)
+        {
+            var result = await AsyncValidator(value, cancellationToken).ConfigureAwait(false);
+            if (!result.Successful)
+            {
+                return (false, result.Message ?? ValidationErrorMessage);
+            }
+
+            return (true, null);
+        }
+
         if (Validator != null)
         {
             var result = Validator(value);
             if (!result.Successful)
             {
-                message = result.Message ?? ValidationErrorMessage;
-                return false;
+                return (false, result.Message ?? ValidationErrorMessage);
             }
         }
 
-        message = null;
-        return true;
+        return (true, null);
     }
 }
