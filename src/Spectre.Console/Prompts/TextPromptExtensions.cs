@@ -319,4 +319,102 @@ public static class TextPromptExtensions
         obj.ClearOnFinish = clear;
         return obj;
     }
+
+    /// <summary>
+    /// Sets an asynchronous validation handler for the prompt.
+    /// The handler receives a <see cref="CancellationToken"/> so it can cancel
+    /// long-running operations (e.g. network calls) when the user cancels the prompt.
+    /// When set, this handler takes precedence over any synchronous validator
+    /// configured via <see cref="Validate{T}(TextPrompt{T}, Func{T, ValidationResult})"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="validator">The async validation function.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> ValidateAsync<T>(
+        this TextPrompt<T> obj,
+        Func<T, CancellationToken, Task<ValidationResult>> validator)
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+        ArgumentNullException.ThrowIfNull(validator);
+
+        obj.AsyncValidator = validator;
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets an asynchronous validation handler for the prompt.
+    /// When set, this handler takes precedence over any synchronous validator
+    /// configured via <see cref="Validate{T}(TextPrompt{T}, Func{T, ValidationResult})"/>.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="validator">The async validation function.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> ValidateAsync<T>(
+        this TextPrompt<T> obj,
+        Func<T, Task<ValidationResult>> validator)
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+        ArgumentNullException.ThrowIfNull(validator);
+
+        obj.AsyncValidator = (value, _) => validator(value);
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets an asynchronous validation handler for the prompt using a bool-returning function.
+    /// Returns <see cref="ValidationResult.Error(string?)"/> when the function returns
+    /// <see langword="false"/>.
+    /// The handler receives a <see cref="CancellationToken"/> so it can cancel
+    /// long-running operations when the user cancels the prompt.
+    /// When set, this handler takes precedence over any synchronous validator.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="validator">The async validation function that returns <see langword="true"/> on success.</param>
+    /// <param name="message">Optional error message to display on failure.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> ValidateAsync<T>(
+        this TextPrompt<T> obj,
+        Func<T, CancellationToken, Task<bool>> validator,
+        string? message = null)
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+        ArgumentNullException.ThrowIfNull(validator);
+
+        obj.AsyncValidator = async (value, ct) =>
+            await validator(value, ct).ConfigureAwait(false)
+                ? ValidationResult.Success()
+                : ValidationResult.Error(message);
+
+        return obj;
+    }
+
+    /// <summary>
+    /// Sets an asynchronous validation handler for the prompt using a bool-returning function.
+    /// Returns <see cref="ValidationResult.Error(string?)"/> when the function returns
+    /// <see langword="false"/>.
+    /// When set, this handler takes precedence over any synchronous validator.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="validator">The async validation function that returns <see langword="true"/> on success.</param>
+    /// <param name="message">Optional error message to display on failure.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> ValidateAsync<T>(
+        this TextPrompt<T> obj,
+        Func<T, Task<bool>> validator,
+        string? message = null)
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+        ArgumentNullException.ThrowIfNull(validator);
+
+        obj.AsyncValidator = async (value, _) =>
+            await validator(value).ConfigureAwait(false)
+                ? ValidationResult.Success()
+                : ValidationResult.Error(message);
+
+        return obj;
+    }
 }
