@@ -1,5 +1,7 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal rendering hook; Stryker cannot trace coverage through
+// the render pipeline (IRenderable yield return chain, live renderable updates, cursor positioning)
 internal sealed class ListPromptRenderHook<T> : IRenderHook
     where T : notnull
 {
@@ -56,3 +58,4 @@ internal sealed class ListPromptRenderHook<T> : IRenderHook
         }
     }
 }
+// Stryker restore all

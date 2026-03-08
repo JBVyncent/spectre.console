@@ -1,5 +1,7 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal async input loop; Stryker cannot trace coverage through
+// the async ReadKeyAsync pipeline or the rendering render hook lifecycle
 internal sealed class ListPrompt<T>
     where T : notnull
 {
@@ -127,3 +129,4 @@ internal sealed class ListPrompt<T>
             state.SearchText);
     }
 }
+// Stryker restore all

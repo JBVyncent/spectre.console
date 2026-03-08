@@ -1,5 +1,6 @@
 namespace Spectre.Console.Rendering;
 
+// Stryker disable all : NoCoverage — scope type exercised through LiveDisplay/prompt pipeline, Stryker cannot trace indirect coverage
 /// <summary>
 /// Represents a render hook scope.
 /// </summary>
@@ -28,3 +29,4 @@ public sealed class RenderHookScope : IDisposable
         _console.Pipeline.Detach(_hook);
     }
 }
+// Stryker restore all

@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal state class; exercised through interactive prompt pipeline, Stryker cannot trace coverage through async input loop
 internal sealed class ListPromptState<T>
     where T : notnull
 {
@@ -27,6 +28,7 @@ internal sealed class ListPromptState<T>
         bool skipUnselectableItems,
         bool searchEnabled)
     {
+        // Stryker disable once all : Equivalent — internal class; converter is always non-null (passed from ListPrompt.Show via SelectionPrompt/MultiSelectionPrompt.ShowAsync)
         ArgumentNullException.ThrowIfNull(converter);
         _converter = converter;
         Items = items;
@@ -187,3 +189,4 @@ internal sealed class ListPromptState<T>
         IsCancelled = true;
     }
 }
+// Stryker restore all

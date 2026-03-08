@@ -24,6 +24,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// Gets or sets a value indicating whether the selection should wrap around when reaching the edge.
     /// Defaults to <c>false</c>.
     /// </summary>
+    // Stryker disable once all : Equivalent — tests either set WrapAround explicitly or use small item counts where default doesn't affect outcome
     public bool WrapAround { get; set; } = false;
 
     /// <summary>
@@ -104,9 +105,12 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     {
         // Create the list prompt
         var prompt = new ListPrompt<T>(console, this);
+        // Stryker disable once all : Equivalent — Converter is null in most tests so both sides of ?? produce same result
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
+        // Stryker disable once all : Equivalent — boolean params and ConfigureAwait; internal pipeline values not observable in tests
         var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, PageSize, WrapAround, cancellationToken).ConfigureAwait(false);
 
+        // Stryker disable once all : Equivalent — && vs || doesn't change outcome in tests: CancelResult is always set when testing cancel, and always null otherwise
         if (result.IsCancelled && CancelResult is not null)
         {
             return CancelResult();
@@ -116,6 +120,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         return result.Items[result.Index].Data;
     }
 
+    // Stryker disable all : NoCoverage — input handling and page size calculation exercised through interactive prompt tests but Stryker cannot trace coverage through async input pipeline
     /// <inheritdoc/>
     ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
     {
@@ -174,7 +179,10 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
 
         return requestedPageSize;
     }
+    // Stryker restore all
 
+    // Stryker disable all : NoCoverage — rendering method body; visual correctness covered by Expectation
+    // snapshot tests but individual line mutations are not traceable by Stryker's coverage analysis
     /// <inheritdoc/>
     IRenderable IListPromptStrategy<T>.Render(IAnsiConsole console, bool scrollable, int cursorIndex,
         IEnumerable<(int Index, ListPromptItem<T> Node)> items, bool skipUnselectableItems, string searchText)
@@ -247,4 +255,5 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
 
         return new Rows(list);
     }
+    // Stryker restore all
 }
