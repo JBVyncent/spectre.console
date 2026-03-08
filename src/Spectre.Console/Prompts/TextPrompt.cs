@@ -100,6 +100,16 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     public Func<T, CancellationToken, Task<ValidationResult>>? AsyncValidator { get; set; }
 
     /// <summary>
+    /// Gets or sets the history list used for UpArrow/DownArrow navigation.
+    /// When set, the user can press UpArrow to recall previous inputs and
+    /// DownArrow to move forward through history back to the current input.
+    /// Successful submissions are appended to this list automatically (duplicates
+    /// of the most-recent entry are suppressed).  The caller owns the list and
+    /// may persist it across prompt invocations for a session-wide history.
+    /// </summary>
+    public IList<string>? History { get; set; }
+
+    /// <summary>
     /// Gets or sets the style in which the default value is displayed. Defaults to green when <see langword="null"/>.
     /// </summary>
     public Style? DefaultValueStyle { get; set; }
@@ -156,7 +166,10 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                 var prefillText = (PrefillDefaultValue && DefaultValue != null)
                     ? converter(DefaultValue.Value)
                     : null;
-                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, prefillText, cancellationToken).ConfigureAwait(false);
+                IReadOnlyList<string>? historySnapshot = History is { Count: > 0 }
+                    ? new List<string>(History)
+                    : null;
+                var input = await console.ReadLine(promptStyle, IsSecret, Mask, choices, prefillText, historySnapshot, cancellationToken).ConfigureAwait(false);
 
                 // Nothing entered?
                 if (string.IsNullOrWhiteSpace(input))
@@ -212,6 +225,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
                 }
 
                 ClearPromptLine(console);
+                AppendToHistory(input);
                 return result!;
             }
         }).ConfigureAwait(false);
@@ -289,6 +303,22 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
             writer.Write("\r");
             writer.EraseInLine(2);
         }));
+    }
+
+    private void AppendToHistory(string input)
+    {
+        if (History == null || string.IsNullOrEmpty(input))
+        {
+            return;
+        }
+
+        // Suppress consecutive duplicate entries
+        if (History.Count > 0 && History[^1] == input)
+        {
+            return;
+        }
+
+        History.Add(input);
     }
 
     /// <summary>

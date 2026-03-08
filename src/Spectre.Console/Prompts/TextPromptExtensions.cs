@@ -154,6 +154,27 @@ public static class TextPromptExtensions
     }
 
     /// <summary>
+    /// Attaches a history list to the prompt.
+    /// Pressing UpArrow recalls the most-recent entry; DownArrow moves forward.
+    /// When the user successfully submits input, it is appended to the list
+    /// (consecutive duplicate entries are suppressed).
+    /// The caller owns the list and may persist it across prompt invocations to
+    /// build a session-wide command history.
+    /// </summary>
+    /// <typeparam name="T">The prompt result type.</typeparam>
+    /// <param name="obj">The prompt.</param>
+    /// <param name="history">The history list to use.</param>
+    /// <returns>The same instance so that multiple calls can be chained.</returns>
+    public static TextPrompt<T> WithHistory<T>(this TextPrompt<T> obj, IList<string> history)
+    {
+        ArgumentNullException.ThrowIfNull(obj);
+        ArgumentNullException.ThrowIfNull(history);
+
+        obj.History = history;
+        return obj;
+    }
+
+    /// <summary>
     /// Enables editable default: the default value's display string is written into
     /// the input buffer so the user can edit it before pressing Enter.
     /// Backspace, continued typing, and Tab-completion all work as normal.

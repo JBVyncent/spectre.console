@@ -6,7 +6,7 @@ namespace Spectre.Console;
 public static partial class AnsiConsoleExtensions
 {
     // Stryker disable all : Internal input method; Stryker cannot trace coverage through TextPrompt pipeline
-    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, string? initialText = null, CancellationToken cancellationToken = default)
+    internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, string? initialText = null, IReadOnlyList<string>? history = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(console);
 
@@ -23,6 +23,10 @@ public static partial class AnsiConsoleExtensions
 
         var autocomplete = new List<string>(items ?? []);
 
+        // History navigation state.  historyIndex == history.Count means "current live input".
+        var historyIndex = history?.Count ?? 0;
+        var savedText = text; // preserved while browsing history, restored on DownArrow
+
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -36,6 +40,42 @@ public static partial class AnsiConsoleExtensions
             if (key.Key == ConsoleKey.Enter)
             {
                 return text;
+            }
+
+            // History navigation — UpArrow moves to older entries, DownArrow to newer.
+            if (history != null && history.Count > 0)
+            {
+                if (key.Key == ConsoleKey.UpArrow)
+                {
+                    if (historyIndex > 0)
+                    {
+                        // Save live text the first time we leave it
+                        if (historyIndex == history.Count)
+                        {
+                            savedText = text;
+                        }
+
+                        historyIndex--;
+                        var entry = history[historyIndex];
+                        ReplaceInputLine(console, style, secret, mask, text, entry);
+                        text = entry;
+                    }
+
+                    continue;
+                }
+
+                if (key.Key == ConsoleKey.DownArrow)
+                {
+                    if (historyIndex < history.Count)
+                    {
+                        historyIndex++;
+                        var entry = historyIndex == history.Count ? savedText : history[historyIndex];
+                        ReplaceInputLine(console, style, secret, mask, text, entry);
+                        text = entry;
+                    }
+
+                    continue;
+                }
             }
 
             if (key.Key == ConsoleKey.Tab && autocomplete.Count > 0)
@@ -74,6 +114,8 @@ public static partial class AnsiConsoleExtensions
                     }
                 }
 
+                // Any edit action exits history mode
+                historyIndex = history?.Count ?? 0;
                 continue;
             }
 
@@ -82,7 +124,26 @@ public static partial class AnsiConsoleExtensions
                 text += key.KeyChar.ToString();
                 var output = key.KeyChar.ToString();
                 console.Write(secret ? output.Mask(mask) : output, style);
+
+                // Any edit action exits history mode
+                historyIndex = history?.Count ?? 0;
             }
+        }
+    }
+
+    // Stryker restore all
+    // Stryker disable all : Internal helper; not exercised through TextPrompt pipeline by Stryker
+    private static void ReplaceInputLine(IAnsiConsole console, Style? style, bool secret, char? mask, string currentText, string newText)
+    {
+        // Erase the current visible characters (1 \b \b cycle per displayed cell).
+        if (currentText.Length > 0)
+        {
+            console.Write("\b \b".Repeat(currentText.Length), style);
+        }
+
+        if (!string.IsNullOrEmpty(newText))
+        {
+            console.Write((secret && mask != null) ? newText.Mask(mask) : newText, style);
         }
     }
 

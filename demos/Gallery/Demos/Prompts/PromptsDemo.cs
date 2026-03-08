@@ -101,6 +101,27 @@ public sealed class PromptsDemo : IDemoModule
         AnsiConsole.WriteLine();
         AnsiConsole.WriteLine();
 
+        // Prompt history (#158)
+        // WithHistory() attaches a shared list; UpArrow/DownArrow navigate through it.
+        // Successful submissions are appended automatically.
+        AnsiConsole.MarkupLine("[bold underline blue]Prompt History[/]");
+        AnsiConsole.MarkupLine("[grey]Press UpArrow to recall previous entries, DownArrow to move forward.[/]");
+        AnsiConsole.WriteLine();
+
+        var history = new List<string>();
+
+        for (var i = 0; i < 3; i++)
+        {
+            var historyEntry = AnsiConsole.Prompt(
+                new TextPrompt<string>($"[green]Entry {i + 1}[/] (try UpArrow for history):")
+                    .WithHistory(history));
+            AnsiConsole.MarkupInterpolated($"  Entered: [bold]{historyEntry}[/]");
+            AnsiConsole.WriteLine();
+        }
+
+        AnsiConsole.MarkupLine($"History contains [bold]{history.Count}[/] entries.");
+        AnsiConsole.WriteLine();
+
         // Editable default value (#595)
         // PrefillDefaultValue() writes the default into the input buffer.
         // The user can backspace, edit, or press Enter to accept unchanged.
