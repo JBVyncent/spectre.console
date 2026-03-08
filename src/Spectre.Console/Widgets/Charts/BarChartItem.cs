@@ -5,20 +5,30 @@ namespace Spectre.Console;
 /// </summary>
 public sealed class BarChartItem : IBarChartItem
 {
-    /// <summary>
-    /// Gets the item label.
-    /// </summary>
-    public string Label { get; }
+    private string _label;
 
     /// <summary>
-    /// Gets the item value.
+    /// Gets or sets the item label.
     /// </summary>
-    public double Value { get; }
+    public string Label
+    {
+        get => _label;
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _label = value;
+        }
+    }
 
     /// <summary>
-    /// Gets the item color.
+    /// Gets or sets the item value.
     /// </summary>
-    public Color? Color { get; }
+    public double Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the item color.
+    /// </summary>
+    public Color? Color { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BarChartItem"/> class.
@@ -28,11 +38,8 @@ public sealed class BarChartItem : IBarChartItem
     /// <param name="color">The item color.</param>
     public BarChartItem(string label, double value, Color? color = null)
     {
-        // Stryker disable once all : Equivalent — constructor null guard; always called with non-null from fluent API
         ArgumentNullException.ThrowIfNull(label);
-        // Stryker disable once all : NoCoverage — constructor assignment; NoCoverage through BarChart pipeline
-        Label = label;
-        // Stryker disable once all : NoCoverage — constructor assignment; NoCoverage through BarChart pipeline
+        _label = label;
         Value = value;
         Color = color;
     }
