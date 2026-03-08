@@ -58,6 +58,7 @@ public sealed class ScreenBuffer
     /// </summary>
     public void WriteChar(int row, int col, char ch, ScreenCell style)
     {
+        // Stryker disable once all : Equivalent — ArgumentNullException still propagates from ScreenCell.CopyStyleFrom(null); defensive guard only
         ArgumentNullException.ThrowIfNull(style);
 
         if (row < 0 || row >= Height || col < 0 || col >= Width)
@@ -254,6 +255,7 @@ public sealed class ScreenBuffer
             }
 
             var cStart = r == startRow ? startCol : 0;
+            // Stryker disable once all : Equivalent — `Width - 1` vs `Width + 1`: the `c < Width` guard on the next line clamps iteration to Width-1 regardless
             var cEnd = r == endRow ? endCol : Width - 1;
             for (var c = cStart; c <= cEnd && c < Width; c++)
             {
@@ -283,6 +285,7 @@ public sealed class ScreenBuffer
     /// </summary>
     public (int Row, int Col)? FindText(string text)
     {
+        // Stryker disable once all : Equivalent — ArgumentNullException still propagates from string.IndexOf(null, ...); defensive guard only
         ArgumentNullException.ThrowIfNull(text);
 
         for (var r = 0; r < Height; r++)

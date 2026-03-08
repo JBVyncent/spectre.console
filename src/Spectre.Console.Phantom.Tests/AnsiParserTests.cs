@@ -408,6 +408,17 @@ public sealed class AnsiParserTests
     }
 
     [Fact]
+    public void Should_Ignore_Non_Hyperlink_OSC_With_Internal_Semicolons()
+    {
+        // OSC content "2;Title;Extra" does NOT start with "8;" so must be ignored.
+        // Kills string mutation "8;" → "" which would make StartsWith("") always true,
+        // falling through to misparse this as a hyperlink.
+        var result = AnsiParser.Parse("\x1b]2;Title;Extra\a");
+
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void Should_Ignore_OSC_8_Without_Second_Semicolon()
     {
         // OSC 8 with params but no second semicolon
@@ -624,6 +635,32 @@ public sealed class AnsiParserTests
         result[1].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Down);
         result[2].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Right);
         result[3].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Left);
+    }
+
+    // ── OSC: ST terminator boundary conditions ────────────────────────
+
+    [Fact]
+    public void Should_Handle_OSC_Ending_In_ESC_Without_Backslash()
+    {
+        // OSC that ends with just ESC (no following backslash) — not a valid ST terminator
+        // The bounds guard `pos + 1 < input.Length` prevents out-of-bounds access
+        var result = AnsiParser.Parse("\x1b]8;;https://example.com\x1b");
+
+        // ESC at end of input without a following `\\` is not an ST terminator,
+        // so the OSC is unterminated — result should be empty (no text escapes)
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Should_Handle_OSC_With_Non_ESC_Char_Followed_By_Backslash_In_Content()
+    {
+        // OSC 8 URL that happens to contain a backslash character (not preceded by ESC)
+        // The `input[pos] == Escape` guard ensures only ESC+\\ terminates
+        var result = AnsiParser.Parse("\x1b]8;;http://a.com/x\x5cy\x1b\\");
+
+        // Backslash in URL is valid; only ESC+\\ terminates the sequence
+        var link = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Hyperlink>();
+        link.Url.ShouldBe("http://a.com/x\x5cy");
     }
 
     // ── Private sequence with unrecognized command ────────────────────

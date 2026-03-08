@@ -676,4 +676,372 @@ public sealed class ScreenBufferTests
         buffer.WriteChar(0, 0, 'X', new ScreenCell());
         buffer.AssertCellDefaultBackground(0, 0);
     }
+
+    // ── EraseToEnd: boundary check at row == Height-1 ─────────────────
+
+    [Fact]
+    public void EraseToEnd_Should_Erase_At_Last_Valid_Row()
+    {
+        var buffer = new ScreenBuffer(5, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(2, c, 'Z', style);
+        }
+
+        buffer.EraseToEnd(2, 2);
+
+        buffer[2, 1].Character.ShouldBe('Z');
+        buffer[2, 2].Character.ShouldBe(' ');
+        buffer[2, 4].Character.ShouldBe(' ');
+    }
+
+    [Fact]
+    public void EraseToEnd_Should_Not_Crash_When_Row_Equals_Height()
+    {
+        // Kills: L82 `row < Height` → `row <= Height`
+        // With `<=`, row == Height passes the guard → IndexOutOfRangeException on _cells[3, c].
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseToEnd(3, 0)); // row == Height
+    }
+
+    // ── EraseToStart: boundary at col == Width-1 ────────────────────
+
+    [Fact]
+    public void EraseToStart_Should_Erase_Up_To_Last_Column()
+    {
+        var buffer = new ScreenBuffer(5, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(2, c, 'X', style);
+        }
+
+        // col = Width-1 = 4: should erase all cols 0..4 on row 2 (last valid row)
+        buffer.EraseToStart(2, 4);
+
+        for (var c = 0; c < 5; c++)
+        {
+            buffer[2, c].Character.ShouldBe(' ');
+        }
+    }
+
+    [Fact]
+    public void EraseToStart_Should_Not_Crash_When_Col_Equals_Width()
+    {
+        // Kills: L113 `c < Width` → `c <= Width`
+        // With `<=`, c == Width passes → _cells[row, Width] → IndexOutOfRangeException.
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseToStart(1, 5)); // col == Width
+    }
+
+    [Fact]
+    public void EraseToStart_Should_Not_Erase_When_Row_Is_Negative()
+    {
+        // Kills: L115 `row >= 0 && row < Height` → `row >= 0 || row < Height`
+        // With `||`, row=-1 would pass because `row < Height` is true, causing IndexOutOfRangeException.
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseToStart(-1, 2));
+    }
+
+    [Fact]
+    public void EraseToStart_Should_Not_Crash_When_Row_Equals_Height()
+    {
+        // Kills: L115 `row < Height` → `row <= Height`
+        // With `<=`, row == Height passes the guard → IndexOutOfRangeException on _cells[3, c].
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseToStart(3, 2)); // row == Height
+    }
+
+    // ── EraseLineToStart: boundary at col == Width-1 ─────────────────
+
+    [Fact]
+    public void EraseLineToStart_Should_Handle_Col_At_Width_Minus_One()
+    {
+        var buffer = new ScreenBuffer(5, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(0, c, 'Y', style);
+        }
+
+        buffer.EraseLineToStart(0, 4);
+
+        for (var c = 0; c < 5; c++)
+        {
+            buffer[0, c].Character.ShouldBe(' ');
+        }
+    }
+
+    [Fact]
+    public void EraseLineToStart_Should_Not_Crash_When_Col_Equals_Width()
+    {
+        // Kills: L162 `c < Width` → `c <= Width`
+        // With `<=`, c == Width passes → _cells[row, Width] → IndexOutOfRangeException.
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseLineToStart(0, 5)); // col == Width
+    }
+
+    // ── GetRegionText: endCol boundary at Width-1 ────────────────────
+
+    [Fact]
+    public void GetRegionText_EndCol_At_Last_Column_Should_Include_All()
+    {
+        // Kills: L258 `Width - 1` → `Width + 1` and L259 `c < Width` → `c <= Width`
+        // When endRow != startRow on a middle row, cEnd = Width - 1.
+        // If mutated to Width + 1, the `c < Width` guard still bounds it.
+        // But if `c < Width` also mutates to `c <= Width`, it would access out of bounds.
+        var buffer = new ScreenBuffer(5, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(0, c, 'A', style);
+            buffer.WriteChar(1, c, 'B', style);
+            buffer.WriteChar(2, c, 'C', style);
+        }
+
+        // startRow=0, startCol=0, endRow=2, endCol=4
+        // Row 1 (middle) should use cEnd = Width - 1 = 4, getting all 5 chars
+        var region = buffer.GetRegionText(0, 0, 2, 4);
+        region.ShouldBe("AAAAA\nBBBBB\nCCCCC");
+    }
+
+    [Fact]
+    public void GetRegionText_Should_Not_Crash_When_EndCol_Equals_Width()
+    {
+        // Kills: L259 `c < Width` → `c <= Width`
+        // With `<=`, c == Width → _cells[r, Width] → IndexOutOfRangeException.
+        // Also kills: L258 `Width - 1` → `Width + 1` combined with L259 mutation.
+        var buffer = new ScreenBuffer(3, 3);
+        var style = new ScreenCell();
+        for (var r = 0; r < 3; r++)
+        {
+            for (var c = 0; c < 3; c++)
+            {
+                buffer.WriteChar(r, c, (char)('A' + r), style);
+            }
+        }
+
+        // endCol == Width (3) which exceeds valid range — should still work
+        // because `c < Width` prevents OOB access
+        var region = buffer.GetRegionText(0, 0, 2, 3);
+        region.ShouldBe("AAA\nBBB\nCCC");
+    }
+
+    // ── Constructor: exact error messages (kills String mutations) ────
+
+    [Fact]
+    public void Constructor_Should_Include_Width_In_Error_Message()
+    {
+        var ex = Should.Throw<ArgumentOutOfRangeException>(() => new ScreenBuffer(0, 5));
+        ex.ParamName.ShouldBe("width");
+        ex.Message.ShouldContain("Width must be positive.");
+    }
+
+    [Fact]
+    public void Constructor_Should_Include_Height_In_Error_Message()
+    {
+        var ex = Should.Throw<ArgumentOutOfRangeException>(() => new ScreenBuffer(5, 0));
+        ex.ParamName.ShouldBe("height");
+        ex.Message.ShouldContain("Height must be positive.");
+    }
+
+    // ── EraseToEnd: row=0 boundary (kills >= 0 → > 0 mutation) ──────
+
+    [Fact]
+    public void EraseToEnd_Should_Erase_Current_Row_When_Row_Is_Zero()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 10; c++)
+        {
+            buffer.WriteChar(0, c, 'A', style);
+        }
+
+        buffer.EraseToEnd(0, 5);
+
+        // Cols 0-4 intact, cols 5-9 erased
+        buffer[0, 4].Character.ShouldBe('A');
+        buffer[0, 5].Character.ShouldBe(' ');
+    }
+
+    // ── EraseToStart: col boundary (kills <= col → < col mutation) ───
+
+    [Fact]
+    public void EraseToStart_Should_Erase_Col_Equal_To_Cursor_Position()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 10; c++)
+        {
+            buffer.WriteChar(1, c, 'B', style);
+        }
+
+        // col=5: positions 0..5 inclusive should be erased
+        buffer.EraseToStart(1, 5);
+
+        buffer[1, 5].Character.ShouldBe(' ');
+        buffer[1, 6].Character.ShouldBe('B');
+    }
+
+    [Fact]
+    public void EraseToStart_Should_Erase_When_Row_Is_Zero()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 10; c++)
+        {
+            buffer.WriteChar(0, c, 'C', style);
+        }
+
+        buffer.EraseToStart(0, 4);
+
+        buffer[0, 0].Character.ShouldBe(' ');
+        buffer[0, 4].Character.ShouldBe(' ');
+        buffer[0, 5].Character.ShouldBe('C');
+    }
+
+    // ── EraseLineToStart: col at Width-1 boundary ────────────────────
+
+    [Fact]
+    public void EraseLineToStart_Should_Erase_Entire_Row_When_Col_Is_Last()
+    {
+        var buffer = new ScreenBuffer(5, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(1, c, 'D', style);
+        }
+
+        // col = Width - 1 = 4: should erase all 5 columns
+        buffer.EraseLineToStart(1, 4);
+
+        for (var c = 0; c < 5; c++)
+        {
+            buffer[1, c].Character.ShouldBe(' ');
+        }
+    }
+
+    // ── GetRegionText: exact newline and content assertions ──────────
+
+    [Fact]
+    public void GetRegionText_Single_Row_Should_Not_Include_Newline()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(0, c, "Hello"[c], style);
+        }
+
+        var region = buffer.GetRegionText(0, 0, 0, 4);
+        region.ShouldBe("Hello");
+        region.ShouldNotContain("\n");
+    }
+
+    [Fact]
+    public void GetRegionText_Multi_Row_Should_Include_Newline_Between_Rows()
+    {
+        // Use a 3-wide buffer so all chars fill the row — no trailing spaces
+        var buffer = new ScreenBuffer(3, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 3; c++)
+        {
+            buffer.WriteChar(0, c, "ABC"[c], style);
+        }
+        for (var c = 0; c < 3; c++)
+        {
+            buffer.WriteChar(1, c, "DEF"[c], style);
+        }
+
+        var region = buffer.GetRegionText(0, 0, 1, 2);
+        // Newline between rows, not before first row
+        region.ShouldBe("ABC\nDEF");
+    }
+
+    [Fact]
+    public void GetRegionText_Should_Use_FullWidth_For_Middle_Rows()
+    {
+        var buffer = new ScreenBuffer(5, 5);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(0, c, 'A', style);
+        }
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(1, c, 'B', style);
+        }
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(2, c, 'C', style);
+        }
+
+        // startRow=0, startCol=2; endRow=2, endCol=2
+        // Row 0: cols 2..4 = "AAA"
+        // Row 1 (middle): full width 0..4 = "BBBBB"
+        // Row 2: cols 0..2 = "CCC"
+        var region = buffer.GetRegionText(0, 2, 2, 2);
+        region.ShouldContain("AAA");
+        region.ShouldContain("BBBBB");
+        region.ShouldContain("CCC");
+    }
+
+    [Fact]
+    public void GetRegionText_Should_Clamp_At_Buffer_Height()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        buffer.WriteChar(0, 0, 'X', style);
+        buffer.WriteChar(1, 0, 'Y', style);
+
+        // endRow beyond buffer height should clamp gracefully
+        var region = buffer.GetRegionText(0, 0, 99, 0);
+        region.ShouldContain("X");
+        region.ShouldContain("Y");
+    }
+
+    [Fact]
+    public void GetRegionText_Should_Include_EndRow_Column()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        for (var c = 0; c < 5; c++)
+        {
+            buffer.WriteChar(0, c, "ABCDE"[c], style);
+        }
+
+        // endCol=4: should include col 4 (inclusive)
+        var region = buffer.GetRegionText(0, 0, 0, 4);
+        region.ShouldBe("ABCDE");
+    }
+
+    // ── ValidatePosition/ValidateRow: exact error messages ───────────
+
+    [Fact]
+    public void Indexer_Row_Error_Should_Include_Row_And_Height()
+    {
+        var buffer = new ScreenBuffer(10, 5);
+        var ex = Should.Throw<ArgumentOutOfRangeException>(() => _ = buffer[-1, 0]);
+        ex.ParamName.ShouldBe("row");
+        ex.Message.ShouldContain("Row -1 is out of range [0, 5).");
+    }
+
+    [Fact]
+    public void Indexer_Col_Error_Should_Include_Col_And_Width()
+    {
+        var buffer = new ScreenBuffer(10, 5);
+        var ex = Should.Throw<ArgumentOutOfRangeException>(() => _ = buffer[0, 10]);
+        ex.ParamName.ShouldBe("col");
+        ex.Message.ShouldContain("Column 10 is out of range [0, 10).");
+    }
+
+    [Fact]
+    public void GetRowText_Row_Error_Should_Include_Row_And_Height()
+    {
+        var buffer = new ScreenBuffer(10, 5);
+        var ex = Should.Throw<ArgumentOutOfRangeException>(() => buffer.GetRowText(5));
+        ex.ParamName.ShouldBe("row");
+        ex.Message.ShouldContain("Row 5 is out of range [0, 5).");
+    }
 }
