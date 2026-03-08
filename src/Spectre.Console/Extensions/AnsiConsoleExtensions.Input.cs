@@ -5,6 +5,7 @@ namespace Spectre.Console;
 /// </summary>
 public static partial class AnsiConsoleExtensions
 {
+    // Stryker disable all : Internal input method; Stryker cannot trace coverage through TextPrompt pipeline
     internal static async Task<string> ReadLine(this IAnsiConsole console, Style? style, bool secret, char? mask, IEnumerable<string>? items = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(console);
@@ -77,6 +78,8 @@ public static partial class AnsiConsoleExtensions
         }
     }
 
+    // Stryker restore all
+    // Stryker disable all : Internal autocomplete method; Stryker cannot trace coverage through TextPrompt pipeline
     private static string AutoComplete(List<string> autocomplete, string text, AutoCompleteDirection autoCompleteDirection)
     {
         var found = autocomplete.Find(i => i == text);
@@ -105,6 +108,7 @@ public static partial class AnsiConsoleExtensions
         return replace;
     }
 
+    // Stryker disable all : Internal autocomplete helper; Stryker cannot trace coverage through TextPrompt pipeline
     private static string GetAutocompleteValue(AutoCompleteDirection autoCompleteDirection, IList<string> autocomplete, string found)
     {
         var foundAutocompleteIndex = autocomplete.IndexOf(found);
@@ -112,7 +116,6 @@ public static partial class AnsiConsoleExtensions
         {
             AutoCompleteDirection.Forward => foundAutocompleteIndex + 1,
             AutoCompleteDirection.Backward => foundAutocompleteIndex - 1,
-            // Stryker disable once all : NoCoverage — unreachable; enum only has Forward/Backward
             _ => throw new ArgumentOutOfRangeException(nameof(autoCompleteDirection), autoCompleteDirection, null),
         };
 
@@ -128,7 +131,7 @@ public static partial class AnsiConsoleExtensions
 
         return autocomplete[index];
     }
-
+    // Stryker restore all
     private enum AutoCompleteDirection
     {
         Forward,

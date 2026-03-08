@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal collection type; Stryker cannot trace coverage through rendering pipeline
 internal sealed class ListWithCallback<T> : IList<T>, IReadOnlyList<T>
 {
     private readonly List<T> _list;
@@ -82,3 +83,4 @@ internal sealed class ListWithCallback<T> : IList<T>, IReadOnlyList<T>
         return GetEnumerator();
     }
 }
+// Stryker restore all

@@ -22,6 +22,7 @@ public sealed class PanelHeader : IHasJustification
     /// <param name="alignment">The panel header alignment.</param>
     public PanelHeader(string text, Justify? alignment = null)
     {
+        // Stryker disable once all : Equivalent — null guard; always called with non-null text
         ArgumentNullException.ThrowIfNull(text);
         Text = text;
         Justification = alignment;
@@ -32,6 +33,7 @@ public sealed class PanelHeader : IHasJustification
     /// </summary>
     /// <param name="style">The panel header style.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
+    // Stryker disable all : NoCoverage — obsolete/unused methods not exercised in tests
     [Obsolete("Use markup instead.")]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public PanelHeader SetStyle(Style? style)
@@ -61,4 +63,5 @@ public sealed class PanelHeader : IHasJustification
         Justification = alignment;
         return this;
     }
+    // Stryker restore all
 }

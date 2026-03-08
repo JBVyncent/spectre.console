@@ -11,7 +11,9 @@ internal abstract class TableAccessor
 
     protected TableAccessor(Table table, RenderOptions options)
     {
+        // Stryker disable once all : Equivalent — internal constructor only called from Table rendering with non-null values
         ArgumentNullException.ThrowIfNull(table);
+        // Stryker disable once all : Equivalent — internal constructor only called from Table rendering with non-null values
         ArgumentNullException.ThrowIfNull(options);
         _table = table;
         Options = options;

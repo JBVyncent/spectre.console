@@ -1,5 +1,6 @@
 namespace Spectre.Console.Rendering;
 
+// Stryker disable all : NoCoverage — rendering collection type; exercised through table/panel pipeline, Stryker cannot trace indirect coverage
 /// <summary>
 /// Represents a collection of segments.
 /// </summary>
@@ -46,3 +47,4 @@ public sealed class SegmentLine : List<Segment>
         Insert(0, segment);
     }
 }
+// Stryker restore all

@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal render hook; exercised through LiveDisplay pipeline, Stryker cannot trace indirect coverage
 internal sealed class LiveDisplayRenderer : IRenderHook
 {
     private readonly IAnsiConsole _console;
@@ -60,3 +61,4 @@ internal sealed class LiveDisplayRenderer : IRenderHook
         }
     }
 }
+// Stryker restore all

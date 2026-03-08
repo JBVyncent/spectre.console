@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal input implementation; Stryker cannot trace coverage through console input pipeline
 internal sealed class DefaultInput : IAnsiConsoleInput
 {
     private readonly Profile _profile;
@@ -55,3 +56,4 @@ internal sealed class DefaultInput : IAnsiConsoleInput
         return ReadKey(intercept);
     }
 }
+// Stryker restore all

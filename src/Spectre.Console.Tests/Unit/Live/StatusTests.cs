@@ -231,6 +231,134 @@ public sealed class StatusTests
     }
 }
 
+public sealed class StatusContextMutationTests
+{
+    // ── SetStatus null guard ───────────────────────────────────────────────────
+
+    [Fact]
+    public void SetStatus_Throws_When_Null()
+    {
+        // Kills L59 Survived: ArgumentNullException.ThrowIfNull(status)
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        Should.Throw<ArgumentNullException>(() =>
+            status.Start("test", ctx => { ctx.Status = null!; }));
+    }
+
+    [Fact]
+    public void SetStatus_Updates_Description()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+        var captured = string.Empty;
+
+        status.Start("initial", ctx =>
+        {
+            ctx.Status = "updated";
+            captured = ctx.Status;
+        });
+
+        captured.ShouldBe("updated");
+    }
+
+    // ── SetSpinner null guard ──────────────────────────────────────────────────
+
+    [Fact]
+    public void SetSpinner_Throws_When_Null()
+    {
+        // Kills L66 Survived: ArgumentNullException.ThrowIfNull(spinner)
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        Should.Throw<ArgumentNullException>(() =>
+            status.Start("test", ctx => { ctx.Spinner = null!; }));
+    }
+
+    [Fact]
+    public void SetSpinner_Updates_Spinner()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+        var spinner = Spinner.Known.Default;
+
+        status.Start("test", ctx =>
+        {
+            ctx.Spinner = spinner;
+            ctx.Spinner.ShouldBeSameAs(spinner);
+        });
+    }
+
+    // ── SpinnerStyle property round-trip ──────────────────────────────────────
+
+    [Fact]
+    public void SpinnerStyle_Property_Gets_And_Sets()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        status.Start("test", ctx =>
+        {
+            ctx.SpinnerStyle = Color.Red;
+            ctx.SpinnerStyle.ShouldBe(Color.Red);
+        });
+    }
+
+    // ── Extension method null guards ──────────────────────────────────────────
+
+    [Fact]
+    public void StatusExtension_Throws_When_Context_IsNull()
+    {
+        // Kills L85 Survived: ArgumentNullException.ThrowIfNull(context)
+        Should.Throw<ArgumentNullException>(
+            () => ((StatusContext)null!).Status("test"));
+    }
+
+    [Fact]
+    public void StatusExtension_Sets_Status_And_Returns_Same_Instance()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        status.Start("initial", ctx =>
+        {
+            var returned = ctx.Status("new status");
+            returned.ShouldBeSameAs(ctx);
+            ctx.Status.ShouldBe("new status");
+        });
+    }
+
+    [Fact]
+    public void SpinnerExtension_Throws_When_Context_IsNull()
+    {
+        // Kills L99 Survived: ArgumentNullException.ThrowIfNull(context)
+        Should.Throw<ArgumentNullException>(
+            () => ((StatusContext)null!).Spinner(Spinner.Known.Default));
+    }
+
+    [Fact]
+    public void SpinnerStyleExtension_Throws_When_Context_IsNull()
+    {
+        // Kills L113 NoCoverage: ArgumentNullException.ThrowIfNull(context)
+        Should.Throw<ArgumentNullException>(
+            () => ((StatusContext)null!).SpinnerStyle(Color.Red));
+    }
+
+    [Fact]
+    public void SpinnerStyleExtension_Sets_SpinnerStyle_And_Returns_Same_Instance()
+    {
+        var console = new TestConsole().Interactive();
+        var status = new Status(console) { AutoRefresh = false };
+
+        status.Start("test", ctx =>
+        {
+            var returned = ctx.SpinnerStyle(Color.Blue);
+            returned.ShouldBeSameAs(ctx);
+            ctx.SpinnerStyle.ShouldBe(Color.Blue);
+        });
+    }
+}
+
 public sealed class StatusExtensionsTests
 {
     // ── AutoRefresh extension ─────────────────────────────────────────────────
@@ -345,5 +473,29 @@ public sealed class StatusExtensionsTests
         status.SpinnerStyle(null);
 
         status.SpinnerStyle.ShouldBeNull();
+    }
+}
+
+public sealed class StatusContextExtensionsTests
+{
+    [Fact]
+    public void Status_Extension_Throws_When_Context_IsNull()
+    {
+        Should.Throw<ArgumentNullException>(
+            () => StatusContextExtensions.Status(null!, "test"));
+    }
+
+    [Fact]
+    public void Spinner_Extension_Throws_When_Context_IsNull()
+    {
+        Should.Throw<ArgumentNullException>(
+            () => StatusContextExtensions.Spinner(null!, Spinner.Known.Default));
+    }
+
+    [Fact]
+    public void SpinnerStyle_Extension_Throws_When_Context_IsNull()
+    {
+        Should.Throw<ArgumentNullException>(
+            () => StatusContextExtensions.SpinnerStyle(null!, Color.Red));
     }
 }

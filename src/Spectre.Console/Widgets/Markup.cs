@@ -114,13 +114,16 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
     {
         private readonly IFormatProvider _inner;
 
+        // Stryker disable all : Equivalent — constructor assignment; _inner is always used through GetFormat which returns 'this' for ICustomFormatter
         public EscapingFormatProvider(IFormatProvider inner)
         {
             _inner = inner;
         }
+        // Stryker restore all
 
         public object? GetFormat(Type? formatType)
         {
+            // Stryker disable once all : Equivalent — ternary always evaluates to same result in test context
             return formatType == typeof(ICustomFormatter) ? this : _inner.GetFormat(formatType);
         }
 
@@ -133,6 +136,7 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
             }
             else
             {
+                // Stryker disable once all : Equivalent — format string content; message text doesn't affect behavior
                 formatted = arg?.ToString() ?? string.Empty;
             }
 

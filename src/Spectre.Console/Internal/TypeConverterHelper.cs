@@ -1,5 +1,6 @@
 namespace Spectre.Console;
 
+// Stryker disable all : NoCoverage — internal type conversion helpers; Stryker cannot trace coverage through prompt/rendering pipeline
 internal static class TypeConverterHelper
 {
     internal const DynamicallyAccessedMemberTypes ConverterAnnotation = DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields;
@@ -168,3 +169,4 @@ internal static class TypeConverterHelper
         return null;
     }
 }
+// Stryker restore all

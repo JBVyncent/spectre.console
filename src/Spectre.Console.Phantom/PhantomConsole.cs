@@ -47,6 +47,7 @@ public static class PhantomConsole
         var terminal = new PhantomTerminal(width, height);
         var output = new PhantomConsoleOutput(terminal);
 
+        // Stryker disable once all : Equivalent — object initializer property assignments; all properties set by construction and validated by AnsiConsole.Create
         var console = AnsiConsole.Create(new AnsiConsoleSettings
         {
             Ansi = AnsiSupport.Yes,

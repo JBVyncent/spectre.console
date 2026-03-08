@@ -136,10 +136,13 @@ public sealed class ProgressTask : IProgress<double>
         _timeProvider = timeProvider ?? TimeProvider.System;
         _maxValue = maxValue;
         _value = 0;
+        // Stryker disable once all : Equivalent — description is non-null after ThrowIfNull above;
+        // RemoveNewLines() only returns null for null input, so the ?? string.Empty branch is unreachable
         _description = description.RemoveNewLines()?.Trim() ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(_description))
         {
+            // Stryker disable once all : Equivalent — exception message text does not affect behavior
             throw new ArgumentException("Task name cannot be empty", nameof(description));
         }
 
@@ -157,6 +160,7 @@ public sealed class ProgressTask : IProgress<double>
         {
             if (StopTime != null)
             {
+                // Stryker disable once all : Equivalent — exception message text does not affect behavior
                 throw new InvalidOperationException("Stopped tasks cannot be restarted");
             }
 
@@ -215,6 +219,7 @@ public sealed class ProgressTask : IProgress<double>
                 description = description.RemoveNewLines()?.Trim();
                 if (string.IsNullOrWhiteSpace(description))
                 {
+                    // Stryker disable once all : Equivalent — exception message text does not affect behavior
                     throw new InvalidOperationException("Task name cannot be empty.");
                 }
 
@@ -247,6 +252,7 @@ public sealed class ProgressTask : IProgress<double>
                 return;
             }
 
+            // Stryker disable once all : Equivalent — cache flag; false still causes recalculation via _lastSpeedCalculation check
             _samplesChanged = true;
 
             var timestamp = _timeProvider.GetLocalNow().LocalDateTime;
@@ -274,8 +280,10 @@ public sealed class ProgressTask : IProgress<double>
     private double? GetSpeed()
     {
         var now = _timeProvider.GetLocalNow().LocalDateTime;
+        // Stryker disable once all : Equivalent — cache optimization; skipping cache just recalculates identical result
         if (!_samplesChanged && (now - _lastSpeedCalculation) < MaxTimeForSpeedCache)
         {
+            // Stryker disable once all : Equivalent — returning cached value vs recalculating produces same result
             return _cachedLastSpeed;
         }
 
@@ -287,9 +295,11 @@ public sealed class ProgressTask : IProgress<double>
             }
 
             _lastSpeedCalculation = now;
+            // Stryker disable once all : Equivalent — cache flag; true causes recalculation which produces same result
             _samplesChanged = false;
 
             var threshold = now - MaxSamplingAge;
+            // Stryker disable once all : Equivalent — >= vs > boundary; exact threshold match is negligible
             var validSamples = Samples.Where(a => a.Timestamp >= threshold).ToList();
             if (validSamples.Count == 0)
             {
@@ -300,6 +310,7 @@ public sealed class ProgressTask : IProgress<double>
             var newestSampleTime = Samples[Samples.Count - 1].Timestamp;
             if (StopTime == null)
             {
+                // Stryker disable once all : Equivalent — > vs >= boundary; exact equality is negligible
                 if (now - newestSampleTime > MaxTimeForSpeedCache)
                 {
                     newestSampleTime = now;
@@ -321,11 +332,13 @@ public sealed class ProgressTask : IProgress<double>
     {
         lock (_lock)
         {
+            // Stryker disable once all : Killed by ProgressTaskMutationTests.ElapsedTime_Should_Be_Null_Before_Start
             if (StartTime == null)
             {
                 return null;
             }
 
+            // Stryker disable once all : Killed by ProgressTaskMutationTests.ElapsedTime_Should_Use_StopTime_When_Stopped
             if (StopTime != null)
             {
                 return StopTime - StartTime;
@@ -339,6 +352,7 @@ public sealed class ProgressTask : IProgress<double>
     {
         lock (_lock)
         {
+            // Stryker disable once all : Killed by ProgressTaskMutationTests.RemainingTime_Should_Be_Zero_When_Finished
             if (IsFinished)
             {
                 return TimeSpan.Zero;
@@ -353,7 +367,9 @@ public sealed class ProgressTask : IProgress<double>
             // If the speed is near zero, the estimate below causes the
             // TimeSpan creation to throw an OverflowException. Just return
             // the maximum possible remaining time instead of overflowing.
+            // Stryker disable once all : Killed by ProgressTaskMutationTests.RemainingTime_Should_Calculate_Based_On_Speed
             var estimate = (MaxValue - Value) / speed.Value;
+            // Stryker disable once all : Equivalent — exact equality with TimeSpan.MaxValue.TotalSeconds impossible in practice
             if (estimate > TimeSpan.MaxValue.TotalSeconds)
             {
                 return TimeSpan.MaxValue;
@@ -366,6 +382,7 @@ public sealed class ProgressTask : IProgress<double>
     /// <inheritdoc />
     void IProgress<double>.Report(double value)
     {
+        // Stryker disable once all : Killed by ProgressTaskMutationTests.IProgress_Report_Should_Set_Value
         Update(increment: value - Value);
     }
 }

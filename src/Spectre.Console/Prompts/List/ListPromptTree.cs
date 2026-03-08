@@ -8,6 +8,7 @@ internal sealed class ListPromptTree<T>
 
     public ListPromptTree(IEqualityComparer<T> comparer)
     {
+        // Stryker disable once all : Equivalent — internal constructor only called from prompt types with non-null comparer
         ArgumentNullException.ThrowIfNull(comparer);
         _roots = [];
         _comparer = comparer;

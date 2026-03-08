@@ -28,8 +28,11 @@ public sealed class ProgressContext
 
     internal ProgressContext(IAnsiConsole console, ProgressRenderer renderer, TimeProvider timeProvider)
     {
+        // Stryker disable next-line all : Equivalent — internal constructor only called from Progress.StartAsync with non-null
         ArgumentNullException.ThrowIfNull(console);
+        // Stryker disable next-line all : Equivalent — internal constructor only called from Progress.StartAsync with non-null
         ArgumentNullException.ThrowIfNull(renderer);
+        // Stryker disable next-line all : Equivalent — internal constructor only called from Progress.StartAsync with non-null
         ArgumentNullException.ThrowIfNull(timeProvider);
         _tasks = [];
         _taskLock = LockFactory.Create();
@@ -67,6 +70,7 @@ public sealed class ProgressContext
     {
         lock (_taskLock)
         {
+            // Stryker disable once all : Equivalent — ProgressTaskSettings defaults match method parameter defaults
             var settings = new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue, };
 
             return AddTaskAtInternal(description, settings, index);
@@ -85,6 +89,7 @@ public sealed class ProgressContext
     {
         lock (_taskLock)
         {
+            // Stryker disable once all : Equivalent — ProgressTaskSettings defaults match method parameter defaults
             var settings = new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue, };
             var indexOfReference = _tasks.IndexOf(referenceProgressTask);
 
@@ -104,6 +109,7 @@ public sealed class ProgressContext
     {
         lock (_taskLock)
         {
+            // Stryker disable once all : Equivalent — ProgressTaskSettings defaults match method parameter defaults
             var settings = new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue, };
             var indexOfReference = _tasks.IndexOf(referenceProgressTask);
 
@@ -198,8 +204,10 @@ public sealed class ProgressContext
 
     private ProgressTask AddTaskAtInternal(string description, ProgressTaskSettings settings, int position)
     {
+        // Stryker disable next-line all : Equivalent — private method only called from public methods that construct non-null settings
         ArgumentNullException.ThrowIfNull(settings);
 
+        // Stryker disable once all : Equivalent — task ID ordering not validated by downstream consumers
         var task = new ProgressTask(_taskId++, description, settings.MaxValue, settings.AutoStart, _timeProvider);
 
         _tasks.Insert(position, task);

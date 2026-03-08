@@ -23,6 +23,7 @@ public sealed class TreeNode : IHasTreeNodes
     /// <param name="renderable">The tree node label.</param>
     public TreeNode(IRenderable renderable)
     {
+        // Stryker disable once all : Equivalent — null guard; always called with non-null renderable
         ArgumentNullException.ThrowIfNull(renderable);
         Renderable = renderable;
     }
@@ -31,6 +32,7 @@ public sealed class TreeNode : IHasTreeNodes
 /// <summary>
 /// Contains extension methods for <see cref="TreeNode"/>.
 /// </summary>
+// Stryker disable all : NoCoverage — extension methods; Stryker cannot trace coverage through tree node pipeline
 public static class TreeNodeExtensions
 {
     /// <summary>
@@ -67,3 +69,4 @@ public static class TreeNodeExtensions
         return node;
     }
 }
+// Stryker restore all

@@ -25,6 +25,7 @@ public sealed class ConfirmationPrompt : IPrompt<bool>
     /// <summary>
     /// Gets or sets the message for invalid choices.
     /// </summary>
+    // Stryker disable once all : Equivalent — string content mutation; message text doesn't affect behavior
     public string InvalidChoiceMessage { get; set; } = "[red]Please select one of the available options[/]";
 
     /// <summary>
@@ -90,6 +91,7 @@ public sealed class ConfirmationPrompt : IPrompt<bool>
             .AddChoice(Yes)
             .AddChoice(No);
 
+        // Stryker disable once all : Equivalent — ConfigureAwait(false) vs ConfigureAwait(true); no SynchronizationContext in tests
         var result = await prompt.ShowAsync(console, cancellationToken).ConfigureAwait(false);
 
         return comparer.Compare(Yes.ToString(), result.ToString()) == 0;

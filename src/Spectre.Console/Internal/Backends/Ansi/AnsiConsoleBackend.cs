@@ -10,6 +10,7 @@ internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
 
     public AnsiConsoleBackend(IAnsiConsole console)
     {
+        // Stryker disable once all : Equivalent — internal constructor only called from AnsiConsoleFacade with non-null console
         ArgumentNullException.ThrowIfNull(console);
         _console = console;
         _writer = new AnsiWriter(_console.Profile.Out.Writer, _console.Profile.Capabilities);

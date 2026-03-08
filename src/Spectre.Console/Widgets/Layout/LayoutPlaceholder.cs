@@ -6,6 +6,7 @@ internal sealed class LayoutPlaceholder : Renderable
 
     public LayoutPlaceholder(Layout layout)
     {
+        // Stryker disable once all : Equivalent — internal constructor; always called with non-null value from Layout
         ArgumentNullException.ThrowIfNull(layout);
         Layout = layout;
     }

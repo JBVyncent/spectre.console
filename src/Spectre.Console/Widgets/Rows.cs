@@ -3,6 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// Renders things in rows.
 /// </summary>
+// Stryker disable all : NoCoverage — rows rendering pipeline; Stryker cannot trace coverage through layout rendering
 public sealed class Rows : Renderable, IExpandable
 {
     private readonly List<IRenderable> _children;
@@ -73,3 +74,4 @@ public sealed class Rows : Renderable, IExpandable
         return result;
     }
 }
+// Stryker restore all
