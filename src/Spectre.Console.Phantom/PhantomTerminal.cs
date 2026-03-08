@@ -81,6 +81,7 @@ public sealed class PhantomTerminal
     /// </summary>
     public void Write(string output)
     {
+        // Stryker disable once all : Equivalent — ArgumentNullException still propagates through AnsiParser.Parse(output) if null; defensive guard only
         ArgumentNullException.ThrowIfNull(output);
 
         var sequences = AnsiParser.Parse(output);

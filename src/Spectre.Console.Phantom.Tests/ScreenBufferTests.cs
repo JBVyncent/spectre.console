@@ -1044,4 +1044,67 @@ public sealed class ScreenBufferTests
         ex.ParamName.ShouldBe("row");
         ex.Message.ShouldContain("Row 5 is out of range [0, 5).");
     }
+
+    // ── Erase bounds: row == Height exactly (kills < Height → <= Height mutation) ──
+
+    [Fact]
+    public void EraseToEnd_Should_Not_Throw_For_Row_Exactly_At_Height()
+    {
+        // row = Height is one past the last valid row; should be silently ignored
+        var buffer = new ScreenBuffer(10, 3);
+        Should.NotThrow(() => buffer.EraseToEnd(3, 0)); // row=Height=3
+    }
+
+    [Fact]
+    public void EraseToStart_Should_Not_Throw_For_Row_Exactly_At_Height()
+    {
+        var buffer = new ScreenBuffer(10, 3);
+        Should.NotThrow(() => buffer.EraseToStart(3, 0)); // row=Height=3
+    }
+
+    [Fact]
+    public void EraseToStart_Should_Not_Throw_For_Negative_Row()
+    {
+        // row=-1 triggers the `||` logical mutation: `row >= 0 || row < Height`
+        // would make condition true and attempt _cells[-1, c].Reset()
+        var buffer = new ScreenBuffer(10, 3);
+        Should.NotThrow(() => buffer.EraseToStart(-1, 0));
+    }
+
+    // ── Erase bounds: col == Width exactly (kills c < Width → c <= Width mutation) ──
+
+    [Fact]
+    public void EraseToStart_Should_Not_Throw_For_Col_Exceeding_Width()
+    {
+        // col=Width: with `c <= Width` mutation, loop would access _cells[row, Width]
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseToStart(1, 5)); // col=Width=5
+    }
+
+    [Fact]
+    public void EraseLineToStart_Should_Not_Throw_For_Col_Exceeding_Width()
+    {
+        // col=Width: with `c <= Width` mutation, loop would access _cells[row, Width]
+        var buffer = new ScreenBuffer(5, 3);
+        Should.NotThrow(() => buffer.EraseLineToStart(1, 5)); // col=Width=5
+    }
+
+    // ── GetRegionText: endCol stops at endCol, not Width (kills c <= cEnd → c <= Width) ──
+
+    [Fact]
+    public void GetRegionText_Should_Stop_At_EndCol_Not_Width()
+    {
+        // Write "ABCDEFGHIJ" to a 10-wide row
+        // Request region stopping at col 3 — should return "ABCD" not "ABCDEFGHIJ"
+        var buffer = new ScreenBuffer(10, 3);
+        var style = new ScreenCell();
+        var text = "ABCDEFGHIJ";
+        for (var c = 0; c < 10; c++)
+        {
+            buffer.WriteChar(0, c, text[c], style);
+        }
+
+        var region = buffer.GetRegionText(0, 0, 0, 3);
+        region.ShouldBe("ABCD");
+    }
 }

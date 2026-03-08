@@ -792,4 +792,104 @@ public sealed class PhantomTerminalTests
 
         terminal.Screen[0, 0].Background!.Value.Index.ShouldBe(sgrCode);
     }
+
+    // ── Reset: complete state check ──────────────────────────────────
+
+    [Fact]
+    public void Reset_Should_Set_Alternate_Screen_To_False()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+
+        // Enter alternate screen, then reset
+        terminal.Write("\x1b[?1049h");
+        terminal.IsAlternateScreen.ShouldBeTrue();
+
+        terminal.Reset();
+
+        terminal.IsAlternateScreen.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Reset_Should_Clear_Current_Style()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+
+        // Set bold + red foreground style, then reset
+        terminal.Write("\x1b[1;31mA");
+        terminal.Reset();
+
+        // After reset, new text should have no decoration or color
+        terminal.Write("X");
+        var cell = terminal.Screen[0, 0];
+        cell.Character.ShouldBe('X');
+        cell.Decoration.ShouldBe(CellDecoration.None);
+        cell.Foreground.ShouldBeNull();
+    }
+
+    // ── Alternate screen: buffer preservation (??= semantics) ────────
+
+    [Fact]
+    public void Should_Preserve_Alternate_Buffer_Content_When_Reusing()
+    {
+        var terminal = new PhantomTerminal(80, 24);
+
+        // Enter alt screen, write content, exit, then re-enter
+        terminal.Write("\x1b[?1049h");
+        terminal.Write("AltContent");
+        terminal.Write("\x1b[?1049l");
+
+        // Re-enter: existing alternate buffer reused (??= not = semantics)
+        terminal.Write("\x1b[?1049h");
+        terminal.GetRowText(0).ShouldBe("AltContent");
+    }
+
+    // ── SGR: decoration idempotency (|= not ^=) ──────────────────────
+
+    [Theory]
+    [InlineData(1, CellDecoration.Bold)]
+    [InlineData(2, CellDecoration.Dim)]
+    [InlineData(3, CellDecoration.Italic)]
+    [InlineData(4, CellDecoration.Underline)]
+    [InlineData(5, CellDecoration.SlowBlink)]
+    [InlineData(6, CellDecoration.RapidBlink)]
+    [InlineData(7, CellDecoration.Reverse)]
+    [InlineData(8, CellDecoration.Conceal)]
+    [InlineData(9, CellDecoration.Strikethrough)]
+    public void Should_Keep_Decoration_When_Same_SGR_Applied_Twice(int sgrCode, CellDecoration expected)
+    {
+        // `|=` means applying the same decoration twice still sets it.
+        // `^=` (XOR) would cancel it out — this test verifies |= semantics.
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write($"\x1b[{sgrCode};{sgrCode}mX");
+
+        terminal.Screen[0, 0].Decoration.HasFlag(expected).ShouldBeTrue();
+    }
+
+    // ── SGR: boundary foreground/background colors ───────────────────
+
+    [Theory]
+    [InlineData(30)]
+    [InlineData(37)]
+    public void Should_Track_Legacy_Foreground_Color_At_Boundary(int sgrCode)
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write($"\x1b[{sgrCode}mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Foreground.ShouldNotBeNull();
+        cell.Foreground!.Value.Index.ShouldBe(sgrCode);
+    }
+
+    [Theory]
+    [InlineData(40)]
+    [InlineData(47)]
+    public void Should_Track_Legacy_Background_Color_At_Boundary(int sgrCode)
+    {
+        var terminal = new PhantomTerminal(80, 24);
+        terminal.Write($"\x1b[{sgrCode}mX");
+
+        var cell = terminal.Screen[0, 0];
+        cell.Background.ShouldNotBeNull();
+        cell.Background!.Value.Index.ShouldBe(sgrCode);
+    }
 }
