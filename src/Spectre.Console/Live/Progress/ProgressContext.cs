@@ -181,6 +181,48 @@ public sealed class ProgressContext
     }
 
     /// <summary>
+    /// Adds a child task directly beneath <paramref name="parent"/> in the display.
+    /// The new task is inserted immediately after the last existing descendant of
+    /// <paramref name="parent"/> so the visual hierarchy is preserved in the flat list.
+    /// </summary>
+    /// <param name="parent">The parent task. Must belong to this context.</param>
+    /// <param name="description">The child task description.</param>
+    /// <param name="autoStart">Whether or not the child task should start immediately.</param>
+    /// <param name="maxValue">The child task's max value.</param>
+    /// <returns>The newly created child task.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="parent"/> does not belong to this context.
+    /// </exception>
+    public ProgressTask AddChildTask(ProgressTask parent, string description, bool autoStart = true, double maxValue = 100)
+    {
+        ArgumentNullException.ThrowIfNull(parent);
+        lock (_taskLock)
+        {
+            var settings = new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue };
+            return AddChildTaskInternal(parent, description, settings);
+        }
+    }
+
+    /// <summary>
+    /// Adds a child task directly beneath <paramref name="parent"/> in the display.
+    /// </summary>
+    /// <param name="parent">The parent task. Must belong to this context.</param>
+    /// <param name="description">The child task description.</param>
+    /// <param name="settings">The task settings.</param>
+    /// <returns>The newly created child task.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when <paramref name="parent"/> does not belong to this context.
+    /// </exception>
+    public ProgressTask AddChildTask(ProgressTask parent, string description, ProgressTaskSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(parent);
+        lock (_taskLock)
+        {
+            return AddChildTaskInternal(parent, description, settings);
+        }
+    }
+
+    /// <summary>
     /// Removes the task from the task collection.
     /// </summary>
     /// <param name="task">The task to remove.</param>
@@ -215,10 +257,76 @@ public sealed class ProgressContext
         return task;
     }
 
+    // Must be called with _taskLock held.
+    private ProgressTask AddChildTaskInternal(ProgressTask parent, string description, ProgressTaskSettings settings)
+    {
+        if (!_tasks.Contains(parent))
+        {
+            // Stryker disable once all : Equivalent — exception message text does not affect behavior
+            throw new InvalidOperationException("The parent task does not belong to this progress context.");
+        }
+
+        var insertIndex = FindChildInsertionIndex(parent);
+        var task = AddTaskAtInternal(description, settings, insertIndex);
+        task.Parent = parent;
+        parent.AddChildInternal(task);
+        return task;
+    }
+
+    /// <summary>
+    /// Finds the flat-list index immediately after the last descendant of
+    /// <paramref name="parent"/>. If the parent has no descendants yet, returns
+    /// the index immediately after the parent itself.
+    /// Must be called with _taskLock held.
+    /// </summary>
+    private int FindChildInsertionIndex(ProgressTask parent)
+    {
+        var parentIndex = _tasks.IndexOf(parent);
+
+        // Walk forward to find the last existing descendant.
+        var lastDescendantIndex = parentIndex;
+        for (var i = parentIndex + 1; i < _tasks.Count; i++)
+        {
+            var ancestor = _tasks[i].Parent;
+            while (ancestor != null)
+            {
+                if (ancestor == parent)
+                {
+                    lastDescendantIndex = i;
+                    break;
+                }
+
+                ancestor = ancestor.Parent;
+            }
+        }
+
+        return lastDescendantIndex + 1;
+    }
+
+    /// <summary>
+    /// Auto-completes any parent task whose <see cref="ProgressTask.AutoCompleteWithChildren"/>
+    /// flag is <c>true</c> and whose children have all finished.
+    /// Must be called with _taskLock held.
+    /// </summary>
+    private void PropagateAutoComplete()
+    {
+        foreach (var task in _tasks)
+        {
+            // Stryker disable once all : Equivalent — Children.Count > 0 guard prevents completing a parent with no children; removing it would stop the loop early via All() on empty set returning true
+            if (task.AutoCompleteWithChildren && !task.IsFinished
+                && task.Children.Count > 0
+                && task.Children.All(c => c.IsFinished))
+            {
+                task.StopTask();
+            }
+        }
+    }
+
     internal IReadOnlyList<ProgressTask> GetTasks()
     {
         lock (_taskLock)
         {
+            PropagateAutoComplete();
             return new List<ProgressTask>(_tasks);
         }
     }

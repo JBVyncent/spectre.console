@@ -9,6 +9,8 @@ public sealed class ProgressTask : IProgress<double>
     private readonly Lock _lock;
     private readonly TimeProvider _timeProvider;
 
+    private readonly List<ProgressTask> _children;
+
     private double _maxValue;
     private string _description;
     private double _value;
@@ -23,6 +25,47 @@ public sealed class ProgressTask : IProgress<double>
     /// Gets the task ID.
     /// </summary>
     public int Id { get; }
+
+    /// <summary>
+    /// Gets the parent task, or <c>null</c> if this is a root-level task.
+    /// </summary>
+    public ProgressTask? Parent { get; internal set; }
+
+    /// <summary>
+    /// Gets the direct children of this task in the order they were added via
+    /// <see cref="ProgressContext.AddChildTask(ProgressTask, string, bool, double)"/>.
+    /// </summary>
+    public IReadOnlyList<ProgressTask> Children
+    {
+        get { lock (_lock) { return new List<ProgressTask>(_children); } }
+    }
+
+    /// <summary>
+    /// Gets the nesting depth of this task (0 = root, 1 = child, 2 = grandchild, …).
+    /// Used by <see cref="TaskDescriptionColumn"/> to indent child tasks.
+    /// </summary>
+    public int IndentLevel
+    {
+        get
+        {
+            var level = 0;
+            var p = Parent;
+            while (p != null)
+            {
+                level++;
+                p = p.Parent;
+            }
+
+            return level;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this task should automatically
+    /// complete (via <see cref="StopTask"/>) when all of its direct children
+    /// have finished. Defaults to <c>false</c>.
+    /// </summary>
+    public bool AutoCompleteWithChildren { get; set; }
 
     /// <summary>
     /// Gets or sets optional user tag data.
@@ -133,6 +176,7 @@ public sealed class ProgressTask : IProgress<double>
         // Stryker disable once all : UniqueRemovedCheck is a perf optimization; true/false produces identical correctness behavior
         _lazySamples = new(() => new CircularBuffer<ProgressSample>(MaxSamplesKept) { UniqueRemovedCheck = false });
         _lock = LockFactory.Create();
+        _children = [];
         _timeProvider = timeProvider ?? TimeProvider.System;
         _maxValue = maxValue;
         _value = 0;
@@ -384,6 +428,15 @@ public sealed class ProgressTask : IProgress<double>
     {
         // Stryker disable once all : Killed by ProgressTaskMutationTests.IProgress_Report_Should_Set_Value
         Update(increment: value - Value);
+    }
+
+    // Called from ProgressContext.AddChildTask while _taskLock is held.
+    internal void AddChildInternal(ProgressTask child)
+    {
+        lock (_lock)
+        {
+            _children.Add(child);
+        }
     }
 }
 
