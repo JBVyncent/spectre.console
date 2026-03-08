@@ -22,6 +22,96 @@ public partial class AnsiConsoleTests
             // Then
             console.Output.ShouldBe(expected);
         }
+
+        [Fact]
+        public void Should_Clear_Entire_Line()
+        {
+            // ESC[2K — erase entire current line; cursor does not move
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Write("Hello");
+            console.ClearLine();
+            console.Write("World");
+            console.Output.ShouldBe("Hello\u001b[2KWorld");
+        }
+
+        [Fact]
+        public void Should_Clear_Line_To_End()
+        {
+            // ESC[0K — erase from cursor to end of line
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Write("Hello");
+            console.ClearLineToEnd();
+            console.Write("World");
+            console.Output.ShouldBe("Hello\u001b[0KWorld");
+        }
+
+        [Fact]
+        public void Should_Clear_Line_To_Start()
+        {
+            // ESC[1K — erase from start of line to cursor
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Write("Hello");
+            console.ClearLineToStart();
+            console.Write("World");
+            console.Output.ShouldBe("Hello\u001b[1KWorld");
+        }
+
+        [Fact]
+        public void Should_Clear_To_Bottom()
+        {
+            // ESC[0J — erase from cursor to bottom of screen
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Write("Hello");
+            console.ClearToBottom();
+            console.Write("World");
+            console.Output.ShouldBe("Hello\u001b[0JWorld");
+        }
+
+        [Fact]
+        public void Should_Clear_To_Top()
+        {
+            // ESC[1J — erase from top of screen to cursor
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Write("Hello");
+            console.ClearToTop();
+            console.Write("World");
+            console.Output.ShouldBe("Hello\u001b[1JWorld");
+        }
+
+        [Fact]
+        public void ClearLine_Should_Throw_For_Null_Console()
+        {
+            var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearLine());
+            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+        }
+
+        [Fact]
+        public void ClearLineToEnd_Should_Throw_For_Null_Console()
+        {
+            var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearLineToEnd());
+            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+        }
+
+        [Fact]
+        public void ClearLineToStart_Should_Throw_For_Null_Console()
+        {
+            var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearLineToStart());
+            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+        }
+
+        [Fact]
+        public void ClearToBottom_Should_Throw_For_Null_Console()
+        {
+            var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearToBottom());
+            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+        }
+
+        [Fact]
+        public void ClearToTop_Should_Throw_For_Null_Console()
+        {
+            var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearToTop());
+            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+        }
     }
 
     public sealed class Write

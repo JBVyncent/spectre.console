@@ -71,4 +71,49 @@ public static partial class AnsiConsole
     {
         Console.Clear();
     }
+
+    /// <summary>
+    /// Erases the entire current line. The cursor position is not changed.
+    /// Emits <c>ESC[2K</c>.
+    /// </summary>
+    public static void ClearLine()
+    {
+        Console.ClearLine();
+    }
+
+    /// <summary>
+    /// Erases from the cursor position to the end of the current line.
+    /// Emits <c>ESC[0K</c>.
+    /// </summary>
+    public static void ClearLineToEnd()
+    {
+        Console.ClearLineToEnd();
+    }
+
+    /// <summary>
+    /// Erases from the start of the current line to the cursor position.
+    /// Emits <c>ESC[1K</c>.
+    /// </summary>
+    public static void ClearLineToStart()
+    {
+        Console.ClearLineToStart();
+    }
+
+    /// <summary>
+    /// Erases from the cursor position to the end of the screen (bottom).
+    /// Emits <c>ESC[0J</c>.
+    /// </summary>
+    public static void ClearToBottom()
+    {
+        Console.ClearToBottom();
+    }
+
+    /// <summary>
+    /// Erases from the start of the screen (top) to the cursor position.
+    /// Emits <c>ESC[1J</c>.
+    /// </summary>
+    public static void ClearToTop()
+    {
+        Console.ClearToTop();
+    }
 }
