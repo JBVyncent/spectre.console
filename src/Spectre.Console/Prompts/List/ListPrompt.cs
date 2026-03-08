@@ -92,6 +92,17 @@ internal sealed class ListPrompt<T>
     }
 
     private IRenderable BuildRenderable(ListPromptState<T> state)
+        => ComputeRenderable(_strategy, _console, state);
+
+    /// <summary>
+    /// Computes a paginated <see cref="IRenderable"/> for <paramref name="state"/> using
+    /// <paramref name="strategy"/> to do the actual rendering. Called from
+    /// <see cref="BuildRenderable"/> and from <see cref="SelectionPromptRenderable{T}"/>.
+    /// </summary>
+    internal static IRenderable ComputeRenderable(
+        IListPromptStrategy<T> strategy,
+        IAnsiConsole console,
+        ListPromptState<T> state)
     {
         var pageSize = state.PageSize;
         var middleOfList = pageSize / 2;
@@ -129,8 +140,8 @@ internal sealed class ListPrompt<T>
         }
 
         // Build the renderable
-        return _strategy.Render(
-            _console,
+        return strategy.Render(
+            console,
             scrollable, cursorIndex,
             displayItems.Skip(skip).Take(take)
                 .Select((node, index) => (index, node)),
