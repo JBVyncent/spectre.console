@@ -71,7 +71,7 @@ public sealed class PromptsDemo : IDemoModule
 
         AnsiConsole.WriteLine();
 
-        // Selection prompt
+        // Selection prompt — basic
         AnsiConsole.MarkupLine("[bold underline blue]Selection Prompt[/]");
         AnsiConsole.WriteLine();
 
@@ -81,6 +81,23 @@ public sealed class PromptsDemo : IDemoModule
                 .PageSize(5)
                 .AddChoices("ASP.NET Core", "Blazor", "MAUI", "WPF", "WinForms", "Console"));
         AnsiConsole.MarkupInterpolated($"You selected [bold]{framework}[/].");
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
+
+        // Selection prompt — with DefaultValue (issue #508)
+        // The cursor is pre-positioned on the previously-used framework so the user
+        // can press Enter to confirm or navigate to something different.
+        AnsiConsole.MarkupLine("[bold underline blue]Selection Prompt with Default Value[/]");
+        AnsiConsole.MarkupLine("[grey]Cursor starts on your previous pick — press Enter to confirm or navigate.[/]");
+        AnsiConsole.WriteLine();
+
+        var frameworkAgain = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[green]Confirm or change your .NET framework:[/]")
+                .PageSize(5)
+                .AddChoices("ASP.NET Core", "Blazor", "MAUI", "WPF", "WinForms", "Console")
+                .DefaultValue(framework));
+        AnsiConsole.MarkupInterpolated($"Confirmed: [bold]{frameworkAgain}[/].");
         AnsiConsole.WriteLine();
         AnsiConsole.WriteLine();
 
