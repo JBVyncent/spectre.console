@@ -117,15 +117,16 @@ public static partial class AnsiConsoleExtensions
                 if (text.Length > 0)
                 {
                     // Determine how many chars to remove: 2 for a surrogate pair, 1 otherwise.
-                    // Surrogate pairs encode non-BMP characters (emojis, CJK ext-B, etc.)
-                    // which are virtually always display-width 2.
+                    // Use the full Unicode codepoint to get accurate display width.
                     var removeCount = 1;
-                    var displayWidth = UnicodeCalculator.GetWidth(text[text.Length - 1]);
+                    int codepoint = text[text.Length - 1];
                     if (text.Length >= 2 && char.IsSurrogatePair(text[text.Length - 2], text[text.Length - 1]))
                     {
+                        codepoint = char.ConvertToUtf32(text[text.Length - 2], text[text.Length - 1]);
                         removeCount = 2;
-                        displayWidth = 2;
                     }
+
+                    var displayWidth = UnicodeCalculator.GetWidth(codepoint);
 
                     text = text.Substring(0, text.Length - removeCount);
 

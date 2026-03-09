@@ -161,15 +161,41 @@ public class Segment
         if (offset > 0)
         {
             var accumulated = 0;
-            foreach (var character in Text)
+#if !NETSTANDARD2_0
+            foreach (var rune in Text.EnumerateRunes())
             {
-                index++;
-                accumulated += Cell.GetCellLength(character);
+                index += rune.Utf16SequenceLength;
+                accumulated += Cell.GetCellLength(rune.Value);
                 if (accumulated >= offset)
                 {
                     break;
                 }
             }
+#else
+            for (var i = 0; i < Text.Length; i++)
+            {
+                int codepoint;
+                int charCount;
+                if (char.IsHighSurrogate(Text[i]) && i + 1 < Text.Length && char.IsLowSurrogate(Text[i + 1]))
+                {
+                    codepoint = char.ConvertToUtf32(Text[i], Text[i + 1]);
+                    charCount = 2;
+                    i++;
+                }
+                else
+                {
+                    codepoint = Text[i];
+                    charCount = 1;
+                }
+
+                index += charCount;
+                accumulated += Cell.GetCellLength(codepoint);
+                if (accumulated >= offset)
+                {
+                    break;
+                }
+            }
+#endif
         }
 
         return (
@@ -226,7 +252,7 @@ public class Segment
             if (lineLength + segmentLength > maxWidth)
             {
                 var diff = -(maxWidth - (lineLength + segmentLength));
-                var offset = segment.Text.Length - diff;
+                var offset = segmentLength - diff;
 
                 var (first, second) = segment.Split(offset);
 
@@ -440,17 +466,46 @@ public class Segment
 
         var builder = new StringBuilder();
         var accumulatedCellWidth = 0;
-        foreach (var character in segment.Text)
+#if !NETSTANDARD2_0
+        foreach (var rune in segment.Text.EnumerateRunes())
         {
-            var characterWidth = UnicodeCalculator.GetWidth(character);
+            var characterWidth = UnicodeCalculator.GetWidth(rune.Value);
             if (accumulatedCellWidth + characterWidth > maxWidth)
             {
                 break;
             }
 
-            builder.Append(character);
+            builder.Append(rune.ToString());
             accumulatedCellWidth += characterWidth;
         }
+#else
+        for (var i = 0; i < segment.Text.Length; i++)
+        {
+            int codepoint;
+            if (char.IsHighSurrogate(segment.Text[i]) && i + 1 < segment.Text.Length && char.IsLowSurrogate(segment.Text[i + 1]))
+            {
+                codepoint = char.ConvertToUtf32(segment.Text[i], segment.Text[i + 1]);
+            }
+            else
+            {
+                codepoint = segment.Text[i];
+            }
+
+            var characterWidth = UnicodeCalculator.GetWidth(codepoint);
+            if (accumulatedCellWidth + characterWidth > maxWidth)
+            {
+                break;
+            }
+
+            builder.Append(segment.Text[i]);
+            if (codepoint > char.MaxValue)
+            {
+                builder.Append(segment.Text[++i]);
+            }
+
+            accumulatedCellWidth += characterWidth;
+        }
+#endif
 
         if (builder.Length == 0)
         {
@@ -585,18 +640,49 @@ public class Segment
 
         var length = 0;
         var sb = new StringBuilder();
-        foreach (var ch in text)
+#if !NETSTANDARD2_0
+        foreach (var rune in text.EnumerateRunes())
         {
-            if (length + UnicodeCalculator.GetWidth(ch) > maxCellLength)
+            var w = UnicodeCalculator.GetWidth(rune.Value);
+            if (length + w > maxCellLength)
             {
                 list.Add(sb.ToString());
                 sb.Clear();
                 length = 0;
             }
 
-            length += UnicodeCalculator.GetWidth(ch);
-            sb.Append(ch);
+            length += w;
+            sb.Append(rune.ToString());
         }
+#else
+        for (var i = 0; i < text.Length; i++)
+        {
+            int codepoint;
+            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            {
+                codepoint = char.ConvertToUtf32(text[i], text[i + 1]);
+            }
+            else
+            {
+                codepoint = text[i];
+            }
+
+            var w = UnicodeCalculator.GetWidth(codepoint);
+            if (length + w > maxCellLength)
+            {
+                list.Add(sb.ToString());
+                sb.Clear();
+                length = 0;
+            }
+
+            length += w;
+            sb.Append(text[i]);
+            if (codepoint > char.MaxValue)
+            {
+                sb.Append(text[++i]);
+            }
+        }
+#endif
 
         list.Add(sb.ToString());
 

@@ -28,12 +28,53 @@ internal static class Cell
     public static int GetCellLength(ReadOnlySpan<char> text)
     {
         var sum = 0;
-        foreach (var rune in text)
+#if !NETSTANDARD2_0
+        foreach (var rune in text.EnumerateRunes())
         {
-            sum += GetCellLength(rune);
+            sum += GetCellLength(rune.Value);
+        }
+#else
+        for (var i = 0; i < text.Length; i++)
+        {
+            int codepoint;
+            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            {
+                codepoint = char.ConvertToUtf32(text[i], text[i + 1]);
+                i++;
+            }
+            else
+            {
+                codepoint = text[i];
+            }
+
+            sum += GetCellLength(codepoint);
+        }
+#endif
+        return sum;
+    }
+
+    public static int GetCellLength(int codepoint)
+    {
+        if (codepoint == '\n')
+        {
+            return 1;
         }
 
-        return sum;
+        // BMP codepoints can use the cache
+        if (codepoint <= char.MaxValue)
+        {
+            var width = _runeWidthCache[codepoint];
+            if (width == Sentinel)
+            {
+                width = (sbyte)UnicodeCalculator.GetWidth(codepoint);
+                _runeWidthCache[codepoint] = width;
+            }
+
+            return width;
+        }
+
+        // Non-BMP: call UnicodeCalculator directly (no cache — rare path)
+        return UnicodeCalculator.GetWidth(codepoint);
     }
 
     public static int GetCellLength(char rune)
