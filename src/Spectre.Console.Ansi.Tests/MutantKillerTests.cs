@@ -833,7 +833,7 @@ public sealed class MutantKillerTests
         writer.BeginLink("https://example.com");
         var result = output.ToString();
 
-        result.Should().Contain("\e]8;https://example.com");
+        result.Should().Contain("\e]8;;https://example.com");
         result.Should().NotContain("id=");
     }
 

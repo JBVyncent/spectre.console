@@ -24,6 +24,24 @@ public sealed class AnsiWriterTests
     }
 
     [Fact]
+    public void Should_Write_OSC8_With_Empty_Params_When_No_LinkId()
+    {
+        // Given
+        var fixture = new AnsiFixture();
+        fixture.Capabilities.Ansi = true;
+        fixture.Capabilities.Links = true;
+
+        // When — no linkId parameter
+        fixture.Writer
+            .BeginLink("https://example.com")
+            .Write("click")
+            .EndLink();
+
+        // Then — OSC 8 format requires `8;;url` (empty params field, two semicolons)
+        fixture.Output.Should().Contain("]8;;https://example.com\e\\");
+    }
+
+    [Fact]
     public void Should_Not_Write_Link_If_Not_Supported()
     {
         // Given
