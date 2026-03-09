@@ -259,6 +259,96 @@ public partial class AnsiConsoleTests
             Should.NotThrow(() => console.MarkupLine("{Pt.1} (TEST ~ 855D)", Array.Empty<object>()));
             console.Output.ShouldContain("{Pt.1}");
         }
+
+        [Fact]
+        public void Should_Not_Throw_When_Arg_Contains_Square_Brackets()
+        {
+            // Regression test for #1763 — interpolation crashes when an argument
+            // contains square brackets that look like markup tags.
+            var console = new TestConsole();
+            var fileName = "[important].txt";
+
+            Should.NotThrow(() => console.Markup("[blue]File:[/] {0}", fileName));
+            console.Output.ShouldContain("[important].txt");
+        }
+
+        [Fact]
+        public void Should_Render_Brackets_In_Args_As_Literal_Text()
+        {
+            // Brackets inside substituted args must be displayed literally,
+            // not interpreted as markup tags. Regression test for #1763 and #1387.
+            var console = new TestConsole();
+
+            console.Markup("Value: {0}", "[not-a-tag]");
+
+            console.Output.ShouldContain("[not-a-tag]");
+        }
+
+        [Fact]
+        public void Should_Still_Apply_Markup_From_Format_String_When_Arg_Has_Brackets()
+        {
+            // The markup tags in the format string itself must still be applied;
+            // only the substituted values should be escaped.
+            var console = new TestConsole()
+                .Colors(ColorSystem.Standard)
+                .EmitAnsiSequences();
+
+            console.Markup("[yellow]{0}[/]", "[raw]");
+
+            // Output should contain the yellow ANSI code and the literal [raw] text.
+            console.Output.ShouldContain("[93m");
+            console.Output.ShouldContain("[raw]");
+        }
+
+        [Fact]
+        public void Should_Not_Throw_When_MarkupLine_Arg_Contains_Square_Brackets()
+        {
+            // Regression test for #1763 — same escaping applies to MarkupLine overload.
+            var console = new TestConsole();
+            var tag = "[bold-value]";
+
+            Should.NotThrow(() => console.MarkupLine("[red]Tag:[/] {0}", tag));
+            console.Output.ShouldContain("[bold-value]");
+        }
+
+        [Fact]
+        public void Should_Escape_Args_With_Provider_Overload()
+        {
+            // The IFormatProvider overload must also escape bracket-containing args.
+            var console = new TestConsole();
+
+            Should.NotThrow(() =>
+                console.Markup(System.Globalization.CultureInfo.InvariantCulture, "[blue]{0}[/]", "[bracketed]"));
+            console.Output.ShouldContain("[bracketed]");
+        }
+
+        [Fact]
+        public void Should_Escape_Args_In_MarkupLine_Provider_Overload()
+        {
+            // The IFormatProvider overload of MarkupLine must also escape bracket-containing args.
+            var console = new TestConsole();
+
+            Should.NotThrow(() =>
+                console.MarkupLine(System.Globalization.CultureInfo.InvariantCulture, "[blue]{0}[/]", "[bracketed]"));
+            console.Output.ShouldContain("[bracketed]");
+        }
+
+        [Fact]
+        public void Should_Escape_Object_Whose_ToString_Contains_Brackets()
+        {
+            // Regression test for #1763 — any object whose ToString() returns a string
+            // with brackets must not corrupt the markup stream.
+            var console = new TestConsole();
+
+            var obj = new ObjectWithBracketsInToString();
+            Should.NotThrow(() => console.Markup("Item: {0}", obj));
+            console.Output.ShouldContain("[item]");
+        }
+
+        private sealed class ObjectWithBracketsInToString
+        {
+            public override string ToString() => "[item]";
+        }
     }
 
     public sealed class WriteException
