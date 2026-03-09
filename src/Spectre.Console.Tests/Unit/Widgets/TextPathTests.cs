@@ -76,6 +76,34 @@ public sealed class TextPathTests
         console.Output.Should().Be("      C:/My documents/Bar/Baz.txt       ");
     }
 
+    [Theory]
+    [InlineData(8, "1234567890", "…4567890")]
+    [InlineData(5, "1234567890", "…7890")]
+    [InlineData(1, "1234567890", "…")]
+    public void Should_Trim_Fallback_By_Cell_Width(int width, string input, string expected)
+    {
+        // Given — single-segment path (no separators) triggers fallback trimming
+        var console = new TestConsole().Width(width);
+
+        // When
+        console.Write(new TextPath(input));
+
+        // Then
+        console.Output.Should().Be(expected);
+    }
+
+    [Fact]
+    public void Measure_Should_Use_Cell_Width_Not_String_Length()
+    {
+        // Given — all ASCII, so cell width = string length. Verify it measures correctly.
+        var path = new TextPath("foo/bar/baz.txt");
+        var console = new TestConsole().Width(40);
+        console.Write(path);
+
+        // Then — full path fits, output should be complete
+        console.Output.Should().Be("foo/bar/baz.txt");
+    }
+
     [Fact]
     [Expectation("GH-1307")]
     [GitHubIssue("https://github.com/spectreconsole/spectre.console/issues/1307")]

@@ -70,7 +70,7 @@ public sealed class TextPath : IRenderable, IHasJustification
     {
         var fitted = Fit(options, maxWidth);
         var separatorCount = fitted.Length - 1;
-        var length = fitted.Sum(f => f.Length) + separatorCount;
+        var length = fitted.Sum(Cell.GetCellLength) + separatorCount;
 
         return new Measurement(
             Math.Min(length, maxWidth),
@@ -180,12 +180,26 @@ public sealed class TextPath : IRenderable, IHasJustification
             }
         }
 
-        // Just trim the last part so it fits
+        // Just trim the last part so it fits (using cell width, not char count)
         var last = _parts.Last();
-        var take = Math.Min(last.Length, Math.Max(0, maxWidth - ellipsisLength));
-        var start = Math.Max(0, last.Length - take);
+        var availableWidth = Math.Max(0, maxWidth - ellipsisLength);
 
-        return [string.Concat(ellipsis, last.Substring(start, take))];
+        // Walk from the end of the string, accumulating cell width
+        var startIndex = last.Length;
+        var cellWidth = 0;
+        while (startIndex > 0)
+        {
+            var charWidth = Cell.GetCellLength(last[startIndex - 1]);
+            if (cellWidth + charWidth > availableWidth)
+            {
+                break;
+            }
+
+            cellWidth += charWidth;
+            startIndex--;
+        }
+
+        return [string.Concat(ellipsis, last.Substring(startIndex))];
     }
 }
 
