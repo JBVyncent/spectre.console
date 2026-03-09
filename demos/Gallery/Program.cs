@@ -9,6 +9,7 @@ using Gallery.Demos.Rules;
 using Gallery.Demos.Sixel;
 using Gallery.Demos.Status;
 using Gallery.Demos.Tables;
+using Gallery.Demos.Unicode;
 using Spectre.Console;
 
 // Register all demo modules
@@ -24,6 +25,7 @@ var modules = new IDemoModule[]
     new RulesDemo(),
     new ExceptionsDemo(),
     new SixelDemo(),
+    new UnicodeDemo(),
 };
 
 // Header
