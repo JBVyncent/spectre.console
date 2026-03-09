@@ -45,8 +45,8 @@ public sealed class TestConsoleInput : IAnsiConsoleInput
     /// <param name="input">The input.</param>
     public void PushCharacter(char input)
     {
-        var control = char.IsUpper(input);
-        _input.Enqueue(new ConsoleKeyInfo(input, (ConsoleKey)input, false, false, control));
+        var shift = char.IsUpper(input);
+        _input.Enqueue(new ConsoleKeyInfo(input, (ConsoleKey)input, shift, alt: false, control: false));
     }
 
     // Keys whose ConsoleKey enum values coincide with printable ASCII characters

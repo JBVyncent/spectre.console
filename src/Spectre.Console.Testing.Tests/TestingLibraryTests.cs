@@ -461,18 +461,18 @@ public sealed class TestConsoleInputTests
     // --- PushCharacter ---
 
     [Fact]
-    public void PushCharacter_Uppercase_SetsControlModifier_NotShiftOrAlt()
+    public void PushCharacter_Uppercase_SetsShiftModifier_NotControlOrAlt()
     {
         // Kills: Logical mutation on `char.IsUpper(input)` — if mutant returns false,
-        //   uppercase chars would have no Control modifier.
-        // Kills: Boolean mutation on the `false, false` (shift, alt) params in ConsoleKeyInfo ctor:
-        //   if shift were true, Modifiers would include Shift (violating the assertion below).
+        //   uppercase chars would have no Shift modifier.
+        // Kills: Boolean mutation on the `control: false` param in ConsoleKeyInfo ctor:
+        //   if control were true, Modifiers would include Control (violating the assertion below).
         var input = new TestConsoleInput();
         input.PushCharacter('A');
         var key = input.ReadKey(false);
         key!.Value.KeyChar.Should().Be('A');
-        key.Value.Modifiers.HasFlag(ConsoleModifiers.Control).Should().BeTrue();
-        key.Value.Modifiers.HasFlag(ConsoleModifiers.Shift).Should().BeFalse();
+        key.Value.Modifiers.HasFlag(ConsoleModifiers.Shift).Should().BeTrue();
+        key.Value.Modifiers.HasFlag(ConsoleModifiers.Control).Should().BeFalse();
         key.Value.Modifiers.HasFlag(ConsoleModifiers.Alt).Should().BeFalse();
     }
 
