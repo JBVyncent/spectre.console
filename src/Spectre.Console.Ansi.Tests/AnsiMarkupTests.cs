@@ -43,6 +43,60 @@ public sealed class AnsiMarkupTests
         }
     }
 
+    public sealed class TheParseLinkScopeMethod
+    {
+        [Fact]
+        public void Link_Should_Not_Leak_Past_Closing_Tag()
+        {
+            // [link=a]x[/]y — 'y' should have no link
+            var segments = AnsiMarkup.Parse("[link=https://example.com]click[/]plain").ToList();
+            segments.Should().HaveCount(2);
+            segments[0].Link.Should().NotBeNull();
+            segments[0].Text.Should().Be("click");
+            segments[1].Link.Should().BeNull();
+            segments[1].Text.Should().Be("plain");
+        }
+
+        [Fact]
+        public void Nested_Link_Should_Override_Outer_Link()
+        {
+            // [link=a][link=b]inner[/]outer[/] — inner should use b, outer should use a
+            var segments = AnsiMarkup.Parse("[link=https://a.com][link=https://b.com]inner[/]outer[/]").ToList();
+            segments.Should().HaveCount(2);
+            segments[0].Link!.Url.Should().Be("https://b.com");
+            segments[0].Text.Should().Be("inner");
+            segments[1].Link!.Url.Should().Be("https://a.com");
+            segments[1].Text.Should().Be("outer");
+        }
+
+        [Fact]
+        public void Link_Should_Restore_To_Null_After_Close()
+        {
+            // "before" = plain+null link, "linked" = plain+link, "after" = plain+null link
+            // "after" can't merge with "linked" (different link), so 3 segments
+            var segments = AnsiMarkup.Parse("before[link=https://x.com]linked[/]after").ToList();
+            segments.Should().HaveCount(3);
+            segments[0].Text.Should().Be("before");
+            segments[0].Link.Should().BeNull();
+            segments[1].Text.Should().Be("linked");
+            segments[1].Link.Should().NotBeNull();
+            segments[2].Text.Should().Be("after");
+            segments[2].Link.Should().BeNull();
+        }
+
+        [Fact]
+        public void Link_With_Style_Should_Scope_Both()
+        {
+            var segments = AnsiMarkup.Parse("[red link=https://x.com]styled[/]plain").ToList();
+            segments.Should().HaveCount(2);
+            segments[0].Text.Should().Be("styled");
+            segments[0].Link.Should().NotBeNull();
+            segments[0].Style.Foreground.Should().Be(Color.Red);
+            segments[1].Text.Should().Be("plain");
+            segments[1].Link.Should().BeNull();
+        }
+    }
+
     public sealed class TheEscapeMethod
     {
         [Theory]

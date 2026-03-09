@@ -55,7 +55,7 @@ public sealed class AnsiMarkup
         using var tokenizer = new MarkupTokenizer(markup);
 
         var result = new List<AnsiMarkupSegment>();
-        var stack = new Stack<Style>();
+        var stack = new Stack<(Style Style, Link? Link)>();
         var link = default(Link?);
 
         while (tokenizer.MoveNext())
@@ -65,8 +65,12 @@ public sealed class AnsiMarkup
             if (token.Kind == MarkupTokenKind.Open)
             {
                 var parsed = AnsiMarkupTagParser.Parse(token.Value);
-                link ??= parsed.Link;
-                stack.Push(style.Value);
+                stack.Push((style.Value, link));
+                if (parsed.Link != null)
+                {
+                    link = parsed.Link;
+                }
+
                 style = style.Value.Combine(parsed.Style);
             }
             else if (token.Kind == MarkupTokenKind.Close)
@@ -77,11 +81,13 @@ public sealed class AnsiMarkup
                         $"Encountered closing tag when none was expected near position {token.Position}.");
                 }
 
-                style = stack.Pop();
+                var previous = stack.Pop();
+                style = previous.Style;
+                link = previous.Link;
             }
             else if (token.Kind == MarkupTokenKind.Text)
             {
-                if (result.Count > 0 && result[^1].Style.Equals(style))
+                if (result.Count > 0 && result[^1].Style.Equals(style) && result[^1].Link == link)
                 {
                     // Merge segments
                     result[^1].Text += token.Value;

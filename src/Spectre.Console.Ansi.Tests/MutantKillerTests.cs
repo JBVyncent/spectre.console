@@ -1914,20 +1914,18 @@ public sealed class MutantKillerTests
     }
 
     [Fact]
-    public void AnsiMarkup_Parse_FirstLinkTag_WinsOverSecondLink()
+    public void AnsiMarkup_Parse_EachLinkTag_HasItsOwnScope()
     {
-        // Line 68: `link ??= parsed.Link` — mutation changes to `link = parsed.Link` (always overwrite)
-        // With original ??=: link is set from first tag and never overwritten
-        // With mutation =: second open tag overwrites link to "second"
-        // Use bold on first tag so styles differ → segments don't merge → we can inspect link on each segment
+        // With the link scope fix, each open/close pair gets its own link.
+        // [bold link=first]A[/] → segment with link "first"
+        // [link=second]B[/] → segment with link "second"
+        // After both close, link is restored to null.
         var segments = AnsiMarkup.Parse("[bold link=first]A[/][link=second]B[/]").ToList();
         segments.Should().HaveCount(2);
-        // First segment has bold+link=first
         segments[0].Link.Should().NotBeNull();
         segments[0].Link!.Url.Should().Be("first");
-        // Second segment: with ??= link stays "first"; with = link becomes "second"
         segments[1].Link.Should().NotBeNull();
-        segments[1].Link!.Url.Should().Be("first");
+        segments[1].Link!.Url.Should().Be("second");
     }
 
     #endregion
