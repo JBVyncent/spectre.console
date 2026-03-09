@@ -18,7 +18,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<string>("Enter:")
                 .ValidateAsync(_ => Task.FromResult(ValidationResult.Success())));
 
-        result.ShouldBe("hello");
+        result.Should().Be("hello");
     }
 
     [Fact]
@@ -40,8 +40,8 @@ public sealed class TextPromptAsyncValidatorTests
                     return Task.FromResult(r);
                 }));
 
-        result.ShouldBe("good");
-        callCount.ShouldBe(2);
+        result.Should().Be("good");
+        callCount.Should().Be(2);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class TextPromptAsyncValidatorTests
                         ? ValidationResult.Success()
                         : ValidationResult.Error("[red]Custom async error[/]"))));
 
-        console.Output.ShouldContain("Custom async error");
+        console.Output.Should().Contain("Custom async error");
     }
 
     // -------------------------------------------------------------------------
@@ -84,7 +84,7 @@ public sealed class TextPromptAsyncValidatorTests
             cts.Token);
 
         // The token we passed into PromptAsync should have been forwarded
-        capturedToken.ShouldBe(cts.Token);
+        capturedToken.Should().Be(cts.Token);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<int>("Number:")
                 .ValidateAsync((_, _) => Task.FromResult(ValidationResult.Success())));
 
-        result.ShouldBe(42);
+        result.Should().Be(42);
     }
 
     // -------------------------------------------------------------------------
@@ -114,7 +114,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<string>("Enter:")
                 .ValidateAsync(_ => Task.FromResult(true)));
 
-        result.ShouldBe("positive");
+        result.Should().Be("positive");
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<string>("Enter:")
                 .ValidateAsync(v => Task.FromResult(v.Length > 5), "[red]Too short[/]"));
 
-        result.ShouldBe("long enough");
+        result.Should().Be("long enough");
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<string>("Enter:")
                 .ValidateAsync(v => Task.FromResult(v.Length > 3), "[red]Too short async[/]"));
 
-        console.Output.ShouldContain("Too short async");
+        console.Output.Should().Contain("Too short async");
     }
 
     // -------------------------------------------------------------------------
@@ -159,7 +159,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<string>("Enter:")
                 .ValidateAsync((_, _) => Task.FromResult(true)));
 
-        result.ShouldBe("hello");
+        result.Should().Be("hello");
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public sealed class TextPromptAsyncValidatorTests
             new TextPrompt<string>("Enter:")
                 .ValidateAsync((v, _) => Task.FromResult(v == "yes"), "[red]Must say yes[/]"));
 
-        result.ShouldBe("yes");
+        result.Should().Be("yes");
     }
 
     // -------------------------------------------------------------------------
@@ -202,8 +202,8 @@ public sealed class TextPromptAsyncValidatorTests
                     return Task.FromResult(ValidationResult.Success());
                 }));
 
-        asyncCalled.ShouldBeTrue();
-        syncCalled.ShouldBeFalse();
+        asyncCalled.Should().BeTrue();
+        syncCalled.Should().BeFalse();
     }
 
     [Fact]
@@ -222,7 +222,7 @@ public sealed class TextPromptAsyncValidatorTests
                     return ValidationResult.Success();
                 }));
 
-        syncCalled.ShouldBeTrue();
+        syncCalled.Should().BeTrue();
     }
 
     // -------------------------------------------------------------------------
@@ -234,7 +234,7 @@ public sealed class TextPromptAsyncValidatorTests
     {
         var ex = Record.Exception(() =>
             ((TextPrompt<string>)null!).ValidateAsync(_ => Task.FromResult(ValidationResult.Success())));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("obj");
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public sealed class TextPromptAsyncValidatorTests
         var prompt = new TextPrompt<string>("Enter:");
         var ex = Record.Exception(() =>
             prompt.ValidateAsync((Func<string, Task<ValidationResult>>)null!));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("validator");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("validator");
     }
 
     [Fact]
@@ -251,7 +251,7 @@ public sealed class TextPromptAsyncValidatorTests
     {
         var ex = Record.Exception(() =>
             ((TextPrompt<string>)null!).ValidateAsync((_, _) => Task.FromResult(ValidationResult.Success())));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("obj");
     }
 
     [Fact]
@@ -260,7 +260,7 @@ public sealed class TextPromptAsyncValidatorTests
         var prompt = new TextPrompt<string>("Enter:");
         var ex = Record.Exception(() =>
             prompt.ValidateAsync((Func<string, CancellationToken, Task<ValidationResult>>)null!));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("validator");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("validator");
     }
 
     [Fact]
@@ -268,7 +268,7 @@ public sealed class TextPromptAsyncValidatorTests
     {
         var ex = Record.Exception(() =>
             ((TextPrompt<string>)null!).ValidateAsync(_ => Task.FromResult(true)));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("obj");
     }
 
     [Fact]
@@ -277,7 +277,7 @@ public sealed class TextPromptAsyncValidatorTests
         var prompt = new TextPrompt<string>("Enter:");
         var ex = Record.Exception(() =>
             prompt.ValidateAsync((Func<string, Task<bool>>)null!));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("validator");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("validator");
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public sealed class TextPromptAsyncValidatorTests
     {
         var ex = Record.Exception(() =>
             ((TextPrompt<string>)null!).ValidateAsync((_, _) => Task.FromResult(true)));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("obj");
     }
 
     [Fact]
@@ -294,6 +294,6 @@ public sealed class TextPromptAsyncValidatorTests
         var prompt = new TextPrompt<string>("Enter:");
         var ex = Record.Exception(() =>
             prompt.ValidateAsync((Func<string, CancellationToken, Task<bool>>)null!));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("validator");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("validator");
     }
 }

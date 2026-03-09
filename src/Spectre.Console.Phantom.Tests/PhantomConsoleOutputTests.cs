@@ -1,5 +1,4 @@
 using System.Text;
-using Shouldly;
 using Spectre.Console.Phantom;
 
 namespace Spectre.Console.Phantom.Tests;
@@ -15,7 +14,7 @@ public sealed class PhantomConsoleOutputTests
     [Fact]
     public void Constructor_Should_Throw_For_Null_Terminal()
     {
-        Should.Throw<ArgumentNullException>(() => new PhantomConsoleOutput(null!));
+        FluentActions.Invoking(() => new PhantomConsoleOutput(null!)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -24,11 +23,11 @@ public sealed class PhantomConsoleOutputTests
         var terminal = new PhantomTerminal(40, 10);
         var output = new PhantomConsoleOutput(terminal);
 
-        output.Terminal.ShouldBe(terminal);
-        output.Writer.ShouldNotBeNull();
-        output.IsTerminal.ShouldBeTrue();
-        output.Width.ShouldBe(40);
-        output.Height.ShouldBe(10);
+        output.Terminal.Should().Be(terminal);
+        output.Writer.Should().NotBeNull();
+        output.IsTerminal.Should().BeTrue();
+        output.Width.Should().Be(40);
+        output.Height.Should().Be(10);
     }
 
     // ── Writer.Write(string) ─────────────────────────────────────────
@@ -41,8 +40,8 @@ public sealed class PhantomConsoleOutputTests
 
         output.Writer.Write("Hello");
 
-        output.RawOutput.ShouldBe("Hello");
-        terminal.GetRowText(0).ShouldBe("Hello");
+        output.RawOutput.Should().Be("Hello");
+        terminal.GetRowText(0).Should().Be("Hello");
     }
 
     [Fact]
@@ -53,7 +52,7 @@ public sealed class PhantomConsoleOutputTests
 
         output.Writer.Write((string?)null);
 
-        output.RawOutput.ShouldBeEmpty();
+        output.RawOutput.Should().BeEmpty();
     }
 
     // ── Writer.Write(char) ───────────────────────────────────────────
@@ -66,8 +65,8 @@ public sealed class PhantomConsoleOutputTests
 
         output.Writer.Write('X');
 
-        output.RawOutput.ShouldBe("X");
-        terminal.GetRowText(0).ShouldBe("X");
+        output.RawOutput.Should().Be("X");
+        terminal.GetRowText(0).Should().Be("X");
     }
 
     // ── Writer.Write(ReadOnlySpan<char>) ─────────────────────────────
@@ -80,8 +79,8 @@ public sealed class PhantomConsoleOutputTests
 
         output.Writer.Write("Span".AsSpan());
 
-        output.RawOutput.ShouldBe("Span");
-        terminal.GetRowText(0).ShouldBe("Span");
+        output.RawOutput.Should().Be("Span");
+        terminal.GetRowText(0).Should().Be("Span");
     }
 
     // ── Writer.WriteLine(string) ─────────────────────────────────────
@@ -95,8 +94,8 @@ public sealed class PhantomConsoleOutputTests
         output.Writer.WriteLine("Line 1");
         output.Writer.Write("Line 2");
 
-        terminal.GetRowText(0).ShouldBe("Line 1");
-        terminal.GetRowText(1).ShouldBe("Line 2");
+        terminal.GetRowText(0).Should().Be("Line 1");
+        terminal.GetRowText(1).Should().Be("Line 2");
     }
 
     [Fact]
@@ -108,8 +107,8 @@ public sealed class PhantomConsoleOutputTests
         output.Writer.WriteLine((string?)null);
         output.Writer.Write("After");
 
-        terminal.GetRowText(0).ShouldBeEmpty();
-        terminal.GetRowText(1).ShouldBe("After");
+        terminal.GetRowText(0).Should().BeEmpty();
+        terminal.GetRowText(1).Should().Be("After");
     }
 
     // ── Writer.WriteLine() (no args) ─────────────────────────────────
@@ -124,8 +123,8 @@ public sealed class PhantomConsoleOutputTests
         output.Writer.WriteLine();
         output.Writer.Write("B");
 
-        terminal.GetRowText(0).ShouldBe("A");
-        terminal.GetRowText(1).ShouldBe("B");
+        terminal.GetRowText(0).Should().Be("A");
+        terminal.GetRowText(1).Should().Be("B");
     }
 
     // ── Writer.Encoding ──────────────────────────────────────────────
@@ -136,7 +135,7 @@ public sealed class PhantomConsoleOutputTests
         var terminal = new PhantomTerminal(80, 24);
         var output = new PhantomConsoleOutput(terminal);
 
-        output.Writer.Encoding.ShouldBe(Encoding.UTF8);
+        output.Writer.Encoding.Should().Be(Encoding.UTF8);
     }
 
     // ── SetEncoding (no-op) ──────────────────────────────────────────
@@ -147,8 +146,8 @@ public sealed class PhantomConsoleOutputTests
         var terminal = new PhantomTerminal(80, 24);
         var output = new PhantomConsoleOutput(terminal);
 
-        Should.NotThrow(() => output.SetEncoding(Encoding.ASCII));
-        Should.NotThrow(() => output.SetEncoding(Encoding.UTF8));
+        FluentActions.Invoking(() => output.SetEncoding(Encoding.ASCII)).Should().NotThrow();
+        FluentActions.Invoking(() => output.SetEncoding(Encoding.UTF8)).Should().NotThrow();
     }
 
     // ── RawOutput ────────────────────────────────────────────────────
@@ -163,7 +162,7 @@ public sealed class PhantomConsoleOutputTests
         output.Writer.Write("B");
         output.Writer.Write("C");
 
-        output.RawOutput.ShouldBe("ABC");
+        output.RawOutput.Should().Be("ABC");
     }
 
     [Fact]
@@ -174,8 +173,8 @@ public sealed class PhantomConsoleOutputTests
 
         output.Writer.Write("\x1b[1mBold\x1b[0m");
 
-        output.RawOutput.ShouldContain("\x1b[1m");
-        output.RawOutput.ShouldContain("\x1b[0m");
+        output.RawOutput.Should().Contain("\x1b[1m");
+        output.RawOutput.Should().Contain("\x1b[0m");
     }
 
     // ── Reset ────────────────────────────────────────────────────────
@@ -187,15 +186,15 @@ public sealed class PhantomConsoleOutputTests
         var output = new PhantomConsoleOutput(terminal);
 
         output.Writer.Write("Before");
-        output.RawOutput.ShouldNotBeEmpty();
-        terminal.GetRowText(0).ShouldBe("Before");
+        output.RawOutput.Should().NotBeEmpty();
+        terminal.GetRowText(0).Should().Be("Before");
 
         output.Reset();
 
-        output.RawOutput.ShouldBeEmpty();
-        terminal.GetRowText(0).ShouldBeEmpty();
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(0);
+        output.RawOutput.Should().BeEmpty();
+        terminal.GetRowText(0).Should().BeEmpty();
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(0);
     }
 
     // ── PhantomConsole Factory ────────────────────────────────────────
@@ -205,10 +204,10 @@ public sealed class PhantomConsoleOutputTests
     {
         var (console, output) = PhantomConsole.Create(60, 20);
 
-        console.ShouldNotBeNull();
-        output.ShouldNotBeNull();
-        output.Width.ShouldBe(60);
-        output.Height.ShouldBe(20);
+        console.Should().NotBeNull();
+        output.Should().NotBeNull();
+        output.Width.Should().Be(60);
+        output.Height.Should().Be(20);
     }
 
     [Fact]
@@ -216,8 +215,8 @@ public sealed class PhantomConsoleOutputTests
     {
         var (console, output) = PhantomConsole.Create();
 
-        output.Width.ShouldBe(80);
-        output.Height.ShouldBe(24);
+        output.Width.Should().Be(80);
+        output.Height.Should().Be(24);
     }
 
     [Fact]
@@ -225,10 +224,10 @@ public sealed class PhantomConsoleOutputTests
     {
         var (console, output) = PhantomConsole.CreateInteractive(50, 15);
 
-        console.ShouldNotBeNull();
-        output.ShouldNotBeNull();
-        output.Width.ShouldBe(50);
-        output.Height.ShouldBe(15);
+        console.Should().NotBeNull();
+        output.Should().NotBeNull();
+        output.Width.Should().Be(50);
+        output.Height.Should().Be(15);
     }
 
     [Fact]
@@ -238,17 +237,17 @@ public sealed class PhantomConsoleOutputTests
         var (console2, _) = PhantomConsole.Create(colorSystem: ColorSystem.EightBit);
         var (console3, _) = PhantomConsole.Create(colorSystem: ColorSystem.TrueColor);
 
-        console1.ShouldNotBeNull();
-        console2.ShouldNotBeNull();
-        console3.ShouldNotBeNull();
+        console1.Should().NotBeNull();
+        console2.Should().NotBeNull();
+        console3.Should().NotBeNull();
     }
 
     [Fact]
     public void PhantomConsole_Create_Should_Support_NoAnsi()
     {
         var (console, output) = PhantomConsole.Create(ansiSupport: AnsiSupport.No);
-        console.ShouldNotBeNull();
-        output.ShouldNotBeNull();
+        console.Should().NotBeNull();
+        output.Should().NotBeNull();
     }
 
     // ── Multiple write types ─────────────────────────────────────────
@@ -265,7 +264,7 @@ public sealed class PhantomConsoleOutputTests
         output.Writer.WriteLine("FG");
         output.Writer.WriteLine();
 
-        output.RawOutput.ShouldStartWith("ABCDEFG");
-        terminal.GetRowText(0).ShouldBe("ABCDEFG");
+        output.RawOutput.Should().StartWith("ABCDEFG");
+        terminal.GetRowText(0).Should().Be("ABCDEFG");
     }
 }

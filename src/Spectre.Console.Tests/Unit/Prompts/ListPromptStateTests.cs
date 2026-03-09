@@ -18,7 +18,7 @@ public sealed class ListPromptStateTests
         /* noop */
 
         // Then
-        state.Index.ShouldBe(0);
+        state.Index.Should().Be(0);
     }
 
     [Theory]
@@ -35,7 +35,7 @@ public sealed class ListPromptStateTests
         state.Update(key.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(index - 1);
+        state.Index.Should().Be(index - 1);
     }
 
     [Theory]
@@ -53,7 +53,7 @@ public sealed class ListPromptStateTests
         state.Update(key.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(index + 1);
+        state.Index.Should().Be(index + 1);
     }
 
     [Theory]
@@ -68,7 +68,7 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.End.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(99);
+        state.Index.Should().Be(99);
     }
 
     [Theory]
@@ -84,7 +84,7 @@ public sealed class ListPromptStateTests
         state.Update(key.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(99);
+        state.Index.Should().Be(99);
     }
 
     [Theory]
@@ -100,7 +100,7 @@ public sealed class ListPromptStateTests
         state.Update(key.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(0);
+        state.Index.Should().Be(0);
     }
 
     [Theory]
@@ -115,7 +115,7 @@ public sealed class ListPromptStateTests
         state.Update(key.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(99);
+        state.Index.Should().Be(99);
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.PageUp.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(0);
+        state.Index.Should().Be(0);
     }
 
     [Theory]
@@ -145,7 +145,7 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.PageDown.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(8);
+        state.Index.Should().Be(8);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.D3.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(3);
+        state.Index.Should().Be(3);
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.Backspace.ToConsoleKeyInfo());
 
         // Then
-        state.Index.ShouldBe(0);
+        state.Index.Should().Be(0);
     }
 
     // ----------------------------------------------------------------
@@ -194,7 +194,7 @@ public sealed class ListPromptStateTests
         state.Update('p'.ToConsoleKeyInfo());
 
         // Index should be 0 ("apple", first match)
-        state.Index.ShouldBe(0);
+        state.Index.Should().Be(0);
     }
 
     [Fact]
@@ -206,9 +206,9 @@ public sealed class ListPromptStateTests
 
         // "ap" matches "apple" (index 0) and "apricot" (index 2)
         var display = state.GetDisplayItems();
-        display.Count.ShouldBe(2);
-        display[0].Data.ShouldBe("apple");
-        display[1].Data.ShouldBe("apricot");
+        display.Count.Should().Be(2);
+        display[0].Data.Should().Be("apple");
+        display[1].Data.Should().Be("apricot");
     }
 
     [Fact]
@@ -220,8 +220,8 @@ public sealed class ListPromptStateTests
         state.Update('p'.ToConsoleKeyInfo()); // narrow to "apple" + "apricot" — "banana" no longer matches
 
         // Cursor should have jumped to first match ("apple")
-        state.GetDisplayIndex().ShouldBe(0);
-        state.GetDisplayItems()[0].Data.ShouldBe("apple");
+        state.GetDisplayIndex().Should().Be(0);
+        state.GetDisplayItems()[0].Data.Should().Be("apple");
     }
 
     [Fact]
@@ -232,8 +232,8 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo()); // move to "banana"
 
         // Display index = 1 (second in filtered results — "banana")
-        state.GetDisplayIndex().ShouldBe(1);
-        state.GetDisplayItems()[1].Data.ShouldBe("banana");
+        state.GetDisplayIndex().Should().Be(1);
+        state.GetDisplayItems()[1].Data.Should().Be("banana");
     }
 
     [Fact]
@@ -244,7 +244,7 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo()); // → banana (pos 1)
         state.Update(ConsoleKey.UpArrow.ToConsoleKeyInfo());   // → apple  (pos 0)
 
-        state.GetDisplayIndex().ShouldBe(0);
+        state.GetDisplayIndex().Should().Be(0);
     }
 
     [Fact]
@@ -255,7 +255,7 @@ public sealed class ListPromptStateTests
         state.Update('p'.ToConsoleKeyInfo()); // 2 matches: apple, apricot
         state.Update(ConsoleKey.Backspace.ToConsoleKeyInfo()); // back to 'a': 3 matches
 
-        state.GetDisplayItems().Count.ShouldBe(3);
+        state.GetDisplayItems().Count.Should().Be(3);
     }
 
     [Fact]
@@ -266,8 +266,8 @@ public sealed class ListPromptStateTests
         state.Update(ConsoleKey.Backspace.ToConsoleKeyInfo()); // clear
 
         // No active filter — GetDisplayItems returns all Items
-        state.GetDisplayItems().Count.ShouldBe(3);
-        state.SearchText.ShouldBe(string.Empty);
+        state.GetDisplayItems().Count.Should().Be(3);
+        state.SearchText.Should().Be(string.Empty);
     }
 
     [Fact]
@@ -276,7 +276,7 @@ public sealed class ListPromptStateTests
         var state = CreateFilterState(["apple", "banana", "apricot"]);
 
         // No search text → GetDisplayIndex == Index
-        state.GetDisplayIndex().ShouldBe(state.Index);
+        state.GetDisplayIndex().Should().Be(state.Index);
     }
 
     [Fact]
@@ -289,7 +289,7 @@ public sealed class ListPromptStateTests
         // One more down should wrap to first
         state.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo());
 
-        state.GetDisplayIndex().ShouldBe(0);
+        state.GetDisplayIndex().Should().Be(0);
     }
 
     [Fact]
@@ -299,7 +299,7 @@ public sealed class ListPromptStateTests
         state.Update('a'.ToConsoleKeyInfo()); // 3 matches, cursor at index 0 (apple)
         state.Update(ConsoleKey.UpArrow.ToConsoleKeyInfo()); // wrap → last (apricot)
 
-        state.GetDisplayIndex().ShouldBe(2);
+        state.GetDisplayIndex().Should().Be(2);
     }
 
     [Fact]
@@ -310,7 +310,7 @@ public sealed class ListPromptStateTests
         state.Update('z'.ToConsoleKeyInfo()); // no match
 
         // Cursor does not move; GetDisplayItems falls back to Items because filter has 0 results
-        state.Index.ShouldBe(initialIndex);
-        state.GetDisplayItems().Count.ShouldBe(3); // full list shown when no match
+        state.Index.Should().Be(initialIndex);
+        state.GetDisplayItems().Count.Should().Be(3); // full list shown when no match
     }
 }

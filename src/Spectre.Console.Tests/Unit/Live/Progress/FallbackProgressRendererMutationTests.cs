@@ -22,7 +22,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldContain("Loading");
+        console.Output.Should().Contain("Loading");
     }
 
     [Fact]
@@ -37,8 +37,8 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldContain("Transfer");
-        console.Output.ShouldContain("50%");
+        console.Output.Should().Contain("Transfer");
+        console.Output.Should().Contain("50%");
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldContain("0%");
+        console.Output.Should().Contain("0%");
     }
 
     // ── Skip conditions ───────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldNotContain("Waiting");
+        console.Output.Should().NotContain("Waiting");
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldNotContain("Done");
+        console.Output.Should().NotContain("Done");
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldNotContain("Stopped");
+        console.Output.Should().NotContain("Stopped");
     }
 
     // ── Milestone advance ─────────────────────────────────────────────────────
@@ -115,7 +115,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();          // Second: milestone advanced → outputs 30%
         });
 
-        console.Output.ShouldContain("30%");
+        console.Output.Should().Contain("30%");
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public sealed class FallbackProgressRendererMutationTests
 
         // "Copy" should appear exactly once (only the first encounter)
         var count = console.Output.Split("Copy").Length - 1;
-        count.ShouldBe(1);
+        count.Should().Be(1);
     }
 
     [Fact]
@@ -156,10 +156,10 @@ public sealed class FallbackProgressRendererMutationTests
         });
 
         var output = console.Output;
-        output.ShouldContain("AllMilestones");
-        output.ShouldContain("26%");
-        output.ShouldContain("51%");
-        output.ShouldContain("76%");
+        output.Should().Contain("AllMilestones");
+        output.Should().Contain("26%");
+        output.Should().Contain("51%");
+        output.Should().Contain("76%");
     }
 
     // ── Process: renderable consumed after each refresh ───────────────────────
@@ -179,7 +179,7 @@ public sealed class FallbackProgressRendererMutationTests
 
         // "Consume" should appear exactly once
         var count = console.Output.Split("Consume").Length - 1;
-        count.ShouldBe(1);
+        count.Should().Be(1);
     }
 
     [Fact]
@@ -194,7 +194,7 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldNotContain("Quiet");
+        console.Output.Should().NotContain("Quiet");
     }
 
     // ── Heartbeat: output after 30 seconds without milestone progress ─────────
@@ -217,7 +217,7 @@ public sealed class FallbackProgressRendererMutationTests
 
         // "Slow" should appear in output at least twice (first encounter + heartbeat)
         var count = console.Output.Split("Slow").Length - 1;
-        count.ShouldBeGreaterThanOrEqualTo(2);
+        count.Should().BeGreaterThanOrEqualTo(2);
     }
 
     [Fact]
@@ -237,7 +237,7 @@ public sealed class FallbackProgressRendererMutationTests
 
         // "Quick" should appear exactly once (only first encounter)
         var count = console.Output.Split("Quick").Length - 1;
-        count.ShouldBe(1);
+        count.Should().Be(1);
     }
 
     // ── Multiple tasks ────────────────────────────────────────────────────────
@@ -254,8 +254,8 @@ public sealed class FallbackProgressRendererMutationTests
             ctx.Refresh();
         });
 
-        console.Output.ShouldContain("Task1");
-        console.Output.ShouldContain("Task2");
+        console.Output.Should().Contain("Task1");
+        console.Output.Should().Contain("Task2");
     }
 
     [Fact]
@@ -278,7 +278,7 @@ public sealed class FallbackProgressRendererMutationTests
         });
 
         var count = console.Output.Split("Track").Length - 1;
-        count.ShouldBe(1);
+        count.Should().Be(1);
     }
 
     // ── BuildTaskGrid ─────────────────────────────────────────────────────────
@@ -300,7 +300,7 @@ public sealed class FallbackProgressRendererMutationTests
         });
 
         // Output length should be the same before and after second refresh
-        console.Output.Length.ShouldBe(initialLength);
+        console.Output.Length.Should().Be(initialLength);
     }
 
     // ── GetNextMilestone ──────────────────────────────────────────────────────
@@ -322,6 +322,6 @@ public sealed class FallbackProgressRendererMutationTests
         });
 
         // Task should appear in output (from the milestone advances) but not after completion
-        console.Output.ShouldContain("Completing");
+        console.Output.Should().Contain("Completing");
     }
 }

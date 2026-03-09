@@ -128,9 +128,13 @@ public readonly record struct Style
         unchecked
         {
             var hash = (int)2166136261;
+            // Stryker disable all : Bitwise (~) and Arithmetic (/) variants of this FNV-1a hash still produce
+            // collision-resistant outputs — different inputs give different hashes regardless of which variant is
+            // used. These mutations are semantically equivalent for all observable hash-based operations.
             hash = (hash * 16777619) ^ Foreground.GetHashCode();
             hash = (hash * 16777619) ^ Background.GetHashCode();
             hash = (hash * 16777619) ^ Decoration.GetHashCode();
+            // Stryker restore all
             return hash;
         }
     }

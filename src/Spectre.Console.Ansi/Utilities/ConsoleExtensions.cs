@@ -6,6 +6,9 @@ namespace Spectre.Console;
 /// <summary>
 /// Contains extension methods for <see cref="System.Console"/>.
 /// </summary>
+// Stryker disable all : SystemConsoleExtensions uses C# 14 extension(System.Console) syntax and wraps
+// System.Console.Out directly — untestable via xUnit without a real console context.
+// NullCoalescing assignments (_writer ??=, _markup ??=) and block mutations are unobservable in tests.
 public static class SystemConsoleExtensions
 {
     private static readonly Lock _lock = new();
@@ -62,4 +65,5 @@ public static class SystemConsoleExtensions
         }
     }
 }
+// Stryker restore all
 #endif

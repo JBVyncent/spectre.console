@@ -14,7 +14,7 @@ public sealed class ToRenderableTests
 
         var renderable = prompt.ToRenderable();
 
-        renderable.ShouldNotBeNull();
+        renderable.Should().NotBeNull();
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public sealed class ToRenderableTests
 
         var renderable = prompt.ToRenderable();
 
-        renderable.ShouldBeSameAs(Text.Empty);
+        renderable.Should().BeSameAs(Text.Empty);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public sealed class ToRenderableTests
 
         var act = () => prompt.ToRenderable(null);
 
-        act.ShouldNotThrow();
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public sealed class ToRenderableTests
         console.Write(renderable);
 
         // The arrow indicator should appear next to "First"
-        console.Output.ShouldContain("> First");
+        console.Output.Should().Contain("> First");
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public sealed class ToRenderableTests
         var renderable = prompt.ToRenderable(console, cursorIndex: 1);
         console.Write(renderable);
 
-        console.Output.ShouldContain("> Second");
+        console.Output.Should().Contain("> Second");
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class ToRenderableTests
         var renderable = prompt.ToRenderable(console, cursorIndex: 99);
         console.Write(renderable);
 
-        console.Output.ShouldContain("> Third");
+        console.Output.Should().Contain("> Third");
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class ToRenderableTests
         var renderable = prompt.ToRenderable(console, cursorIndex: -5);
         console.Write(renderable);
 
-        console.Output.ShouldContain("> First");
+        console.Output.Should().Contain("> First");
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public sealed class ToRenderableTests
         var renderable = prompt.ToRenderable(console);
         console.Write(renderable);
 
-        console.Output.ShouldContain("Choose wisely");
+        console.Output.Should().Contain("Choose wisely");
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class ToRenderableTests
         var renderable = prompt.ToRenderable(console, cursorIndex: 0);
         var act = () => console.Write(renderable);
 
-        act.ShouldNotThrow();
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -143,7 +143,7 @@ public sealed class ToRenderableTests
         var renderable = prompt.ToRenderable(console, cursorIndex: 1);
         console.Write(renderable);
 
-        console.Output.ShouldContain("> 20");
+        console.Output.Should().Contain("> 20");
     }
 }
 
@@ -164,8 +164,8 @@ public sealed class SelectionPromptRenderableTests
         var ex = Record.Exception(() =>
             new SelectionPrompt<string>().AsRenderable(console));
 
-        ex.ShouldBeOfType<InvalidOperationException>()
-          .Message.ShouldContain("AddChoice");
+        ex.Should().BeOfType<InvalidOperationException>()
+              .Which.Message.Should().Contain("AddChoice");
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public sealed class SelectionPromptRenderableTests
             .AddChoices("A", "B", "C")
             .AsRenderable(console);
 
-        renderable.ShouldNotBeNull();
+        renderable.Should().NotBeNull();
     }
 
     [Fact]
@@ -188,7 +188,7 @@ public sealed class SelectionPromptRenderableTests
             .AddChoices("A", "B")
             .AsRenderable(null);
 
-        act.ShouldNotThrow();
+        act.Should().NotThrow();
     }
 
     [Fact]
@@ -205,7 +205,7 @@ public sealed class SelectionPromptRenderableTests
         // Without any Update() calls, submitting should yield the default.
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        renderable.GetResult().ShouldBe("Second");
+        renderable.GetResult().Should().Be("Second");
     }
 
     // ─── IsDone / IsCancelled initial state ────────────────────────────────
@@ -215,7 +215,7 @@ public sealed class SelectionPromptRenderableTests
     {
         var renderable = CreateRenderable("A", "B", "C");
 
-        renderable.IsDone.ShouldBeFalse();
+        renderable.IsDone.Should().BeFalse();
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public sealed class SelectionPromptRenderableTests
     {
         var renderable = CreateRenderable("A", "B", "C");
 
-        renderable.IsCancelled.ShouldBeFalse();
+        renderable.IsCancelled.Should().BeFalse();
     }
 
     // ─── Update() with Submit ───────────────────────────────────────────────
@@ -235,7 +235,7 @@ public sealed class SelectionPromptRenderableTests
 
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        renderable.IsDone.ShouldBeTrue();
+        renderable.IsDone.Should().BeTrue();
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public sealed class SelectionPromptRenderableTests
 
         var changed = renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        changed.ShouldBeTrue();
+        changed.Should().BeTrue();
     }
 
     [Fact]
@@ -256,7 +256,7 @@ public sealed class SelectionPromptRenderableTests
 
         var changed = renderable.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo());
 
-        changed.ShouldBeFalse();
+        changed.Should().BeFalse();
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public sealed class SelectionPromptRenderableTests
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
         // Still done; no re-entry.
-        renderable.IsDone.ShouldBeTrue();
+        renderable.IsDone.Should().BeTrue();
     }
 
     // ─── Navigation ─────────────────────────────────────────────────────────
@@ -281,7 +281,7 @@ public sealed class SelectionPromptRenderableTests
 
         var changed = renderable.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo());
 
-        changed.ShouldBeTrue();
+        changed.Should().BeTrue();
     }
 
     [Fact]
@@ -292,7 +292,7 @@ public sealed class SelectionPromptRenderableTests
         renderable.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo()); // move to "Second"
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        renderable.GetResult().ShouldBe("Second");
+        renderable.GetResult().Should().Be("Second");
     }
 
     [Fact]
@@ -304,7 +304,7 @@ public sealed class SelectionPromptRenderableTests
         renderable.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo()); // C
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        renderable.GetResult().ShouldBe("C");
+        renderable.GetResult().Should().Be("C");
     }
 
     [Fact]
@@ -315,8 +315,8 @@ public sealed class SelectionPromptRenderableTests
         // No wrap-around, so UpArrow at index 0 should be a no-op.
         var changed = renderable.Update(ConsoleKey.UpArrow.ToConsoleKeyInfo());
 
-        changed.ShouldBeFalse();
-        renderable.IsDone.ShouldBeFalse();
+        changed.Should().BeFalse();
+        renderable.IsDone.Should().BeFalse();
     }
 
     // ─── Cancel / Abort ──────────────────────────────────────────────────────
@@ -328,8 +328,8 @@ public sealed class SelectionPromptRenderableTests
 
         renderable.Update(ConsoleKey.Escape.ToConsoleKeyInfo());
 
-        renderable.IsDone.ShouldBeTrue();
-        renderable.IsCancelled.ShouldBeTrue();
+        renderable.IsDone.Should().BeTrue();
+        renderable.IsCancelled.Should().BeTrue();
     }
 
     [Fact]
@@ -339,7 +339,7 @@ public sealed class SelectionPromptRenderableTests
 
         renderable.Update(ConsoleKey.Escape.ToConsoleKeyInfo());
 
-        renderable.GetResult().ShouldBe("CANCEL");
+        renderable.GetResult().Should().Be("CANCEL");
     }
 
     [Fact]
@@ -350,8 +350,8 @@ public sealed class SelectionPromptRenderableTests
 
         renderable.Update(ConsoleKey.Escape.ToConsoleKeyInfo());
 
-        renderable.IsDone.ShouldBeFalse();
-        renderable.IsCancelled.ShouldBeFalse();
+        renderable.IsDone.Should().BeFalse();
+        renderable.IsCancelled.Should().BeFalse();
     }
 
     // ─── GetResult() ─────────────────────────────────────────────────────────
@@ -363,8 +363,8 @@ public sealed class SelectionPromptRenderableTests
 
         var ex = Record.Exception(() => renderable.GetResult());
 
-        ex.ShouldBeOfType<InvalidOperationException>()
-          .Message.ShouldContain("IsDone");
+        ex.Should().BeOfType<InvalidOperationException>()
+              .Which.Message.Should().Contain("IsDone");
     }
 
     [Fact]
@@ -374,7 +374,7 @@ public sealed class SelectionPromptRenderableTests
 
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        renderable.GetResult().ShouldBe("Alpha");
+        renderable.GetResult().Should().Be("Alpha");
     }
 
     [Fact]
@@ -390,7 +390,7 @@ public sealed class SelectionPromptRenderableTests
         renderable.Update(ConsoleKey.DownArrow.ToConsoleKeyInfo()); // 20
         renderable.Update(ConsoleKey.Enter.ToConsoleKeyInfo());
 
-        renderable.GetResult().ShouldBe(20);
+        renderable.GetResult().Should().Be(20);
     }
 
     // ─── IRenderable implementation ──────────────────────────────────────────
@@ -407,7 +407,7 @@ public sealed class SelectionPromptRenderableTests
 
         console.Write(renderable);
 
-        console.Output.ShouldNotBeEmpty();
+        console.Output.Should().NotBeEmpty();
     }
 
     [Fact]
@@ -435,8 +435,8 @@ public sealed class SelectionPromptRenderableTests
         var after = console2.Output;
 
         // Before: Alpha highlighted; After: Beta highlighted
-        before.ShouldContain("> Alpha");
-        after.ShouldContain("> Beta");
+        before.Should().Contain("> Alpha");
+        after.Should().Contain("> Beta");
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

@@ -17,7 +17,7 @@ public sealed class MarkupTests
             var result = markup.Length;
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -36,7 +36,7 @@ public sealed class MarkupTests
             var result = markup.Lines;
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -54,7 +54,7 @@ public sealed class MarkupTests
             var result = Markup.Escape(input);
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -70,7 +70,7 @@ public sealed class MarkupTests
             var result = Markup.Remove(input);
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
 
         [Theory]
@@ -89,7 +89,7 @@ public sealed class MarkupTests
             console.MarkupInterpolated($"[yellow]{input1}[/] [red]{input2}[/] {date:yyyy-MM-dd}");
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
     }
 
@@ -105,9 +105,9 @@ public sealed class MarkupTests
         var result = Record.Exception(() => new Markup(input));
 
         // Then
-        result.ShouldNotBeNull();
-        result.ShouldBeOfType<InvalidOperationException>();
-        result.Message.ShouldBe("Encountered unescaped ']' token at position 16");
+        result.Should().NotBeNull();
+        result.Should().BeOfType<InvalidOperationException>();
+        result.Message.Should().Be("Encountered unescaped ']' token at position 16");
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public sealed class MarkupTests
         console.Write(markup);
 
         // Then
-        console.Output.ShouldBe("Hello [ World ] !");
+        console.Output.Should().Be("Hello [ World ] !");
     }
 
     [Theory]
@@ -137,7 +137,7 @@ public sealed class MarkupTests
         console.Write(markup);
 
         // Then
-        console.Output.ShouldBe(output);
+        console.Output.Should().Be(output);
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public sealed class MarkupTests
 
         // Then
         console.Output.NormalizeLineEndings()
-            .ShouldBe("{\n");
+            .Should().Be("{\n");
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public sealed class MarkupTests
         console.Write(table);
 
         // Then
-        console.Output.NormalizeLineEndings().ShouldBe(@"┌─────────────────┐
+        console.Output.NormalizeLineEndings().Should().Be(@"┌─────────────────┐
 │ First Column    │
 ├─────────────────┤
 │ Result: [value[ │

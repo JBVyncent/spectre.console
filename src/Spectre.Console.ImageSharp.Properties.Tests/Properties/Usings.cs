@@ -1,0 +1,11 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using FluentAssertions;
+global using FsCheck;
+global using FsCheck.Xunit;
+global using SixLabors.ImageSharp;
+global using SixLabors.ImageSharp.PixelFormats;
+global using Spectre.Console;
+global using Xunit;
+global using ImageColor = SixLabors.ImageSharp.Color;

@@ -19,7 +19,7 @@ public sealed class TextPromptHistoryTests
             new TextPrompt<string>("Enter:")
                 .WithHistory(history));
 
-        result.ShouldBe("third");
+        result.Should().Be("third");
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public sealed class TextPromptHistoryTests
             new TextPrompt<string>("Enter:")
                 .WithHistory(history));
 
-        result.ShouldBe("second");
+        result.Should().Be("second");
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class TextPromptHistoryTests
             new TextPrompt<string>("Enter:")
                 .WithHistory(history));
 
-        result.ShouldBe("first");
+        result.Should().Be("first");
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public sealed class TextPromptHistoryTests
             new TextPrompt<string>("Enter:")
                 .WithHistory(history));
 
-        result.ShouldBe("live");
+        result.Should().Be("live");
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public sealed class TextPromptHistoryTests
             new TextPrompt<string>("Enter:")
                 .WithHistory(history));
 
-        result.ShouldBe("third");
+        result.Should().Be("third");
     }
 
     [Fact]
@@ -106,13 +106,13 @@ public sealed class TextPromptHistoryTests
         console.Input.PushKey(ConsoleKey.DownArrow);
         console.Input.PushTextWithEnter("hello");
 
-        Should.NotThrow(() =>
+        FluentActions.Invoking(() =>
         {
             var result = console.Prompt(
                 new TextPrompt<string>("Enter:")
                     .WithHistory(new List<string>()));
-            result.ShouldBe("hello");
-        });
+            result.Should().Be("hello");
+        }).Should().NotThrow();
     }
 
     // -------------------------------------------------------------------------
@@ -131,8 +131,8 @@ public sealed class TextPromptHistoryTests
             new TextPrompt<string>("Enter:")
                 .WithHistory(history));
 
-        history.Count.ShouldBe(1);
-        history[0].ShouldBe("hello");
+        history.Count.Should().Be(1);
+        history[0].Should().Be("hello");
     }
 
     [Fact]
@@ -150,10 +150,10 @@ public sealed class TextPromptHistoryTests
                     .WithHistory(history));
         }
 
-        history.Count.ShouldBe(3);
-        history[0].ShouldBe("entry0");
-        history[1].ShouldBe("entry1");
-        history[2].ShouldBe("entry2");
+        history.Count.Should().Be(3);
+        history[0].Should().Be("entry0");
+        history[1].Should().Be("entry1");
+        history[2].Should().Be("entry2");
     }
 
     [Fact]
@@ -169,8 +169,8 @@ public sealed class TextPromptHistoryTests
                 .WithHistory(history));
 
         // "existing" should not be duplicated
-        history.Count.ShouldBe(1);
-        history[0].ShouldBe("existing");
+        history.Count.Should().Be(1);
+        history[0].Should().Be("existing");
     }
 
     [Fact]
@@ -186,8 +186,8 @@ public sealed class TextPromptHistoryTests
                 .WithHistory(history));
 
         // "a" can appear again because the last entry was "b", not "a"
-        history.Count.ShouldBe(3);
-        history[^1].ShouldBe("a");
+        history.Count.Should().Be(3);
+        history[^1].Should().Be("a");
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public sealed class TextPromptHistoryTests
                 .DefaultValue("default")
                 .WithHistory(history));
 
-        history.Count.ShouldBe(0);
+        history.Count.Should().Be(0);
     }
 
     // -------------------------------------------------------------------------
@@ -221,7 +221,7 @@ public sealed class TextPromptHistoryTests
 
         var result = console.Prompt(new TextPrompt<string>("Enter:"));
 
-        result.ShouldBe("hello");
+        result.Should().Be("hello");
     }
 
     // -------------------------------------------------------------------------
@@ -232,7 +232,7 @@ public sealed class TextPromptHistoryTests
     public void WithHistory_Should_Throw_For_Null_Prompt()
     {
         var ex = Record.Exception(() => ((TextPrompt<string>)null!).WithHistory(new List<string>()));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("obj");
     }
 
     [Fact]
@@ -240,6 +240,6 @@ public sealed class TextPromptHistoryTests
     {
         var prompt = new TextPrompt<string>("Enter:");
         var ex = Record.Exception(() => prompt.WithHistory(null!));
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("history");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("history");
     }
 }

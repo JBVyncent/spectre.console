@@ -12,7 +12,7 @@ public sealed class MultiSelectionPromptTests
         var choice = prompt.AddChoice(32);
 
         // Then
-        choice.IsSelected.ShouldBeFalse();
+        choice.IsSelected.Should().BeFalse();
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public sealed class MultiSelectionPromptTests
         prompt.Select(32);
 
         // Then
-        choice.IsSelected.ShouldBeTrue();
+        choice.IsSelected.Should().BeTrue();
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class MultiSelectionPromptTests
         prompt.Select(item);
 
         // Then
-        choice.IsSelected.ShouldBeTrue();
+        choice.IsSelected.Should().BeTrue();
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class MultiSelectionPromptTests
         prompt.Select(new CustomItem { X = 18, Y = 32 });
 
         // Then
-        choice.IsSelected.ShouldBeTrue();
+        choice.IsSelected.Should().BeTrue();
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public sealed class MultiSelectionPromptTests
         var actual = prompt.GetParent("item");
 
         // Then
-        actual.ShouldBe("level-2");
+        actual.Should().Be("level-2");
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class MultiSelectionPromptTests
         var actual = prompt.GetParents("item");
 
         // Then
-        actual.ShouldBe(["root", "level-1", "level-2"]);
+        actual.Should().Equal(["root", "level-1", "level-2"]);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public sealed class MultiSelectionPromptTests
         var actual = prompt.GetParents("root");
 
         // Then
-        actual.ShouldBeEmpty();
+        actual.Should().BeEmpty();
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public sealed class MultiSelectionPromptTests
         var actual = prompt.GetParent("root");
 
         // Then
-        actual.ShouldBeNull();
+        actual.Should().BeNull();
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public sealed class MultiSelectionPromptTests
         Action action = () => prompt.GetParents("non-existing");
 
         // Then
-        action.ShouldThrow<ArgumentOutOfRangeException>();
+        action.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Fact]
@@ -142,8 +142,8 @@ public sealed class MultiSelectionPromptTests
         Action action = () => prompt.Show(console);
 
         // Then
-        var exception = action.ShouldThrow<InvalidOperationException>();
-        exception.Message.ShouldBe(
+        var exception = action.Should().Throw<InvalidOperationException>();
+        exception.Which.Message.Should().Be(
             "Cannot show an empty selection prompt. Please call the AddChoice() method to configure the prompt.");
     }
 
@@ -164,7 +164,7 @@ public sealed class MultiSelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe(["A", "B"]);
+        selection.Should().Equal(["A", "B"]);
     }
 
     [Fact]
@@ -185,7 +185,7 @@ public sealed class MultiSelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe(["E"]);
+        selection.Should().Equal(["E"]);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public sealed class MultiSelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe(["E", "F"]);
+        selection.Should().Equal(["E", "F"]);
     }
 
     [Fact]
@@ -227,7 +227,7 @@ public sealed class MultiSelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe(["E"]);
+        selection.Should().Equal(["E"]);
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public sealed class MultiSelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe([]);
+        selection.Should().Equal([]);
     }
 
     [Fact]
@@ -266,7 +266,7 @@ public sealed class MultiSelectionPromptTests
             .AddChoices("[01] First item", "[02] Second item");
         var result = prompt.Show(console);
 
-        result.ShouldBe(["[01] First item"]);
+        result.Should().Equal(["[01] First item"]);
     }
 }
 

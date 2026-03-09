@@ -1,4 +1,3 @@
-using Shouldly;
 using Spectre.Console.Phantom;
 
 namespace Spectre.Console.Phantom.Tests;
@@ -24,10 +23,10 @@ public sealed class IntegrationTests
         console.Write(table);
 
         var screen = output.Terminal;
-        screen.ContainsText("Name").ShouldBeTrue();
-        screen.ContainsText("Value").ShouldBeTrue();
-        screen.ContainsText("Key").ShouldBeTrue();
-        screen.ContainsText("42").ShouldBeTrue();
+        screen.ContainsText("Name").Should().BeTrue();
+        screen.ContainsText("Value").Should().BeTrue();
+        screen.ContainsText("Key").Should().BeTrue();
+        screen.ContainsText("42").Should().BeTrue();
     }
 
     [Fact]
@@ -44,10 +43,10 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         // The tab should be replaced with a space, so we see "A B C"
-        screen.ContainsText("A B C").ShouldBeTrue();
+        screen.ContainsText("A B C").Should().BeTrue();
         // Verify no raw tab characters in output
         var fullText = screen.GetScreenText();
-        fullText.ShouldNotContain("\t");
+        fullText.Should().NotContain("\t");
     }
 
     [Fact]
@@ -58,15 +57,15 @@ public sealed class IntegrationTests
         console.MarkupLine("[bold red]Error:[/] Something went wrong");
 
         var screen = output.Terminal;
-        screen.ContainsText("Error:").ShouldBeTrue();
-        screen.ContainsText("Something went wrong").ShouldBeTrue();
+        screen.ContainsText("Error:").Should().BeTrue();
+        screen.ContainsText("Something went wrong").Should().BeTrue();
 
         // Verify the "Error:" text has bold+red styling
         var pos = screen.FindText("Error:");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
-        cell.Foreground.ShouldNotBeNull();
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
+        cell.Foreground.Should().NotBeNull();
     }
 
     [Fact]
@@ -79,8 +78,8 @@ public sealed class IntegrationTests
         console.MarkupInterpolated($"[green]Count:[/] {count}");
 
         var screen = output.Terminal;
-        screen.ContainsText("Count:").ShouldBeTrue();
-        screen.ContainsText("42").ShouldBeTrue();
+        screen.ContainsText("Count:").Should().BeTrue();
+        screen.ContainsText("42").Should().BeTrue();
     }
 
     [Fact]
@@ -91,10 +90,10 @@ public sealed class IntegrationTests
         console.Write(new Rule("[yellow]Title[/]"));
 
         var screen = output.Terminal;
-        screen.ContainsText("Title").ShouldBeTrue();
+        screen.ContainsText("Title").Should().BeTrue();
         // The rule should contain the line character
         var rowText = screen.GetRowText(0);
-        rowText.Length.ShouldBeGreaterThan(5);
+        rowText.Length.Should().BeGreaterThan(5);
     }
 
     [Fact]
@@ -104,11 +103,11 @@ public sealed class IntegrationTests
         var (console, output) = PhantomConsole.Create(5, 24);
 
         // This should not throw
-        Should.NotThrow(() => console.Write(new Rule()));
+        FluentActions.Invoking(() => console.Write(new Rule())).Should().NotThrow();
 
         // It should produce some output
         var screen = output.Terminal;
-        screen.GetScreenText().ShouldNotBeNullOrEmpty();
+        screen.GetScreenText().Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -119,8 +118,8 @@ public sealed class IntegrationTests
         console.Write(new Panel("Hello World").Header("[blue]Info[/]"));
 
         var screen = output.Terminal;
-        screen.ContainsText("Hello World").ShouldBeTrue();
-        screen.ContainsText("Info").ShouldBeTrue();
+        screen.ContainsText("Hello World").Should().BeTrue();
+        screen.ContainsText("Info").Should().BeTrue();
     }
 
     [Fact]
@@ -137,9 +136,9 @@ public sealed class IntegrationTests
         console.Write(panel);
 
         var screen = output.Terminal;
-        screen.ContainsText("Data").ShouldBeTrue();
-        screen.ContainsText("1").ShouldBeTrue();
-        screen.ContainsText("2").ShouldBeTrue();
+        screen.ContainsText("Data").Should().BeTrue();
+        screen.ContainsText("1").Should().BeTrue();
+        screen.ContainsText("2").Should().BeTrue();
     }
 
     [Fact]
@@ -148,10 +147,10 @@ public sealed class IntegrationTests
         // Bug #6: Writing strings with { or } without format args should not throw
         var (console, output) = PhantomConsole.Create(80, 24);
 
-        Should.NotThrow(() => console.WriteLine("JSON: { \"key\": \"value\" }"));
+        FluentActions.Invoking(() => console.WriteLine("JSON: { \"key\": \"value\" }")).Should().NotThrow();
 
         var screen = output.Terminal;
-        screen.ContainsText("JSON:").ShouldBeTrue();
+        screen.ContainsText("JSON:").Should().BeTrue();
     }
 
     [Fact]
@@ -163,7 +162,7 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         // Figlet text spans multiple rows
-        screen.GetScreenText().ShouldNotBeNullOrEmpty();
+        screen.GetScreenText().Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -176,8 +175,8 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         var row = screen.GetRowText(0);
-        row.ShouldContain("Hello");
-        row.ShouldContain("World");
+        row.Should().Contain("Hello");
+        row.Should().Contain("World");
     }
 
     [Fact]
@@ -192,11 +191,11 @@ public sealed class IntegrationTests
         terminal.Write("Working...\nProgress: 50%");
         terminal.Write("\x1b[u");  // Restore to col 8
 
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(8);
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(8);
 
         // "Status: " should still be intact on row 0
-        terminal.GetRowText(0).ShouldStartWith("Status:");
+        terminal.GetRowText(0).Should().StartWith("Status:");
     }
 
     [Fact]
@@ -212,7 +211,7 @@ public sealed class IntegrationTests
         terminal.Write("\x1b[0J");          // Erase from cursor to end
         terminal.Write("New");              // Write new content
 
-        terminal.GetRowText(0).ShouldBe("Prefix New");
+        terminal.GetRowText(0).Should().Be("Prefix New");
     }
 
     [Fact]
@@ -240,10 +239,10 @@ public sealed class IntegrationTests
         terminal.Write("\x1b[?25h");
 
         // The screen should show the latest status
-        terminal.ContainsText("Done!").ShouldBeTrue();
-        terminal.ContainsText("Connecting").ShouldBeFalse(); // Old content erased
-        terminal.ContainsText("Processing").ShouldBeFalse(); // Old content erased
-        terminal.CursorVisible.ShouldBeTrue();
+        terminal.ContainsText("Done!").Should().BeTrue();
+        terminal.ContainsText("Connecting").Should().BeFalse(); // Old content erased
+        terminal.ContainsText("Processing").Should().BeFalse(); // Old content erased
+        terminal.CursorVisible.Should().BeTrue();
     }
 
     [Fact]
@@ -268,9 +267,9 @@ public sealed class IntegrationTests
         terminal.Write("\x1b[u\x1b[0J");
 
         // Verify user content is still intact
-        terminal.GetRowText(0).ShouldStartWith("User content:");
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(userContentCol);
+        terminal.GetRowText(0).Should().StartWith("User content:");
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(userContentCol);
     }
 
     // ── Additional Widget Tests ──────────────────────────────────────
@@ -288,9 +287,9 @@ public sealed class IntegrationTests
         console.Write(table);
 
         var screen = output.Terminal;
-        screen.ContainsText("Col1").ShouldBeTrue();
-        screen.ContainsText("A").ShouldBeTrue();
-        screen.ContainsText("B").ShouldBeTrue();
+        screen.ContainsText("Col1").Should().BeTrue();
+        screen.ContainsText("A").Should().BeTrue();
+        screen.ContainsText("B").Should().BeTrue();
     }
 
     [Fact]
@@ -306,8 +305,8 @@ public sealed class IntegrationTests
         console.Write(table);
 
         var screen = output.Terminal;
-        screen.ContainsText("1").ShouldBeTrue();
-        screen.ContainsText("2").ShouldBeTrue();
+        screen.ContainsText("1").Should().BeTrue();
+        screen.ContainsText("2").Should().BeTrue();
     }
 
     [Fact]
@@ -325,10 +324,10 @@ public sealed class IntegrationTests
         console.Write(table);
 
         var screen = output.Terminal;
-        screen.ContainsText("Alice").ShouldBeTrue();
-        screen.ContainsText("Bob").ShouldBeTrue();
-        screen.ContainsText("Charlie").ShouldBeTrue();
-        screen.ContainsText("30").ShouldBeTrue();
+        screen.ContainsText("Alice").Should().BeTrue();
+        screen.ContainsText("Bob").Should().BeTrue();
+        screen.ContainsText("Charlie").Should().BeTrue();
+        screen.ContainsText("30").Should().BeTrue();
     }
 
     [Fact]
@@ -339,7 +338,7 @@ public sealed class IntegrationTests
         console.Write(new Paragraph("This is a paragraph of text that will wrap across multiple lines in a narrow terminal."));
 
         var screen = output.Terminal;
-        screen.ContainsText("This is a paragraph").ShouldBeTrue();
+        screen.ContainsText("This is a paragraph").Should().BeTrue();
     }
 
     [Fact]
@@ -350,7 +349,7 @@ public sealed class IntegrationTests
         console.Write(new Rule("[cyan]Left[/]").LeftJustified());
 
         var screen = output.Terminal;
-        screen.ContainsText("Left").ShouldBeTrue();
+        screen.ContainsText("Left").Should().BeTrue();
     }
 
     [Fact]
@@ -361,7 +360,7 @@ public sealed class IntegrationTests
         console.Write(new Rule("[cyan]Right[/]").RightJustified());
 
         var screen = output.Terminal;
-        screen.ContainsText("Right").ShouldBeTrue();
+        screen.ContainsText("Right").Should().BeTrue();
     }
 
     [Fact]
@@ -373,7 +372,7 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         var rowText = screen.GetRowText(0);
-        rowText.Length.ShouldBeGreaterThan(0);
+        rowText.Length.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -384,7 +383,7 @@ public sealed class IntegrationTests
         console.Write(new Panel("Padded").Padding(2, 1));
 
         var screen = output.Terminal;
-        screen.ContainsText("Padded").ShouldBeTrue();
+        screen.ContainsText("Padded").Should().BeTrue();
     }
 
     [Fact]
@@ -395,7 +394,7 @@ public sealed class IntegrationTests
         console.Write(new Panel("Content only"));
 
         var screen = output.Terminal;
-        screen.ContainsText("Content only").ShouldBeTrue();
+        screen.ContainsText("Content only").Should().BeTrue();
     }
 
     [Fact]
@@ -406,14 +405,14 @@ public sealed class IntegrationTests
         console.MarkupLine("[bold][red]Bold Red[/][/] [italic]Italic[/]");
 
         var screen = output.Terminal;
-        screen.ContainsText("Bold Red").ShouldBeTrue();
-        screen.ContainsText("Italic").ShouldBeTrue();
+        screen.ContainsText("Bold Red").Should().BeTrue();
+        screen.ContainsText("Italic").Should().BeTrue();
 
         // Verify "Bold Red" has both bold and foreground color
         var pos = screen.FindText("Bold Red");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
     }
 
     [Fact]
@@ -424,12 +423,12 @@ public sealed class IntegrationTests
         console.MarkupLine("[strikethrough]Deleted[/]");
 
         var screen = output.Terminal;
-        screen.ContainsText("Deleted").ShouldBeTrue();
+        screen.ContainsText("Deleted").Should().BeTrue();
 
         var pos = screen.FindText("Deleted");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Decoration.HasFlag(CellDecoration.Strikethrough).ShouldBeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Strikethrough).Should().BeTrue();
     }
 
     [Fact]
@@ -441,9 +440,9 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         var pos = screen.FindText("Underlined");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Decoration.HasFlag(CellDecoration.Underline).ShouldBeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Underline).Should().BeTrue();
     }
 
     [Fact]
@@ -455,9 +454,9 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         var pos = screen.FindText("Dimmed");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Decoration.HasFlag(CellDecoration.Dim).ShouldBeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Dim).Should().BeTrue();
     }
 
     [Fact]
@@ -470,9 +469,9 @@ public sealed class IntegrationTests
         console.MarkupLine("[red]Line 3[/]");
 
         var screen = output.Terminal;
-        screen.ContainsText("Line 1").ShouldBeTrue();
-        screen.ContainsText("Line 2").ShouldBeTrue();
-        screen.ContainsText("Line 3").ShouldBeTrue();
+        screen.ContainsText("Line 1").Should().BeTrue();
+        screen.ContainsText("Line 2").Should().BeTrue();
+        screen.ContainsText("Line 3").Should().BeTrue();
     }
 
     [Fact]
@@ -491,9 +490,9 @@ public sealed class IntegrationTests
         console.Write(outer);
 
         var screen = output.Terminal;
-        screen.ContainsText("Inner").ShouldBeTrue();
-        screen.ContainsText("Data").ShouldBeTrue();
-        screen.ContainsText("Outer").ShouldBeTrue();
+        screen.ContainsText("Inner").Should().BeTrue();
+        screen.ContainsText("Data").Should().BeTrue();
+        screen.ContainsText("Outer").Should().BeTrue();
     }
 
     [Fact]
@@ -505,7 +504,7 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         // FigletText renders characters using ASCII art patterns
-        screen.GetScreenText().ShouldNotBeNullOrEmpty();
+        screen.GetScreenText().Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -519,9 +518,9 @@ public sealed class IntegrationTests
             new Markup("[red]Row 3[/]")));
 
         var screen = output.Terminal;
-        screen.ContainsText("Row 1").ShouldBeTrue();
-        screen.ContainsText("Row 2").ShouldBeTrue();
-        screen.ContainsText("Row 3").ShouldBeTrue();
+        screen.ContainsText("Row 1").Should().BeTrue();
+        screen.ContainsText("Row 2").Should().BeTrue();
+        screen.ContainsText("Row 3").Should().BeTrue();
     }
 
     [Fact]
@@ -532,12 +531,12 @@ public sealed class IntegrationTests
         console.Write(Align.Center(new Markup("[cyan]Centered[/]")));
 
         var screen = output.Terminal;
-        screen.ContainsText("Centered").ShouldBeTrue();
+        screen.ContainsText("Centered").Should().BeTrue();
 
         // The text should have leading spaces (centered in 40 columns)
         var pos = screen.FindText("Centered");
-        pos.ShouldNotBeNull();
-        pos!.Value.Col.ShouldBeGreaterThan(0);
+        pos.Should().NotBeNull();
+        pos!.Value.Col.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -548,11 +547,11 @@ public sealed class IntegrationTests
         console.Write(Align.Right(new Markup("[cyan]Right[/]")));
 
         var screen = output.Terminal;
-        screen.ContainsText("Right").ShouldBeTrue();
+        screen.ContainsText("Right").Should().BeTrue();
 
         var pos = screen.FindText("Right");
-        pos.ShouldNotBeNull();
-        pos!.Value.Col.ShouldBeGreaterThan(10);
+        pos.Should().NotBeNull();
+        pos!.Value.Col.Should().BeGreaterThan(10);
     }
 
     [Fact]
@@ -564,8 +563,8 @@ public sealed class IntegrationTests
         console.WriteLine("Line B");
 
         var screen = output.Terminal;
-        screen.ContainsText("Line A").ShouldBeTrue();
-        screen.ContainsText("Line B").ShouldBeTrue();
+        screen.ContainsText("Line A").Should().BeTrue();
+        screen.ContainsText("Line B").Should().BeTrue();
     }
 
     [Fact]
@@ -576,7 +575,7 @@ public sealed class IntegrationTests
         console.MarkupLine("[yellow]:warning: Warning![/]");
 
         var screen = output.Terminal;
-        screen.ContainsText("Warning!").ShouldBeTrue();
+        screen.ContainsText("Warning!").Should().BeTrue();
     }
 
     [Fact]
@@ -590,7 +589,7 @@ public sealed class IntegrationTests
         console.Write(table);
 
         var screen = output.Terminal;
-        screen.ContainsText("Empty").ShouldBeTrue();
+        screen.ContainsText("Empty").Should().BeTrue();
     }
 
     [Fact]
@@ -606,8 +605,8 @@ public sealed class IntegrationTests
         console.Write(table);
 
         var screen = output.Terminal;
-        screen.ContainsText("Short").ShouldBeTrue();
-        screen.ContainsText("This is").ShouldBeTrue();
+        screen.ContainsText("Short").Should().BeTrue();
+        screen.ContainsText("This is").Should().BeTrue();
     }
 
     // ── PhantomConsoleOutput integration ──────────────────────────────
@@ -620,8 +619,8 @@ public sealed class IntegrationTests
         console.MarkupLine("[bold]Test[/]");
 
         // Raw output should contain ANSI sequences
-        output.RawOutput.ShouldContain("\x1b[");
-        output.RawOutput.ShouldContain("Test");
+        output.RawOutput.Should().Contain("\x1b[");
+        output.RawOutput.Should().Contain("Test");
     }
 
     [Fact]
@@ -630,14 +629,14 @@ public sealed class IntegrationTests
         var (console, output) = PhantomConsole.Create(80, 24);
 
         console.WriteLine("First");
-        output.Terminal.ContainsText("First").ShouldBeTrue();
+        output.Terminal.ContainsText("First").Should().BeTrue();
 
         output.Reset();
-        output.Terminal.ContainsText("First").ShouldBeFalse();
-        output.RawOutput.ShouldBeEmpty();
+        output.Terminal.ContainsText("First").Should().BeFalse();
+        output.RawOutput.Should().BeEmpty();
 
         console.WriteLine("Second");
-        output.Terminal.ContainsText("Second").ShouldBeTrue();
+        output.Terminal.ContainsText("Second").Should().BeTrue();
     }
 
     // ── Style verification ───────────────────────────────────────────
@@ -651,9 +650,9 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         var pos = screen.FindText("Green text");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Foreground.ShouldNotBeNull();
+        cell.Foreground.Should().NotBeNull();
     }
 
     [Fact]
@@ -665,10 +664,10 @@ public sealed class IntegrationTests
 
         var screen = output.Terminal;
         var pos = screen.FindText("Highlighted");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
         var cell = screen.GetCell(pos!.Value.Row, pos!.Value.Col);
-        cell.Foreground.ShouldNotBeNull();
-        cell.Background.ShouldNotBeNull();
+        cell.Foreground.Should().NotBeNull();
+        cell.Background.Should().NotBeNull();
     }
 
     [Fact]
@@ -681,13 +680,13 @@ public sealed class IntegrationTests
         var screen = output.Terminal;
         var boldPos = screen.FindText("Bold");
         var italicPos = screen.FindText("Italic");
-        boldPos.ShouldNotBeNull();
-        italicPos.ShouldNotBeNull();
+        boldPos.Should().NotBeNull();
+        italicPos.Should().NotBeNull();
 
         screen.GetCell(boldPos!.Value.Row, boldPos!.Value.Col)
-            .Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+            .Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
         screen.GetCell(italicPos!.Value.Row, italicPos!.Value.Col)
-            .Decoration.HasFlag(CellDecoration.Italic).ShouldBeTrue();
+            .Decoration.HasFlag(CellDecoration.Italic).Should().BeTrue();
     }
 
     // ── Using assertion helpers ──────────────────────────────────────
@@ -711,7 +710,7 @@ public sealed class IntegrationTests
         console.Markup("[bold underline]Styled[/]");
 
         var pos = output.Terminal.FindText("Styled");
-        pos.ShouldNotBeNull();
+        pos.Should().NotBeNull();
 
         output.Terminal.Screen.AssertCellDecoration(pos!.Value.Row, pos!.Value.Col, CellDecoration.Bold);
         output.Terminal.Screen.AssertCellDecoration(pos!.Value.Row, pos!.Value.Col, CellDecoration.Underline);

@@ -14,8 +14,8 @@ public sealed class SixelEncoderTests
         public void Should_Throw_If_Image_Is_Null()
         {
             var result = Record.Exception(() => SixelEncoder.Encode(null!));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .And(ex => ex.ParamName.ShouldBe("image"));
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.And(ex => ex.ParamName.Should().Be("image"));
         }
 
         [Fact]
@@ -24,8 +24,8 @@ public sealed class SixelEncoderTests
             using var image = CreateSolidImage(1, 1, ImageColor.Red);
 
             var result = Record.Exception(() => SixelEncoder.Encode(image, 1));
-            result.ShouldBeOfType<ArgumentOutOfRangeException>()
-                .And(ex => ex.ParamName.ShouldBe("maxColors"));
+            result.Should().BeOfType<ArgumentOutOfRangeException>()
+                    .Which.And(ex => ex.ParamName.Should().Be("maxColors"));
         }
 
         [Fact]
@@ -35,7 +35,7 @@ public sealed class SixelEncoderTests
 
             var sixel = SixelEncoder.Encode(image);
 
-            sixel.ShouldStartWith("\x1bP");
+            sixel.Should().StartWith("\x1bP");
         }
 
         [Fact]
@@ -45,7 +45,7 @@ public sealed class SixelEncoderTests
 
             var sixel = SixelEncoder.Encode(image);
 
-            sixel.ShouldEndWith("\x1b\\");
+            sixel.Should().EndWith("\x1b\\");
         }
 
         [Fact]
@@ -56,7 +56,7 @@ public sealed class SixelEncoderTests
             var sixel = SixelEncoder.Encode(image);
 
             // "1;1;4;6 (aspect-h;aspect-v;width;height)
-            sixel.ShouldContain("\"1;1;4;6");
+            sixel.Should().Contain("\"1;1;4;6");
         }
 
         [Fact]
@@ -68,7 +68,7 @@ public sealed class SixelEncoderTests
             var sixel = SixelEncoder.Encode(image);
 
             // Palette entry format: #<idx>;2;<r100>;<g100>;<b100>
-            sixel.ShouldContain("#0;2;");
+            sixel.Should().Contain("#0;2;");
         }
 
         [Fact]
@@ -80,13 +80,13 @@ public sealed class SixelEncoderTests
             image[0, 1] = new Rgba32(0, 0, 255, 255);
 
             var result = Record.Exception(() => SixelEncoder.Encode(image));
-            result.ShouldBeNull();
+            result.Should().BeNull();
         }
 
         [Fact]
         public void Default_MaxColors_Is_256()
         {
-            SixelEncoder.DefaultMaxColors.ShouldBe(256);
+            SixelEncoder.DefaultMaxColors.Should().Be(256);
         }
     }
 
@@ -102,7 +102,7 @@ public sealed class SixelEncoderTests
 
             var (_, pixels) = SixelEncoder.BuildPaletteAndPixels(image, 256);
 
-            pixels[0, 0].ShouldBe(-1);
+            pixels[0, 0].Should().Be(-1);
         }
 
         [Fact]
@@ -113,7 +113,7 @@ public sealed class SixelEncoderTests
 
             var (_, pixels) = SixelEncoder.BuildPaletteAndPixels(image, 256);
 
-            pixels[0, 0].ShouldBe(-1);
+            pixels[0, 0].Should().Be(-1);
         }
 
         [Fact]
@@ -124,8 +124,8 @@ public sealed class SixelEncoderTests
 
             var (palette, pixels) = SixelEncoder.BuildPaletteAndPixels(image, 256);
 
-            pixels[0, 0].ShouldBeGreaterThanOrEqualTo(0);
-            palette.Length.ShouldBe(1);
+            pixels[0, 0].Should().BeGreaterThanOrEqualTo(0);
+            palette.Length.Should().Be(1);
         }
 
         [Fact]
@@ -135,7 +135,7 @@ public sealed class SixelEncoderTests
 
             var (palette, _) = SixelEncoder.BuildPaletteAndPixels(image, 256);
 
-            palette.Length.ShouldBe(1);
+            palette.Length.Should().Be(1);
         }
 
         [Fact]
@@ -147,7 +147,7 @@ public sealed class SixelEncoderTests
 
             var (palette, _) = SixelEncoder.BuildPaletteAndPixels(image, 256);
 
-            palette.Length.ShouldBe(2);
+            palette.Length.Should().Be(2);
         }
 
         [Fact]
@@ -162,7 +162,7 @@ public sealed class SixelEncoderTests
 
             var (palette, _) = SixelEncoder.BuildPaletteAndPixels(image, 4);
 
-            palette.Length.ShouldBeLessThanOrEqualTo(4);
+            palette.Length.Should().BeLessThanOrEqualTo(4);
         }
 
         [Fact]
@@ -177,10 +177,10 @@ public sealed class SixelEncoderTests
 
             var (palette, pixels) = SixelEncoder.BuildPaletteAndPixels(image, 2);
 
-            palette.Length.ShouldBe(2);
+            palette.Length.Should().Be(2);
             // The near-black pixel must be mapped to a valid palette index (0 or 1).
-            pixels[2, 0].ShouldBeGreaterThanOrEqualTo(0);
-            pixels[2, 0].ShouldBeLessThan(2);
+            pixels[2, 0].Should().BeGreaterThanOrEqualTo(0);
+            pixels[2, 0].Should().BeLessThan(2);
         }
 
         [Fact]
@@ -191,9 +191,9 @@ public sealed class SixelEncoderTests
 
             var (palette, pixels) = SixelEncoder.BuildPaletteAndPixels(image, 256);
 
-            palette.Length.ShouldBe(0);
-            pixels[0, 0].ShouldBe(-1);
-            pixels[1, 1].ShouldBe(-1);
+            palette.Length.Should().Be(0);
+            pixels[0, 0].Should().Be(-1);
+            pixels[1, 1].Should().Be(-1);
         }
     }
 
@@ -210,9 +210,9 @@ public sealed class SixelEncoderTests
 
             var result = SixelEncoder.EncodeCore(1, 1, palette, pixels);
 
-            result.ShouldStartWith("\x1bP");
-            result.ShouldEndWith("\x1b\\");
-            result.ShouldContain("#0;2;"); // palette definition
+            result.Should().StartWith("\x1bP");
+            result.Should().EndWith("\x1b\\");
+            result.Should().Contain("#0;2;"); // palette definition
         }
 
         [Fact]
@@ -229,7 +229,7 @@ public sealed class SixelEncoderTests
             var result = SixelEncoder.EncodeCore(8, 1, palette, pixels);
 
             // Should contain RLE notation !8<char>
-            result.ShouldContain("!8");
+            result.Should().Contain("!8");
         }
 
         [Fact]
@@ -246,7 +246,7 @@ public sealed class SixelEncoderTests
             var result = SixelEncoder.EncodeCore(3, 1, palette, pixels);
 
             // No RLE notation expected
-            result.ShouldNotContain("!3");
+            result.Should().NotContain("!3");
         }
 
         [Fact]
@@ -262,8 +262,8 @@ public sealed class SixelEncoderTests
 
             var result = SixelEncoder.EncodeCore(2, 2, palette, pixels);
 
-            result.ShouldStartWith("\x1bP");
-            result.ShouldEndWith("\x1b\\");
+            result.Should().StartWith("\x1bP");
+            result.Should().EndWith("\x1b\\");
         }
 
         [Fact]
@@ -280,7 +280,7 @@ public sealed class SixelEncoderTests
             var result = SixelEncoder.EncodeCore(1, 12, palette, pixels);
 
             // At least one band separator
-            result.ShouldContain("-");
+            result.Should().Contain("-");
         }
 
         [Fact]
@@ -301,7 +301,7 @@ public sealed class SixelEncoderTests
             var result = SixelEncoder.EncodeCore(2, 1, palette, pixels);
 
             // The second color's row should start with '$'
-            result.ShouldContain("$");
+            result.Should().Contain("$");
         }
     }
 

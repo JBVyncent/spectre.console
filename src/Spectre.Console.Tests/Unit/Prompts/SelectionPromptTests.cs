@@ -20,7 +20,7 @@ public sealed class SelectionPromptTests
         prompt.Show(console);
 
         // Then
-        console.Output.ShouldContain(@"[red]This text will never be red[/]");
+        console.Output.Should().Contain(@"[red]This text will never be red[/]");
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public sealed class SelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe("A");
+        selection.Should().Be("A");
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class SelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe("D");
+        selection.Should().Be("D");
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public sealed class SelectionPromptTests
         prompt.Show(console);
 
         // Then
-        console.Output.ShouldContain($"{ESC}[38;5;12m> Item {ESC}[0m{ESC}[1;38;5;12;48;5;11m1{ESC}[0m");
+        console.Output.Should().Contain($"{ESC}[38;5;12m> Item {ESC}[0m{ESC}[1;38;5;12;48;5;11m1{ESC}[0m");
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public sealed class SelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe(choices[1]);
+        selection.Should().Be(choices[1]);
     }
 
     [Fact]
@@ -128,8 +128,8 @@ public sealed class SelectionPromptTests
         Action action = () => prompt.Show(console);
 
         // Then
-        var exception = action.ShouldThrow<InvalidOperationException>();
-        exception.Message.ShouldBe("Cannot show an empty selection prompt. Please call the AddChoice() method to configure the prompt.");
+        var exception = action.Should().Throw<InvalidOperationException>();
+        exception.Which.Message.Should().Be("Cannot show an empty selection prompt. Please call the AddChoice() method to configure the prompt.");
     }
 
     [Fact]
@@ -152,8 +152,8 @@ public sealed class SelectionPromptTests
         string result = prompt.Show(console);
 
         // Then
-        result.ShouldBe("Item 2");
-        console.Output.ShouldContain($"{ESC}[38;5;12m> {ESC}[0m{ESC}[1;38;5;12;48;5;11mItem {ESC}[0m{ESC}[38;5;12m2{ESC}[0m ");
+        result.Should().Be("Item 2");
+        console.Output.Should().Contain($"{ESC}[38;5;12m> {ESC}[0m{ESC}[1;38;5;12;48;5;11mItem {ESC}[0m{ESC}[38;5;12m2{ESC}[0m ");
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public sealed class SelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe("E");
+        selection.Should().Be("E");
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public sealed class SelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe("E");
+        selection.Should().Be("E");
     }
 
     [Fact]
@@ -216,7 +216,7 @@ public sealed class SelectionPromptTests
         var selection = prompt.Show(console);
 
         // Then
-        selection.ShouldBe("A");
+        selection.Should().Be("A");
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public sealed class SelectionPromptTests
             .AddChoices("OnlyChoice");
         var result = prompt.Show(console);
 
-        result.ShouldBe("OnlyChoice");
+        result.Should().Be("OnlyChoice");
     }
 
     [Fact]
@@ -250,7 +250,7 @@ public sealed class SelectionPromptTests
             .AddChoices("[01] First item", "[02] Second item");
         var result = prompt.Show(console);
 
-        result.ShouldBe("[01] First item");
+        result.Should().Be("[01] First item");
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public sealed class SelectionPromptTests
             .AddChoices("[01] First item", "[02] Second item");
         var result = prompt.Show(console);
 
-        result.ShouldBe("[01] First item");
+        result.Should().Be("[01] First item");
     }
 }
 
@@ -289,7 +289,7 @@ public sealed class SearchFilterTests
             .AddChoices("banana", "apple", "apricot", "cherry")
             .Show(console);
 
-        result.ShouldBe("apple");
+        result.Should().Be("apple");
     }
 
     [Fact]
@@ -307,7 +307,7 @@ public sealed class SearchFilterTests
             .AddChoices("banana", "apple", "apricot", "cherry")
             .Show(console);
 
-        result.ShouldBe("apricot");
+        result.Should().Be("apricot");
     }
 
     [Fact]
@@ -328,7 +328,7 @@ public sealed class SearchFilterTests
 
         // With filter "a": "banana"(idx0), "apple"(idx1), "apricot"(idx2) match.
         // Cursor stays on "apple" (already in filtered set after backspace).
-        result.ShouldBe("apple");
+        result.Should().Be("apple");
     }
 
     [Fact]
@@ -336,8 +336,8 @@ public sealed class SearchFilterTests
     {
         var ex = Record.Exception(() =>
             ((SelectionPrompt<string>)null!).EnableSearch(SearchMode.Filter));
-        ex.ShouldBeOfType<ArgumentNullException>()
-          .ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>()
+              .Which.ParamName.Should().Be("obj");
     }
 
     [Fact]
@@ -354,7 +354,7 @@ public sealed class SearchFilterTests
             .AddChoices("item 1", "item 2", "item 3", "item 4")
             .Show(console);
 
-        result.ShouldBe("item 3");
+        result.Should().Be("item 3");
     }
 }
 
@@ -374,7 +374,7 @@ public sealed class DefaultValueTests
             .DefaultValue("Second")
             .Show(console);
 
-        result.ShouldBe("Second");
+        result.Should().Be("Second");
     }
 
     [Fact]
@@ -389,7 +389,7 @@ public sealed class DefaultValueTests
             .DefaultValue("C")
             .Show(console);
 
-        result.ShouldBe("C");
+        result.Should().Be("C");
     }
 
     [Fact]
@@ -406,7 +406,7 @@ public sealed class DefaultValueTests
             .DefaultValue("Second")
             .Show(console);
 
-        result.ShouldBe("First");
+        result.Should().Be("First");
     }
 
     [Fact]
@@ -421,7 +421,7 @@ public sealed class DefaultValueTests
             .DefaultValue("NotInList")
             .Show(console);
 
-        result.ShouldBe("A");
+        result.Should().Be("A");
     }
 
     [Fact]
@@ -440,7 +440,7 @@ public sealed class DefaultValueTests
             .DefaultValue("GroupA")      // group, not a leaf
             .Show(console);
 
-        result.ShouldBe("Leaf1");
+        result.Should().Be("Leaf1");
     }
 
     [Fact]
@@ -457,7 +457,7 @@ public sealed class DefaultValueTests
             .DefaultValue("Leaf3")
             .Show(console);
 
-        result.ShouldBe("Leaf3");
+        result.Should().Be("Leaf3");
     }
 
     [Fact]
@@ -472,7 +472,7 @@ public sealed class DefaultValueTests
             .DefaultValue(3)
             .Show(console);
 
-        result.ShouldBe(3);
+        result.Should().Be(3);
     }
 
     [Fact]
@@ -480,8 +480,8 @@ public sealed class DefaultValueTests
     {
         var ex = Record.Exception(() =>
             ((SelectionPrompt<string>)null!).DefaultValue("x"));
-        ex.ShouldBeOfType<ArgumentNullException>()
-          .ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>()
+              .Which.ParamName.Should().Be("obj");
     }
 }
 

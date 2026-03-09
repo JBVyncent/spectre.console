@@ -18,7 +18,7 @@ public partial class AnsiConsoleTests
         });
 
         // Then
-        console.Profile.Capabilities.ColorSystem.ShouldBe(expected);
+        console.Profile.Capabilities.ColorSystem.Should().Be(expected);
     }
 
     public sealed class TrueColor
@@ -37,7 +37,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(128, 0, 128), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -54,7 +54,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(Color.Purple, foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
     }
 
@@ -74,7 +74,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(Color.Olive, foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -91,7 +91,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(128, 128, 0), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -108,7 +108,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(126, 127, 0), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
     }
 
@@ -128,7 +128,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(Color.Olive, foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -150,7 +150,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(r, g, b), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -172,7 +172,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(r, g, b), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
     }
 
@@ -192,7 +192,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(Color.Olive, foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -214,7 +214,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(r, g, b), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -236,7 +236,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello", new Style().SetColor(new Color(r, g, b), foreground));
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
     }
 }

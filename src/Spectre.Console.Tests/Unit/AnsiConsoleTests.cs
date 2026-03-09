@@ -20,7 +20,7 @@ public partial class AnsiConsoleTests
             console.Write("World");
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello");
             console.ClearLine();
             console.Write("World");
-            console.Output.ShouldBe("Hello\u001b[2KWorld");
+            console.Output.Should().Be("Hello\u001b[2KWorld");
         }
 
         [Fact]
@@ -42,7 +42,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello");
             console.ClearLineToEnd();
             console.Write("World");
-            console.Output.ShouldBe("Hello\u001b[0KWorld");
+            console.Output.Should().Be("Hello\u001b[0KWorld");
         }
 
         [Fact]
@@ -53,7 +53,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello");
             console.ClearLineToStart();
             console.Write("World");
-            console.Output.ShouldBe("Hello\u001b[1KWorld");
+            console.Output.Should().Be("Hello\u001b[1KWorld");
         }
 
         [Fact]
@@ -64,7 +64,7 @@ public partial class AnsiConsoleTests
             console.Write("Hello");
             console.ClearToBottom();
             console.Write("World");
-            console.Output.ShouldBe("Hello\u001b[0JWorld");
+            console.Output.Should().Be("Hello\u001b[0JWorld");
         }
 
         [Fact]
@@ -75,42 +75,42 @@ public partial class AnsiConsoleTests
             console.Write("Hello");
             console.ClearToTop();
             console.Write("World");
-            console.Output.ShouldBe("Hello\u001b[1JWorld");
+            console.Output.Should().Be("Hello\u001b[1JWorld");
         }
 
         [Fact]
         public void ClearLine_Should_Throw_For_Null_Console()
         {
             var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearLine());
-            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+            ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("console");
         }
 
         [Fact]
         public void ClearLineToEnd_Should_Throw_For_Null_Console()
         {
             var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearLineToEnd());
-            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+            ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("console");
         }
 
         [Fact]
         public void ClearLineToStart_Should_Throw_For_Null_Console()
         {
             var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearLineToStart());
-            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+            ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("console");
         }
 
         [Fact]
         public void ClearToBottom_Should_Throw_For_Null_Console()
         {
             var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearToBottom());
-            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+            ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("console");
         }
 
         [Fact]
         public void ClearToTop_Should_Throw_For_Null_Console()
         {
             var ex = Record.Exception(() => ((IAnsiConsole)null!).ClearToTop());
-            ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("console");
+            ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("console");
         }
     }
 
@@ -133,7 +133,7 @@ public partial class AnsiConsoleTests
                     .Decoration(Decoration.Italic));
 
             // Then
-            console.Output.ShouldBe("\u001b[3;90;47mHello\u001b[0m");
+            console.Output.Should().Be("\u001b[3;90;47mHello\u001b[0m");
         }
 
         [Fact]
@@ -153,7 +153,7 @@ public partial class AnsiConsoleTests
                     .Decoration(Decoration.Italic));
 
             // Then
-            console.Output.ShouldBe("\u001b[3;47mHello\u001b[0m");
+            console.Output.Should().Be("\u001b[3;47mHello\u001b[0m");
         }
 
         [Fact]
@@ -173,7 +173,7 @@ public partial class AnsiConsoleTests
                     .Decoration(Decoration.Italic));
 
             // Then
-            console.Output.ShouldBe("\u001b[3;90mHello\u001b[0m");
+            console.Output.Should().Be("\u001b[3;90mHello\u001b[0m");
         }
 
         [Fact]
@@ -193,7 +193,7 @@ public partial class AnsiConsoleTests
                     .Decoration(Decoration.None));
 
             // Then
-            console.Output.ShouldBe("\u001b[90;47mHello\u001b[0m");
+            console.Output.Should().Be("\u001b[90;47mHello\u001b[0m");
         }
     }
 
@@ -213,7 +213,7 @@ public partial class AnsiConsoleTests
 
             // Then
             console.Output.NormalizeLineEndings()
-                .ShouldBe("[101mHello[0m\n[102mWorld[0m\n");
+                .Should().Be("[101mHello[0m\n[102mWorld[0m\n");
         }
 
         [Fact]
@@ -229,7 +229,7 @@ public partial class AnsiConsoleTests
 
             // Then
             console.Output.NormalizeLineEndings()
-                .ShouldBe("[101mHello[0m\n[101mWorld[0m\n");
+                .Should().Be("[101mHello[0m\n[101mWorld[0m\n");
         }
     }
 
@@ -245,8 +245,8 @@ public partial class AnsiConsoleTests
             // Before the fix, string.Format("{Pt.1}", []) would throw FormatException
             // because "{Pt.1}" looks like an invalid format placeholder.
             // Regression test for #1495.
-            Should.NotThrow(() => console.Markup("{Pt.1} (TEST ~ 855D)", Array.Empty<object>()));
-            console.Output.ShouldContain("{Pt.1}");
+            FluentActions.Invoking(() => console.Markup("{Pt.1} (TEST ~ 855D)", Array.Empty<object>())).Should().NotThrow();
+            console.Output.Should().Contain("{Pt.1}");
         }
 
         [Fact]
@@ -256,8 +256,8 @@ public partial class AnsiConsoleTests
             var console = new TestConsole();
 
             // When / Then
-            Should.NotThrow(() => console.MarkupLine("{Pt.1} (TEST ~ 855D)", Array.Empty<object>()));
-            console.Output.ShouldContain("{Pt.1}");
+            FluentActions.Invoking(() => console.MarkupLine("{Pt.1} (TEST ~ 855D)", Array.Empty<object>())).Should().NotThrow();
+            console.Output.Should().Contain("{Pt.1}");
         }
 
         [Fact]
@@ -268,8 +268,8 @@ public partial class AnsiConsoleTests
             var console = new TestConsole();
             var fileName = "[important].txt";
 
-            Should.NotThrow(() => console.Markup("[blue]File:[/] {0}", fileName));
-            console.Output.ShouldContain("[important].txt");
+            FluentActions.Invoking(() => console.Markup("[blue]File:[/] {0}", fileName)).Should().NotThrow();
+            console.Output.Should().Contain("[important].txt");
         }
 
         [Fact]
@@ -281,7 +281,7 @@ public partial class AnsiConsoleTests
 
             console.Markup("Value: {0}", "[not-a-tag]");
 
-            console.Output.ShouldContain("[not-a-tag]");
+            console.Output.Should().Contain("[not-a-tag]");
         }
 
         [Fact]
@@ -296,8 +296,8 @@ public partial class AnsiConsoleTests
             console.Markup("[yellow]{0}[/]", "[raw]");
 
             // Output should contain the yellow ANSI code and the literal [raw] text.
-            console.Output.ShouldContain("[93m");
-            console.Output.ShouldContain("[raw]");
+            console.Output.Should().Contain("[93m");
+            console.Output.Should().Contain("[raw]");
         }
 
         [Fact]
@@ -307,8 +307,8 @@ public partial class AnsiConsoleTests
             var console = new TestConsole();
             var tag = "[bold-value]";
 
-            Should.NotThrow(() => console.MarkupLine("[red]Tag:[/] {0}", tag));
-            console.Output.ShouldContain("[bold-value]");
+            FluentActions.Invoking(() => console.MarkupLine("[red]Tag:[/] {0}", tag)).Should().NotThrow();
+            console.Output.Should().Contain("[bold-value]");
         }
 
         [Fact]
@@ -317,9 +317,9 @@ public partial class AnsiConsoleTests
             // The IFormatProvider overload must also escape bracket-containing args.
             var console = new TestConsole();
 
-            Should.NotThrow(() =>
-                console.Markup(System.Globalization.CultureInfo.InvariantCulture, "[blue]{0}[/]", "[bracketed]"));
-            console.Output.ShouldContain("[bracketed]");
+            FluentActions.Invoking(() =>
+                console.Markup(System.Globalization.CultureInfo.InvariantCulture, "[blue]{0}[/]", "[bracketed]")).Should().NotThrow();
+            console.Output.Should().Contain("[bracketed]");
         }
 
         [Fact]
@@ -328,9 +328,9 @@ public partial class AnsiConsoleTests
             // The IFormatProvider overload of MarkupLine must also escape bracket-containing args.
             var console = new TestConsole();
 
-            Should.NotThrow(() =>
-                console.MarkupLine(System.Globalization.CultureInfo.InvariantCulture, "[blue]{0}[/]", "[bracketed]"));
-            console.Output.ShouldContain("[bracketed]");
+            FluentActions.Invoking(() =>
+                console.MarkupLine(System.Globalization.CultureInfo.InvariantCulture, "[blue]{0}[/]", "[bracketed]")).Should().NotThrow();
+            console.Output.Should().Contain("[bracketed]");
         }
 
         [Fact]
@@ -341,8 +341,8 @@ public partial class AnsiConsoleTests
             var console = new TestConsole();
 
             var obj = new ObjectWithBracketsInToString();
-            Should.NotThrow(() => console.Markup("Item: {0}", obj));
-            console.Output.ShouldContain("[item]");
+            FluentActions.Invoking(() => console.Markup("Item: {0}", obj)).Should().NotThrow();
+            console.Output.Should().Contain("[item]");
         }
 
         private sealed class ObjectWithBracketsInToString
@@ -364,7 +364,7 @@ public partial class AnsiConsoleTests
             void When() => console.WriteException(exception);
 
             // Then
-            Should.NotThrow(When);
+            FluentActions.Invoking(When).Should().NotThrow();
         }
     }
 }

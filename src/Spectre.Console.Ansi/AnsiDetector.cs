@@ -2,6 +2,9 @@ using System.Text.RegularExpressions;
 
 namespace Spectre.Console;
 
+// Stryker disable all : AnsiDetector uses RuntimeInformation.IsOSPlatform, Environment.GetEnvironmentVariable,
+// TERM regex matching, and Win32 P/Invoke kernel32.dll — all OS/environment dependent and uncontrollable in
+// unit tests. Tests bypass this code entirely by constructing AnsiCapabilities directly via object initializer.
 internal static class AnsiDetector
 {
     private static readonly Regex[] _regexes =
@@ -24,7 +27,6 @@ internal static class AnsiDetector
         new("^st-256color"), // Suckless Simple Terminal, st
         new("alacritty") // Alacritty
     ];
-
     public static (bool Ansi, bool Legacy) Detect(TextWriter buffer, AnsiSupport ansi)
     {
         var supportsAnsi = ansi == AnsiSupport.Yes;
@@ -155,3 +157,4 @@ internal static class AnsiDetector
         }
     }
 }
+// Stryker restore all

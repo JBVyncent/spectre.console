@@ -6,35 +6,35 @@ public sealed class BypassSpinnerTests
     public void Interval_Should_Be_80_Milliseconds()
     {
         var spinner = new BypassSpinner();
-        spinner.Interval.ShouldBe(TimeSpan.FromMilliseconds(80));
+        spinner.Interval.Should().Be(TimeSpan.FromMilliseconds(80));
     }
 
     [Fact]
     public void IsUnicode_Should_Be_False()
     {
         var spinner = new BypassSpinner();
-        spinner.IsUnicode.ShouldBeFalse();
+        spinner.IsUnicode.Should().BeFalse();
     }
 
     [Fact]
     public void Frames_Should_Have_Two_Entries()
     {
         var spinner = new BypassSpinner();
-        spinner.Frames.Count.ShouldBe(2);
+        spinner.Frames.Count.Should().Be(2);
     }
 
     [Fact]
     public void First_Frame_Should_Be_Dash()
     {
         var spinner = new BypassSpinner();
-        spinner.Frames[0].ShouldBe("-");
+        spinner.Frames[0].Should().Be("-");
     }
 
     [Fact]
     public void Second_Frame_Should_Be_Backslash()
     {
         var spinner = new BypassSpinner();
-        spinner.Frames[1].ShouldBe("\\");
+        spinner.Frames[1].Should().Be("\\");
     }
 }
 
@@ -75,13 +75,13 @@ public sealed class SpinnerColumnTests
     public void NoWrap_Should_Be_True()
     {
         var column = new SpinnerColumn();
-        column.NoWrap.ShouldBeTrue();
+        column.NoWrap.Should().BeTrue();
     }
 
     [Fact]
     public void Constructor_Throws_When_Spinner_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => new SpinnerColumn(null!));
+        FluentActions.Invoking(() => new SpinnerColumn(null!)).Should().Throw<ArgumentNullException>();
     }
 
     // ── Render: not-started task ─────────────────────────────────────────────
@@ -94,7 +94,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.Zero);
 
-        result.ShouldBe(" ");
+        result.Should().Be(" ");
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.Zero);
 
-        result.ShouldBe("...");
+        result.Should().Be("...");
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public sealed class SpinnerColumnTests
         output.Write(column.Render(options, task, TimeSpan.Zero));
 
         // Color.Red (index 9) in EightBit mode produces ANSI codes → output is longer than bare text
-        output.Output.Length.ShouldBeGreaterThan("?".Length);
+        output.Output.Length.Should().BeGreaterThan("?".Length);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class SpinnerColumnTests
         var plainOutput = new TestConsole().EmitAnsiSequences().Colors(ColorSystem.EightBit);
         plainOutput.Write(columnPlain.Render(options, task, TimeSpan.Zero));
 
-        colorOutput.Output.ShouldNotBe(plainOutput.Output);
+        colorOutput.Output.Should().NotBe(plainOutput.Output);
     }
 
     // ── Render: finished task ────────────────────────────────────────────────
@@ -153,7 +153,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.Zero);
 
-        result.ShouldBe(" ");
+        result.Should().Be(" ");
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.Zero);
 
-        result.ShouldBe("✓");
+        result.Should().Be("✓");
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public sealed class SpinnerColumnTests
         output.Write(column.Render(options, task, TimeSpan.Zero));
 
         // Color.Green in EightBit mode produces ANSI codes → output is longer than bare text
-        output.Output.Length.ShouldBeGreaterThan("done".Length);
+        output.Output.Length.Should().BeGreaterThan("done".Length);
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public sealed class SpinnerColumnTests
         var plainOutput = new TestConsole().EmitAnsiSequences().Colors(ColorSystem.EightBit);
         plainOutput.Write(columnPlain.Render(options, task, TimeSpan.Zero));
 
-        colorOutput.Output.ShouldNotBe(plainOutput.Output);
+        colorOutput.Output.Should().NotBe(plainOutput.Output);
     }
 
     [Fact]
@@ -213,7 +213,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.Zero);
 
-        result.ShouldBe("DONE");
+        result.Should().Be("DONE");
     }
 
     // ── Render: active task / frame advancement ──────────────────────────────
@@ -226,7 +226,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.Zero);
 
-        result.ShouldBe("-");
+        result.Should().Be("-");
     }
 
     [Fact]
@@ -238,7 +238,7 @@ public sealed class SpinnerColumnTests
         // First render advances to frame index 1 when delta >= 80ms
         var result = Render(column, task, TimeSpan.FromMilliseconds(80));
 
-        result.ShouldBe("\\");
+        result.Should().Be("\\");
     }
 
     [Fact]
@@ -249,7 +249,7 @@ public sealed class SpinnerColumnTests
 
         var result = Render(column, task, TimeSpan.FromMilliseconds(79));
 
-        result.ShouldBe("-");
+        result.Should().Be("-");
     }
 
     [Fact]
@@ -262,12 +262,12 @@ public sealed class SpinnerColumnTests
         // First render: accumulated = 40ms, not enough → frame "-"
         var console1 = new TestConsole();
         console1.Write(column.Render(options, task, TimeSpan.FromMilliseconds(40)));
-        console1.Output.ShouldBe("-");
+        console1.Output.Should().Be("-");
 
         // Second render: accumulated = 80ms, interval reached → advance to frame "\"
         var console2 = new TestConsole();
         console2.Write(column.Render(options, task, TimeSpan.FromMilliseconds(40)));
-        console2.Output.ShouldBe("\\");
+        console2.Output.Should().Be("\\");
     }
 
     [Fact]
@@ -281,12 +281,12 @@ public sealed class SpinnerColumnTests
         // Advance to frame 1 ("\"): delta = 80ms
         var c1 = new TestConsole();
         c1.Write(column.Render(options, task, TimeSpan.FromMilliseconds(80)));
-        c1.Output.ShouldBe("\\");
+        c1.Output.Should().Be("\\");
 
         // Advance to frame 2 → 2%2 = 0 ("-"): delta = 80ms again
         var c2 = new TestConsole();
         c2.Write(column.Render(options, task, TimeSpan.FromMilliseconds(80)));
-        c2.Output.ShouldBe("-");
+        c2.Output.Should().Be("-");
     }
 
     [Fact]
@@ -301,12 +301,12 @@ public sealed class SpinnerColumnTests
         // First render advances index to 1 (accumulated resets to 0)
         var c1 = new TestConsole();
         c1.Write(column.Render(options, task, TimeSpan.FromMilliseconds(80)));
-        c1.Output.ShouldBe("\\");
+        c1.Output.Should().Be("\\");
 
         // Second render with small delta: accumulated = 10, not enough → stays at index 1
         var c2 = new TestConsole();
         c2.Write(column.Render(options, task, TimeSpan.FromMilliseconds(10)));
-        c2.Output.ShouldBe("\\");
+        c2.Output.Should().Be("\\");
     }
 
     // ── ASCII fallback ────────────────────────────────────────────────────────
@@ -320,7 +320,7 @@ public sealed class SpinnerColumnTests
         // Unicode=true → useAscii=false → uses UnicodeSpinner → frame "*"
         var result = Render(column, task, TimeSpan.Zero, unicode: true);
 
-        result.ShouldBe("*");
+        result.Should().Be("*");
     }
 
     [Fact]
@@ -332,7 +332,7 @@ public sealed class SpinnerColumnTests
         // Unicode=false, IsUnicode=true → useAscii=true → uses BypassSpinner → frame "-"
         var result = Render(column, task, TimeSpan.Zero, unicode: false);
 
-        result.ShouldBe("-");
+        result.Should().Be("-");
     }
 
     [Fact]
@@ -344,7 +344,7 @@ public sealed class SpinnerColumnTests
         // Unicode=false, IsUnicode=false → useAscii=false → uses AsciiSpinner → frame "X"
         var result = Render(column, task, TimeSpan.Zero, unicode: false);
 
-        result.ShouldBe("X");
+        result.Should().Be("X");
     }
 
     // ── Spinner property setter ───────────────────────────────────────────────
@@ -358,7 +358,7 @@ public sealed class SpinnerColumnTests
         var task = new ProgressTask(1, "Foo", 100);
         var result = Render(column, task, TimeSpan.Zero, unicode: true);
 
-        result.ShouldBe("-"); // BypassSpinner first frame
+        result.Should().Be("-"); // BypassSpinner first frame
     }
 
     [Fact]
@@ -374,7 +374,7 @@ public sealed class SpinnerColumnTests
         column.Spinner = new WideFrameSpinner();
 
         var newWidth = column.GetColumnWidth(options)!.Value;
-        newWidth.ShouldBeGreaterThan(initialWidth);
+        newWidth.Should().BeGreaterThan(initialWidth);
     }
 
     // ── PendingText / CompletedText reset maxWidth ────────────────────────────
@@ -390,7 +390,7 @@ public sealed class SpinnerColumnTests
         column.CompletedText = "VERY WIDE COMPLETED TEXT";
         var newWidth = column.GetColumnWidth(options)!.Value;
 
-        newWidth.ShouldBeGreaterThan(initialWidth);
+        newWidth.Should().BeGreaterThan(initialWidth);
     }
 
     [Fact]
@@ -404,7 +404,7 @@ public sealed class SpinnerColumnTests
         column.PendingText = "VERY WIDE PENDING TEXT";
         var newWidth = column.GetColumnWidth(options)!.Value;
 
-        newWidth.ShouldBeGreaterThan(initialWidth);
+        newWidth.Should().BeGreaterThan(initialWidth);
     }
 
     // ── GetColumnWidth ────────────────────────────────────────────────────────
@@ -414,7 +414,7 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         var width = column.GetColumnWidth(CreateOptions());
-        width.ShouldNotBeNull();
+        width.Should().NotBeNull();
     }
 
     [Fact]
@@ -422,7 +422,7 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         var width = column.GetColumnWidth(CreateOptions());
-        width!.Value.ShouldBeGreaterThan(0);
+        width!.Value.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -434,7 +434,7 @@ public sealed class SpinnerColumnTests
             CompletedText = "COMP",  // 4 chars
         };
         var width = column.GetColumnWidth(CreateOptions());
-        width!.Value.ShouldBe(4);
+        width!.Value.Should().Be(4);
     }
 
     [Fact]
@@ -443,7 +443,7 @@ public sealed class SpinnerColumnTests
         var column = new SpinnerColumn(new UnicodeSpinner());
         var width = column.GetColumnWidth(CreateOptions(unicode: false));
         // Falls back to BypassSpinner whose frames are 1 char each
-        width!.Value.ShouldBe(1);
+        width!.Value.Should().Be(1);
     }
 
     [Fact]
@@ -454,7 +454,7 @@ public sealed class SpinnerColumnTests
         // Mutant ||: useAscii = !false || false = true → uses BypassSpinner (width=1)
         var column = new SpinnerColumn(new WideAsciiSpinner());
         var width = column.GetColumnWidth(CreateOptions(unicode: false));
-        width!.Value.ShouldBe(4);
+        width!.Value.Should().Be(4);
     }
 
     [Fact]
@@ -465,7 +465,7 @@ public sealed class SpinnerColumnTests
         // Mutant (no !): useAscii = true && true = true → uses BypassSpinner (width=1)
         var column = new SpinnerColumn(new WideUnicodeSpinner());
         var width = column.GetColumnWidth(CreateOptions(unicode: true));
-        width!.Value.ShouldBe(4);
+        width!.Value.Should().Be(4);
     }
 
     [Fact]
@@ -476,7 +476,7 @@ public sealed class SpinnerColumnTests
         // Mutant (always use _spinner): uses WideUnicodeSpinner → width=4
         var column = new SpinnerColumn(new WideUnicodeSpinner());
         var width = column.GetColumnWidth(CreateOptions(unicode: false));
-        width!.Value.ShouldBe(1);
+        width!.Value.Should().Be(1);
     }
 
     [Fact]
@@ -488,7 +488,7 @@ public sealed class SpinnerColumnTests
         // Mutant: Min(1, 4) = 1
         var column = new SpinnerColumn(new MixedWidthSpinner());
         var width = column.GetColumnWidth(CreateOptions(unicode: false));
-        width!.Value.ShouldBe(4);
+        width!.Value.Should().Be(4);
     }
 
     // ── Style ─────────────────────────────────────────────────────────────────
@@ -497,7 +497,7 @@ public sealed class SpinnerColumnTests
     public void Style_Defaults_To_Yellow()
     {
         var column = new SpinnerColumn();
-        column.Style.ShouldBe(Color.Yellow);
+        column.Style.Should().Be((Style)Color.Yellow);
     }
 
     [Fact]
@@ -506,7 +506,7 @@ public sealed class SpinnerColumnTests
         var column = new SpinnerColumn { Style = null };
         var task = new ProgressTask(1, "Foo", 100);
 
-        Should.NotThrow(() => Render(column, task, TimeSpan.Zero));
+        FluentActions.Invoking(() => Render(column, task, TimeSpan.Zero)).Should().NotThrow();
     }
 
     // ── SpinnerColumnExtensions ───────────────────────────────────────────────
@@ -516,7 +516,7 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         var result = column.Style(Color.Red);
-        result.ShouldBeSameAs(column);
+        result.Should().BeSameAs(column);
     }
 
     [Fact]
@@ -524,13 +524,13 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         column.Style(Color.Red);
-        column.Style.ShouldBe(Color.Red);
+        column.Style.Should().Be((Style)Color.Red);
     }
 
     [Fact]
     public void Style_Extension_Throws_When_Column_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((SpinnerColumn)null!).Style(Color.Red));
+        FluentActions.Invoking(() => ((SpinnerColumn)null!).Style(Color.Red)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -538,7 +538,7 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         var result = column.CompletedText("done");
-        result.ShouldBeSameAs(column);
+        result.Should().BeSameAs(column);
     }
 
     [Fact]
@@ -546,13 +546,13 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         column.CompletedText("done");
-        column.CompletedText.ShouldBe("done");
+        column.CompletedText.Should().Be("done");
     }
 
     [Fact]
     public void CompletedText_Extension_Throws_When_Column_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((SpinnerColumn)null!).CompletedText("done"));
+        FluentActions.Invoking(() => ((SpinnerColumn)null!).CompletedText("done")).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -560,7 +560,7 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         var result = column.CompletedStyle(Color.Green);
-        result.ShouldBeSameAs(column);
+        result.Should().BeSameAs(column);
     }
 
     [Fact]
@@ -568,13 +568,13 @@ public sealed class SpinnerColumnTests
     {
         var column = new SpinnerColumn();
         column.CompletedStyle(Color.Green);
-        column.CompletedStyle.ShouldBe(Color.Green);
+        column.CompletedStyle.Should().Be((Style)Color.Green);
     }
 
     [Fact]
     public void CompletedStyle_Extension_Throws_When_Column_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((SpinnerColumn)null!).CompletedStyle(Color.Green));
+        FluentActions.Invoking(() => ((SpinnerColumn)null!).CompletedStyle(Color.Green)).Should().Throw<ArgumentNullException>();
     }
 
     private sealed class WideFrameSpinner : Spinner

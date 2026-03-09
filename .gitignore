@@ -97,3 +97,12 @@ Thumbs.db
 node_modules
 .claude/
 .gemini/
+.codex-review/
+
+# Gemini CLI configuration and output files
+GEMINI.md
+AGENTS.md
+MEMORY.md
+LESSON_LEARNED.md
+BUGS-*.md
+BUGS-Codex.md

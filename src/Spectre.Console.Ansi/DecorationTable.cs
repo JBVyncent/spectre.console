@@ -32,6 +32,7 @@ internal static class DecorationTable
         foreach (var (name, decoration) in _lookup)
         {
             // Cannot happen, but the compiler thinks so...
+            // Stryker disable once all : Dead-code guard — all _lookup values are non-null enum constants
             if (decoration == null)
             {
                 continue;

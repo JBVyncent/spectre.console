@@ -26,11 +26,11 @@ public class WhiteSpaceSegmentEnumeratorTests
         var splitWords = input.SplitWords();
         var segmenter = new WhiteSpaceSegmentEnumerator(input);
 
-        splitWords.ShouldBeEquivalentTo(expected);
+        splitWords.Should().BeEquivalentTo(expected);
         var index = 0;
         foreach (var segment in segmenter)
         {
-            segment.ToString().ShouldBeEquivalentTo(expected[index++]);
+            segment.ToString().Should().BeEquivalentTo(expected[index++]);
         }
     }
 }

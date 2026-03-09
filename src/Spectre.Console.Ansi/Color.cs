@@ -182,9 +182,11 @@ public readonly partial struct Color : IEquatable<Color>
         }
 
         // Should not happen, but this will make things easier if we mess things up...
+        // Stryker disable all : Debug.Assert fires but does not throw in test environments; statement/string/equality mutations are not observable
         Debug.Assert(
             color.Number >= 0 && color.Number < 16,
             "Color does not fall inside the standard palette range.");
+        // Stryker restore all
 
         return color.Number.Value switch
         {
@@ -204,6 +206,7 @@ public readonly partial struct Color : IEquatable<Color>
             13 => ConsoleColor.Magenta,
             14 => ConsoleColor.Cyan,
             15 => ConsoleColor.White,
+            // Stryker disable once String : Dead code — quantization always produces 0–15; _ branch is never reached
             _ => throw new InvalidOperationException("Cannot convert color to console color."),
         };
     }

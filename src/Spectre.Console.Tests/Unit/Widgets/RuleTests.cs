@@ -143,7 +143,7 @@ public sealed class RuleTests
         console.Write(new Rule(input));
 
         // Then
-        console.Lines.Count.ShouldBe(1);
-        console.Lines[0].ShouldBe(expected);
+        console.Lines.Count.Should().Be(1);
+        console.Lines[0].Should().Be(expected);
     }
 }

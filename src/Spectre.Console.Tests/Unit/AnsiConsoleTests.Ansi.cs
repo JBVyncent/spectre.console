@@ -18,7 +18,7 @@ public sealed partial class AnsiConsoleTests
 
             // Then
             console.Output.NormalizeLineEndings()
-                .ShouldBe("[101mHello[0m");
+                .Should().Be("[101mHello[0m");
         }
 
         [Fact]
@@ -35,7 +35,7 @@ public sealed partial class AnsiConsoleTests
 
             // Then
             console.Output.NormalizeLineEndings()
-                .ShouldBeEmpty();
+                .Should().BeEmpty();
         }
 
         [Fact]
@@ -49,7 +49,7 @@ public sealed partial class AnsiConsoleTests
             var result = console.ToAnsi(markup);
 
             // Then
-            result.ShouldBe("[38;5;11mHello [0m[38;5;12mWorld[0m[38;5;11m![0m");
+            result.Should().Be("[38;5;11mHello [0m[38;5;12mWorld[0m[38;5;11m![0m");
         }
     }
 }

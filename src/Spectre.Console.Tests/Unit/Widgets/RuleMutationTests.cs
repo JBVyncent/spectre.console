@@ -12,7 +12,7 @@ public sealed class RuleMutationTests
         {
             // Kills: Line 42, ThrowIfNull removal
             var ex = Record.Exception(() => new Rule(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -20,7 +20,7 @@ public sealed class RuleMutationTests
         {
             // Kills: Line 173, ThrowIfNull removal
             var ex = Record.Exception(() => RuleExtensions.RuleTitle(null!, "test"));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -29,7 +29,7 @@ public sealed class RuleMutationTests
             // Kills: Line 174, ThrowIfNull removal
             var rule = new Rule();
             var ex = Record.Exception(() => rule.RuleTitle(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -37,7 +37,7 @@ public sealed class RuleMutationTests
         {
             // Kills: Line 188, ThrowIfNull removal (NoCoverage)
             var ex = Record.Exception(() => RuleExtensions.RuleStyle(null!, Style.Plain));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
     }
 
@@ -51,7 +51,7 @@ public sealed class RuleMutationTests
             var console = new TestConsole().Width(40);
             // Rendering the rule implicitly calls Measure
             console.Write(rule);
-            console.Output.ShouldNotBeEmpty();
+            console.Output.Should().NotBeEmpty();
         }
     }
 
@@ -65,7 +65,7 @@ public sealed class RuleMutationTests
             var console = new TestConsole().Width(1);
             var rule = new Rule();
             console.Write(rule);
-            console.Output.ShouldNotBeEmpty();
+            console.Output.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -75,7 +75,7 @@ public sealed class RuleMutationTests
             var console = new TestConsole().Width(20);
             var rule = new Rule();
             console.Write(rule);
-            console.Output.ShouldNotBeEmpty();
+            console.Output.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -91,7 +91,7 @@ public sealed class RuleMutationTests
             noTitleConsole.Write(new Rule("X"));
             // At width 6, should render without title (just a line)
             // At width 7, should attempt title
-            noTitleConsole.Output.ShouldNotBe(withTitleConsole.Output);
+            noTitleConsole.Output.Should().NotBe(withTitleConsole.Output);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ public sealed class RuleMutationTests
             console.Write(rule);
             var output = console.Output;
             // Title should be truncated with ellipsis
-            output.ShouldContain("…");
+            output.Should().Contain("…");
         }
 
         [Fact]
@@ -116,7 +116,7 @@ public sealed class RuleMutationTests
             console.Write(rule);
             // With width 12 and extraLength 6, title gets 6 chars max
             // "ABCDEFGHIJ" is 10 chars, should be truncated
-            console.Output.ShouldContain("…");
+            console.Output.Should().Contain("…");
         }
 
         [Fact]
@@ -126,7 +126,7 @@ public sealed class RuleMutationTests
             var console = new TestConsole().Width(20);
             var rule = new Rule("Test");
             console.Write(rule);
-            console.Output.ShouldContain("\n");
+            console.Output.Should().Contain("\n");
         }
 
         [Fact]
@@ -146,7 +146,7 @@ public sealed class RuleMutationTests
             var asciiOutput = asciiConsole.Output;
 
             // Heavy border renders differently in unicode vs non-unicode
-            unicodeOutput.ShouldNotBe(asciiOutput);
+            unicodeOutput.Should().NotBe(asciiOutput);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ public sealed class RuleMutationTests
             // With SingleLine=true, title renders on one line
             var lines = console.Output.Split('\n');
             // Should be 2 (content + trailing newline), not more
-            lines.Length.ShouldBeLessThanOrEqualTo(3);
+            lines.Length.Should().BeLessThanOrEqualTo(3);
         }
     }
 
@@ -184,7 +184,7 @@ public sealed class RuleMutationTests
             var plainConsole = CreateAnsiConsole(40);
             plainConsole.Write(plainRule);
 
-            styledConsole.Output.ShouldNotBe(plainConsole.Output);
+            styledConsole.Output.Should().NotBe(plainConsole.Output);
         }
 
         [Fact]
@@ -203,7 +203,7 @@ public sealed class RuleMutationTests
             var plainConsole = CreateAnsiConsole(40);
             plainConsole.Write(plainRule);
 
-            styledConsole.Output.ShouldNotBe(plainConsole.Output);
+            styledConsole.Output.Should().NotBe(plainConsole.Output);
         }
 
         [Fact]
@@ -222,7 +222,7 @@ public sealed class RuleMutationTests
             var plainConsole = CreateAnsiConsole(40);
             plainConsole.Write(plainRule);
 
-            styledConsole.Output.ShouldNotBe(plainConsole.Output);
+            styledConsole.Output.Should().NotBe(plainConsole.Output);
         }
 
         [Fact]
@@ -237,7 +237,7 @@ public sealed class RuleMutationTests
             var plainConsole = CreateAnsiConsole(40);
             plainConsole.Write(plainRule);
 
-            styledConsole.Output.ShouldNotBe(plainConsole.Output);
+            styledConsole.Output.Should().NotBe(plainConsole.Output);
         }
     }
 }

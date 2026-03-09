@@ -9,7 +9,7 @@ public sealed class StyleTests
         Style style = Color.Red;
 
         // Then
-        style.Foreground.ShouldBe(Color.Red);
+        style.Foreground.Should().Be(Color.Red);
     }
 
     [Fact]
@@ -23,9 +23,9 @@ public sealed class StyleTests
         var result = first.Combine(other);
 
         // Then
-        result.Foreground.ShouldBe(Color.Green);
-        result.Background.ShouldBe(Color.Silver);
-        result.Decoration.ShouldBe(Decoration.Bold | Decoration.Italic | Decoration.Underline);
+        result.Foreground.Should().Be(Color.Green);
+        result.Background.Should().Be(Color.Silver);
+        result.Decoration.Should().Be(Decoration.Bold | Decoration.Italic | Decoration.Underline);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public sealed class StyleTests
         var result = first.Equals(second);
 
         // Then
-        result.ShouldBeTrue();
+        result.Should().BeTrue();
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public sealed class StyleTests
         var result = first.Equals(second);
 
         // Then
-        result.ShouldBeFalse();
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public sealed class StyleTests
         var result = first.Equals(second);
 
         // Then
-        result.ShouldBeFalse();
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class StyleTests
         var result = first.Equals(second);
 
         // Then
-        result.ShouldBeFalse();
+        result.Should().BeFalse();
     }
 
     public sealed class TheParseMethod
@@ -93,9 +93,9 @@ public sealed class StyleTests
             var result = Style.Parse("default");
 
             // Then
-            result.Foreground.ShouldBe(Color.Default);
-            result.Background.ShouldBe(Color.Default);
-            result.Decoration.ShouldBe(Decoration.None);
+            result.Foreground.Should().Be(Color.Default);
+            result.Background.Should().Be(Color.Default);
+            result.Decoration.Should().Be(Decoration.None);
         }
 
         [Theory]
@@ -118,7 +118,7 @@ public sealed class StyleTests
             var result = Style.Parse(text);
 
             // Then
-            result.Decoration.ShouldBe(decoration);
+            result.Decoration.Should().Be(decoration);
         }
 
         [Fact]
@@ -128,9 +128,9 @@ public sealed class StyleTests
             var result = Style.Parse("default on green");
 
             // Then
-            result.Decoration.ShouldBe(Decoration.None);
-            result.Foreground.ShouldBe(Color.Default);
-            result.Background.ShouldBe(Color.Green);
+            result.Decoration.Should().Be(Decoration.None);
+            result.Foreground.Should().Be(Color.Default);
+            result.Background.Should().Be(Color.Green);
         }
 
         [Fact]
@@ -140,8 +140,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse("green yellow"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldBe("A foreground color has already been set.");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Be("A foreground color has already been set.");
         }
 
         [Fact]
@@ -151,8 +151,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse("green on blue yellow"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldBe("A background color has already been set.");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Be("A background color has already been set.");
         }
 
         [Fact]
@@ -162,8 +162,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse("bold lol"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldBe("Could not find color or style 'lol'.");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Be("Could not find color or style 'lol'.");
         }
 
         [Fact]
@@ -173,8 +173,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse("blue on lol"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldBe("Could not find color 'lol'.");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Be("Could not find color 'lol'.");
         }
 
         [Fact]
@@ -184,9 +184,9 @@ public sealed class StyleTests
             var result = Style.Parse("bold underline blue on green");
 
             // Then
-            result.Decoration.ShouldBe(Decoration.Bold | Decoration.Underline);
-            result.Foreground.ShouldBe(Color.Blue);
-            result.Background.ShouldBe(Color.Green);
+            result.Decoration.Should().Be(Decoration.Bold | Decoration.Underline);
+            result.Foreground.Should().Be(Color.Blue);
+            result.Background.Should().Be(Color.Green);
         }
 
         [Theory]
@@ -198,8 +198,8 @@ public sealed class StyleTests
             var result = Style.Parse(style);
 
             // Then
-            result.Foreground.ShouldBe(Color.Red);
-            result.Background.ShouldBe(Color.Blue);
+            result.Foreground.Should().Be(Color.Red);
+            result.Background.Should().Be(Color.Blue);
         }
 
         [Theory]
@@ -212,8 +212,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse(style));
 
             // Then
-            result.ShouldNotBeNull();
-            result.Message.ShouldBe(expected);
+            result.Should().NotBeNull();
+            result.Message.Should().Be(expected);
         }
 
         [Theory]
@@ -224,8 +224,8 @@ public sealed class StyleTests
             var result = Style.Parse(style);
 
             // Then
-            result.Foreground.ShouldBe(Color.Red);
-            result.Background.ShouldBe(Color.Blue);
+            result.Foreground.Should().Be(Color.Red);
+            result.Background.Should().Be(Color.Blue);
         }
 
         [Theory]
@@ -236,8 +236,8 @@ public sealed class StyleTests
             var result = Style.Parse(style);
 
             // Then
-            result.Foreground.ShouldBe(Color.Blue);
-            result.Background.ShouldBe(Color.DeepSkyBlue4_1);
+            result.Foreground.Should().Be(Color.Blue);
+            result.Background.Should().Be(Color.DeepSkyBlue4_1);
         }
 
         [Theory]
@@ -249,8 +249,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse(style));
 
             // Then
-            result.ShouldNotBeNull();
-            result.Message.ShouldBe(expected);
+            result.Should().NotBeNull();
+            result.Message.Should().Be(expected);
         }
 
         [Theory]
@@ -266,8 +266,8 @@ public sealed class StyleTests
             var result = Record.Exception(() => Style.Parse(style));
 
             // Then
-            result.ShouldNotBeNull();
-            result.Message.ShouldStartWith(expected);
+            result.Should().NotBeNull();
+            result.Message.Should().StartWith(expected);
         }
     }
 
@@ -280,8 +280,8 @@ public sealed class StyleTests
             var result = Style.TryParse("bold", out var style);
 
             // Then
-            result.ShouldBeTrue();
-            style.Decoration.ShouldBe(Decoration.Bold);
+            result.Should().BeTrue();
+            style.Decoration.Should().Be(Decoration.Bold);
         }
 
         [Fact]
@@ -291,7 +291,7 @@ public sealed class StyleTests
             var result = Style.TryParse("lol", out _);
 
             // Then
-            result.ShouldBeFalse();
+            result.Should().BeFalse();
         }
     }
 
@@ -307,7 +307,7 @@ public sealed class StyleTests
             var result = style.ToMarkup();
 
             // Then
-            result.ShouldBe("red");
+            result.Should().Be("red");
         }
 
         [Fact]
@@ -320,7 +320,7 @@ public sealed class StyleTests
             var result = style.ToMarkup();
 
             // Then
-            result.ShouldBe("red on green");
+            result.Should().Be("red on green");
         }
 
         [Fact]
@@ -333,7 +333,7 @@ public sealed class StyleTests
             var result = style.ToMarkup();
 
             // Then
-            result.ShouldBe("bold underline red on green");
+            result.Should().Be("bold underline red on green");
         }
 
         [Fact]
@@ -346,7 +346,7 @@ public sealed class StyleTests
             var result = style.ToMarkup();
 
             // Then
-            result.ShouldBe("default on green");
+            result.Should().Be("default on green");
         }
     }
 }

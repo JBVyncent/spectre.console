@@ -13,7 +13,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 82, ThrowIfNull removal
             var ex = Record.Exception(() => new Segment(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -21,7 +21,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 123, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.CellCount(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -29,7 +29,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 196, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.SplitLines(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -37,7 +37,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 210, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.SplitLines(null!, 80));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -45,7 +45,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 328, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.SplitOverflow(null!, Overflow.Fold, 80));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -53,7 +53,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 385, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.Truncate((IEnumerable<Segment>)null!, 80));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -61,7 +61,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 494, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.TruncateWithEllipsis(null!, 80));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -69,7 +69,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 514, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.TrimEnd(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -77,7 +77,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 456, ThrowIfNull removal
             var ex = Record.Exception(() => Segment.Merge(null!).ToList());
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -86,7 +86,7 @@ public sealed class SegmentMutationTests
             // Kills: Line 539, ThrowIfNull removal
             // Not equivalent — foreach on null throws NullReferenceException
             var ex = Record.Exception(() => Segment.MakeSameHeight(3, null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
     }
 
@@ -96,7 +96,7 @@ public sealed class SegmentMutationTests
         public void Should_Not_Be_Control_Code()
         {
             // Kills: Line 51, false -> true mutation on Segment.Empty
-            Segment.Empty.IsControlCode.ShouldBeFalse();
+            Segment.Empty.IsControlCode.Should().BeFalse();
         }
     }
 
@@ -107,8 +107,8 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 98, false -> true mutation on control code flag
             var segment = Segment.Control("\x1b[2J");
-            segment.IsControlCode.ShouldBeTrue();
-            segment.CellCount().ShouldBe(0);
+            segment.IsControlCode.Should().BeTrue();
+            segment.CellCount().Should().Be(0);
         }
 
         [Fact]
@@ -116,7 +116,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: Line 98, additional flag boolean mutation
             var segment = Segment.Control("test");
-            segment.IsLineBreak.ShouldBeFalse();
+            segment.IsLineBreak.Should().BeFalse();
         }
     }
 
@@ -128,7 +128,7 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 139-141
             var segment = new Segment("Hello\n");
             var stripped = segment.StripLineEndings();
-            stripped.Text.ShouldBe("Hello");
+            stripped.Text.Should().Be("Hello");
         }
 
         [Fact]
@@ -137,7 +137,7 @@ public sealed class SegmentMutationTests
             var segment = new Segment("World\r\n");
             var stripped = segment.StripLineEndings();
             // Note: NormalizeNewLines in ctor converts \r\n to \n, so \r is already gone
-            stripped.Text.ShouldBe("World");
+            stripped.Text.Should().Be("World");
         }
 
         [Fact]
@@ -146,7 +146,7 @@ public sealed class SegmentMutationTests
             var style = new Style(Color.Red);
             var segment = new Segment("Test\n", style);
             var stripped = segment.StripLineEndings();
-            stripped.Style.ShouldBe(style);
+            stripped.Style.Should().Be(style);
         }
     }
 
@@ -158,8 +158,8 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 185-187
             var original = new Segment("Hello", new Style(Color.Red));
             var cloned = original.Clone();
-            cloned.Text.ShouldBe("Hello");
-            cloned.Style.ShouldBe(original.Style);
+            cloned.Text.Should().Be("Hello");
+            cloned.Style.Should().Be(original.Style);
         }
     }
 
@@ -171,8 +171,8 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 151-153
             var segment = new Segment("Hello");
             var (first, second) = segment.Split(-1);
-            first.ShouldBe(segment);
-            second.ShouldBeNull();
+            first.Should().Be(segment);
+            second.Should().BeNull();
         }
     }
 
@@ -186,9 +186,9 @@ public sealed class SegmentMutationTests
             var segments = new[] { new Segment("ABCDE") };
             var lines = Segment.SplitLines(segments, 5);
             // Should produce exactly 1 line containing the segment
-            lines.Count.ShouldBe(1);
-            lines[0].Count.ShouldBe(1);
-            lines[0][0].Text.ShouldBe("ABCDE");
+            lines.Count.Should().Be(1);
+            lines[0].Count.Should().Be(1);
+            lines[0][0].Text.Should().Be("ABCDE");
         }
 
         [Fact]
@@ -197,9 +197,9 @@ public sealed class SegmentMutationTests
             // Kills: Line 237 (stack.Push removal) — without pushing second, content is lost
             var segments = new[] { new Segment("ABCDEFGHIJ") };
             var lines = Segment.SplitLines(segments, 5);
-            lines.Count.ShouldBe(2);
-            lines[0][0].Text.ShouldBe("ABCDE");
-            lines[1][0].Text.ShouldBe("FGHIJ");
+            lines.Count.Should().Be(2);
+            lines[0][0].Text.Should().Be("ABCDE");
+            lines[1][0].Text.Should().Be("FGHIJ");
         }
 
         [Fact]
@@ -208,9 +208,9 @@ public sealed class SegmentMutationTests
             // Kills: Line 244, "\n" -> "" mutation
             var segments = new[] { new Segment("Hello\nWorld") };
             var lines = Segment.SplitLines(segments);
-            lines.Count.ShouldBe(2);
-            lines[0][0].Text.ShouldBe("Hello");
-            lines[1][0].Text.ShouldBe("World");
+            lines.Count.Should().Be(2);
+            lines[0][0].Text.Should().Be("Hello");
+            lines[1][0].Text.Should().Be("World");
         }
 
         [Fact]
@@ -224,9 +224,9 @@ public sealed class SegmentMutationTests
                 new Segment("B"),
             };
             var lines = Segment.SplitLines(segments);
-            lines.Count.ShouldBe(2);
-            lines[0][0].Text.ShouldBe("A");
-            lines[1][0].Text.ShouldBe("B");
+            lines.Count.Should().Be(2);
+            lines[0][0].Text.Should().Be("A");
+            lines[1][0].Text.Should().Be("B");
         }
 
         [Fact]
@@ -236,10 +236,10 @@ public sealed class SegmentMutationTests
             // and Line 272, line.Length > 0 -> line.Length >= 0
             var segments = new[] { new Segment("Hello\nWorld\nFoo") };
             var lines = Segment.SplitLines(segments);
-            lines.Count.ShouldBe(3);
-            lines[0][0].Text.ShouldBe("Hello");
-            lines[1][0].Text.ShouldBe("World");
-            lines[2][0].Text.ShouldBe("Foo");
+            lines.Count.Should().Be(3);
+            lines[0][0].Text.Should().Be("Hello");
+            lines[1][0].Text.Should().Be("World");
+            lines[2][0].Text.Should().Be("Foo");
         }
 
         [Fact]
@@ -248,8 +248,8 @@ public sealed class SegmentMutationTests
             // Kills: Line 278, parts.Length - 1 -> parts.Length + 1
             var segments = new[] { new Segment("A\nB\nC") };
             var lines = Segment.SplitLines(segments);
-            lines.Count.ShouldBe(3);
-            lines[2][0].Text.ShouldBe("C");
+            lines.Count.Should().Be(3);
+            lines[2][0].Text.Should().Be("C");
         }
 
         [Fact]
@@ -264,9 +264,9 @@ public sealed class SegmentMutationTests
                 new Segment("Line2"),
             };
             var lines = Segment.SplitLines(segments, int.MaxValue, height: 2);
-            lines.Count.ShouldBe(2);
-            lines[0][0].Text.ShouldBe("Line1");
-            lines[1][0].Text.ShouldBe("Line2");
+            lines.Count.Should().Be(2);
+            lines[0][0].Text.Should().Be("Line1");
+            lines[1][0].Text.Should().Be("Line2");
         }
 
         [Fact]
@@ -280,7 +280,7 @@ public sealed class SegmentMutationTests
                 new Segment("C"),
             };
             var lines = Segment.SplitLines(segments, int.MaxValue, height: 2);
-            lines.Count.ShouldBe(2);
+            lines.Count.Should().Be(2);
         }
     }
 
@@ -292,8 +292,8 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 331-333 and Line 330 <= vs < mutation
             var segment = new Segment("AB");
             var result = Segment.SplitOverflow(segment, Overflow.Fold, 2);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("AB");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("AB");
         }
 
         [Fact]
@@ -302,8 +302,8 @@ public sealed class SegmentMutationTests
             // Kills: Line 330, <= -> < boundary mutation
             var segment = new Segment("ABCDE");
             var result = Segment.SplitOverflow(segment, Overflow.Fold, 5);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("ABCDE");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("ABCDE");
         }
 
         [Fact]
@@ -312,8 +312,8 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 350-352 and Line 350 <= vs < mutation
             var segment = new Segment("Hello");
             var result = Segment.SplitOverflow(segment, Overflow.Crop, 0);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe(string.Empty);
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be(string.Empty);
         }
 
         [Fact]
@@ -322,8 +322,8 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 356-357
             var segment = new Segment("Hello World");
             var result = Segment.SplitOverflow(segment, Overflow.Crop, 5);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("Hello");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("Hello");
         }
 
         [Fact]
@@ -333,8 +333,8 @@ public sealed class SegmentMutationTests
             var style = new Style(Color.Green);
             var segment = new Segment("Hello", style);
             var result = Segment.SplitOverflow(segment, Overflow.Crop, 3);
-            result.Count.ShouldBe(1);
-            result[0].Style.ShouldBe(style);
+            result.Count.Should().Be(1);
+            result[0].Style.Should().Be(style);
         }
 
         [Fact]
@@ -344,8 +344,8 @@ public sealed class SegmentMutationTests
             // and NoCoverage lines 364
             var segment = new Segment("Hello");
             var result = Segment.SplitOverflow(segment, Overflow.Ellipsis, 1);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("…");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("…");
         }
 
         [Fact]
@@ -354,9 +354,9 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 368-370
             var segment = new Segment("Hello World");
             var result = Segment.SplitOverflow(segment, Overflow.Ellipsis, 6);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldStartWith("Hello");
-            result[0].Text.ShouldEndWith("…");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().StartWith("Hello");
+            result[0].Text.Should().EndWith("…");
         }
 
         [Fact]
@@ -365,8 +365,8 @@ public sealed class SegmentMutationTests
             // Kills: Line 362 arithmetic and Line 369 string mutation
             var segment = new Segment("ABCDEFGH");
             var result = Segment.SplitOverflow(segment, Overflow.Ellipsis, 4);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("ABC…");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("ABC…");
         }
 
         [Fact]
@@ -377,8 +377,8 @@ public sealed class SegmentMutationTests
             // With <:  CellCount(5) < 5 is false → enters Fold/Crop/Ellipsis logic
             var segment = new Segment("ABCDE");
             var foldResult = Segment.SplitOverflow(segment, Overflow.Fold, 5);
-            foldResult.Count.ShouldBe(1);
-            foldResult[0].ShouldBe(segment); // Same instance for early return
+            foldResult.Count.Should().Be(1);
+            foldResult[0].Should().Be(segment); // Same instance for early return
         }
     }
 
@@ -396,7 +396,7 @@ public sealed class SegmentMutationTests
             };
             var result = Segment.Truncate(segments, 6);
             // "Hello" (5) fits, " " (1) fits (total 6), "World" (5) exceeds 6
-            result.Count.ShouldBe(2);
+            result.Count.Should().Be(2);
         }
 
         [Fact]
@@ -409,7 +409,7 @@ public sealed class SegmentMutationTests
                 new Segment("DE"),
             };
             var result = Segment.Truncate(segments, 5);
-            result.Count.ShouldBe(2); // Both fit exactly
+            result.Count.Should().Be(2); // Both fit exactly
         }
 
         [Fact]
@@ -418,8 +418,8 @@ public sealed class SegmentMutationTests
             // Kills: Line 404, First() -> FirstOrDefault()
             var segments = new[] { new Segment("Hello World") };
             var result = Segment.Truncate(segments, 5);
-            result.Count.ShouldBe(1);
-            result[0].CellCount().ShouldBeLessThanOrEqualTo(5);
+            result.Count.Should().Be(1);
+            result[0].CellCount().Should().BeLessThanOrEqualTo(5);
         }
     }
 
@@ -430,7 +430,7 @@ public sealed class SegmentMutationTests
         {
             // Kills: NoCoverage lines 422-424
             var result = Segment.Truncate((Segment?)null, 10);
-            result.ShouldBeNull();
+            result.Should().BeNull();
         }
 
         [Fact]
@@ -439,7 +439,7 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 427-429 and <= vs < mutation
             var segment = new Segment("Hi");
             var result = Segment.Truncate(segment, 5);
-            result.ShouldBe(segment);
+            result.Should().Be(segment);
         }
 
         [Fact]
@@ -448,7 +448,7 @@ public sealed class SegmentMutationTests
             // Kills: Line 427, <= -> < boundary
             var segment = new Segment("Hello");
             var result = Segment.Truncate(segment, 5);
-            result.ShouldBe(segment);
+            result.Should().Be(segment);
         }
 
         [Fact]
@@ -458,7 +458,7 @@ public sealed class SegmentMutationTests
             // A fullwidth character (width 2) in maxWidth 1 can't fit
             var segment = new Segment("测");
             var result = Segment.Truncate(segment, 1);
-            result.ShouldBeNull();
+            result.Should().BeNull();
         }
     }
 
@@ -470,8 +470,8 @@ public sealed class SegmentMutationTests
             // Kills: NoCoverage lines 496-498 and <= vs < mutation
             var segments = new[] { new Segment("Hi") };
             var result = Segment.TruncateWithEllipsis(segments, 10);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("Hi");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("Hi");
         }
 
         [Fact]
@@ -480,8 +480,8 @@ public sealed class SegmentMutationTests
             // Kills: Line 496, <= -> < boundary
             var segments = new[] { new Segment("Hello") };
             var result = Segment.TruncateWithEllipsis(segments, 5);
-            result.Count.ShouldBe(1);
-            result[0].Text.ShouldBe("Hello");
+            result.Count.Should().Be(1);
+            result[0].Text.Should().Be("Hello");
         }
 
         [Fact]
@@ -503,8 +503,8 @@ public sealed class SegmentMutationTests
             // result.Last() = "EFGH" (Blue), ellipsis should get Blue style
             var result = Segment.TruncateWithEllipsis(segments, 9);
             var ellipsis = result[^1];
-            ellipsis.Text.ShouldContain("…");
-            ellipsis.Style.ShouldBe(style2);
+            ellipsis.Text.Should().Contain("…");
+            ellipsis.Style.Should().Be(style2);
         }
     }
 
@@ -520,8 +520,8 @@ public sealed class SegmentMutationTests
                 new() { new SegmentLine(), new SegmentLine(), new SegmentLine() },
             };
             var result = Segment.MakeSameHeight(3, cells);
-            result[0].Count.ShouldBe(3);
-            result[1].Count.ShouldBe(3);
+            result[0].Count.Should().Be(3);
+            result[1].Count.Should().Be(3);
         }
 
         [Fact]
@@ -535,7 +535,7 @@ public sealed class SegmentMutationTests
                 new() { new SegmentLine(), new SegmentLine() },
             };
             var result = Segment.MakeSameHeight(2, cells);
-            result[0].Count.ShouldBe(2); // Should NOT grow to 3
+            result[0].Count.Should().Be(2); // Should NOT grow to 3
         }
     }
 
@@ -551,7 +551,7 @@ public sealed class SegmentMutationTests
 
             var result = Segment.MakeWidth(5, lines);
             // Line should now be padded to width 5
-            result[0].CellCount().ShouldBe(5);
+            result[0].CellCount().Should().Be(5);
         }
 
         [Fact]
@@ -563,8 +563,8 @@ public sealed class SegmentMutationTests
             var lines = new List<SegmentLine> { line };
 
             var result = Segment.MakeWidth(5, lines);
-            result[0].CellCount().ShouldBe(5);
-            result[0].Count.ShouldBe(1); // No padding segment added
+            result[0].CellCount().Should().Be(5);
+            result[0].Count.Should().Be(1); // No padding segment added
         }
     }
 }

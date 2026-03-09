@@ -36,10 +36,10 @@ public sealed class SegmentTests
             var (first, second) = segment.Split(offset);
 
             // Then
-            first.Text.ShouldBe(expectedFirst);
-            first.Style.ShouldBe(style);
-            second?.Text.ShouldBe(expectedSecond);
-            second?.Style.ShouldBe(style);
+            first.Text.Should().Be(expectedFirst);
+            first.Style.Should().Be(style);
+            second?.Text.Should().Be(expectedSecond);
+            second?.Style.Should().Be(style);
         }
     }
 
@@ -61,18 +61,18 @@ public sealed class SegmentTests
             ]);
 
             // Then
-            lines.Count.ShouldBe(3);
+            lines.Count.Should().Be(3);
 
-            lines[0].Count.ShouldBe(2);
-            lines[0][0].Text.ShouldBe("Foo");
-            lines[0][1].Text.ShouldBe("Bar");
+            lines[0].Count.Should().Be(2);
+            lines[0][0].Text.Should().Be("Foo");
+            lines[0][1].Text.Should().Be("Bar");
 
-            lines[1].Count.ShouldBe(2);
-            lines[1][0].Text.ShouldBe("Baz");
-            lines[1][1].Text.ShouldBe("Qux");
+            lines[1].Count.Should().Be(2);
+            lines[1][0].Text.Should().Be("Baz");
+            lines[1][1].Text.Should().Be("Qux");
 
-            lines[2].Count.ShouldBe(1);
-            lines[2][0].Text.ShouldBe("Corgi");
+            lines[2].Count.Should().Be(1);
+            lines[2][0].Text.Should().Be("Corgi");
         }
 
         [Fact]
@@ -91,18 +91,18 @@ public sealed class SegmentTests
             ]);
 
             // Then
-            lines.Count.ShouldBe(3);
+            lines.Count.Should().Be(3);
 
-            lines[0].Count.ShouldBe(2);
-            lines[0][0].Text.ShouldBe("Foo");
-            lines[0][1].Text.ShouldBe("Bar");
+            lines[0].Count.Should().Be(2);
+            lines[0][0].Text.Should().Be("Foo");
+            lines[0][1].Text.Should().Be("Bar");
 
-            lines[1].Count.ShouldBe(2);
-            lines[1][0].Text.ShouldBe("Baz");
-            lines[1][1].Text.ShouldBe("Qux");
+            lines[1].Count.Should().Be(2);
+            lines[1][0].Text.Should().Be("Baz");
+            lines[1][1].Text.Should().Be("Qux");
 
-            lines[2].Count.ShouldBe(1);
-            lines[2][0].Text.ShouldBe("Corgi");
+            lines[2].Count.Should().Be(1);
+            lines[2][0].Text.Should().Be("Corgi");
         }
 
         [Fact]
@@ -119,20 +119,20 @@ public sealed class SegmentTests
             ]);
 
             // Then
-            lines.Count.ShouldBe(4);
+            lines.Count.Should().Be(4);
 
-            lines[0].Count.ShouldBe(1);
-            lines[0][0].Text.ShouldBe("Foo");
+            lines[0].Count.Should().Be(1);
+            lines[0][0].Text.Should().Be("Foo");
 
-            lines[1].Count.ShouldBe(1);
-            lines[1][0].Text.ShouldBe("Bar");
+            lines[1].Count.Should().Be(1);
+            lines[1][0].Text.Should().Be("Bar");
 
-            lines[2].Count.ShouldBe(2);
-            lines[2][0].Text.ShouldBe("Baz");
-            lines[2][1].Text.ShouldBe("Qux");
+            lines[2].Count.Should().Be(2);
+            lines[2][0].Text.Should().Be("Baz");
+            lines[2][1].Text.Should().Be("Qux");
 
-            lines[3].Count.ShouldBe(1);
-            lines[3][0].Text.ShouldBe("Corgi");
+            lines[3].Count.Should().Be(1);
+            lines[3][0].Text.Should().Be("Corgi");
         }
 
         [Fact]
@@ -148,22 +148,22 @@ public sealed class SegmentTests
             ]);
 
             // Then — "Qux" precedes the \n so it stays on line 1 with "Bar"+"Baz"
-            lines.Count.ShouldBe(4);
+            lines.Count.Should().Be(4);
 
-            lines[0].Count.ShouldBe(1);
-            lines[0][0].Text.ShouldBe("Foo");
+            lines[0].Count.Should().Be(1);
+            lines[0][0].Text.Should().Be("Foo");
 
-            lines[1].Count.ShouldBe(3);
-            lines[1][0].Text.ShouldBe("Bar");
-            lines[1][1].Text.ShouldBe("Baz");
-            lines[1][2].Text.ShouldBe("Qux");
+            lines[1].Count.Should().Be(3);
+            lines[1][0].Text.Should().Be("Bar");
+            lines[1][1].Text.Should().Be("Baz");
+            lines[1][2].Text.Should().Be("Qux");
 
-            lines[2].Count.ShouldBe(1);
-            lines[2][0].Text.ShouldBe("Tra");
+            lines[2].Count.Should().Be(1);
+            lines[2][0].Text.Should().Be("Tra");
 
-            lines[3].Count.ShouldBe(2);
-            lines[3][0].Text.ShouldBe("Late");
-            lines[3][1].Text.ShouldBe("Corgi");
+            lines[3].Count.Should().Be(2);
+            lines[3][0].Text.Should().Be("Late");
+            lines[3][1].Text.Should().Be("Corgi");
         }
     }
 
@@ -180,9 +180,9 @@ public sealed class SegmentTests
             var result = Segment.SplitOverflow(segment, Overflow.Ellipsis, 10);
 
             // Then
-            result.Count.ShouldBe(1);
-            result[0].CellCount().ShouldBeLessThanOrEqualTo(10);
-            result[0].Text.EndsWith("…", StringComparison.Ordinal).ShouldBeTrue();
+            result.Count.Should().Be(1);
+            result[0].CellCount().Should().BeLessThanOrEqualTo(10);
+            result[0].Text.EndsWith("…", StringComparison.Ordinal).Should().BeTrue();
         }
 
         [Fact]
@@ -196,9 +196,9 @@ public sealed class SegmentTests
             var result = Segment.SplitOverflow(segment, Overflow.Crop, 10);
 
             // Then
-            result.Count.ShouldBe(1);
-            result[0].CellCount().ShouldBeLessThanOrEqualTo(10);
-            result[0].Text.EndsWith("…", StringComparison.Ordinal).ShouldBeFalse();
+            result.Count.Should().Be(1);
+            result[0].CellCount().Should().BeLessThanOrEqualTo(10);
+            result[0].Text.EndsWith("…", StringComparison.Ordinal).Should().BeFalse();
         }
     }
 }

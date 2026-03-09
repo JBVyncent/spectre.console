@@ -20,7 +20,7 @@ public sealed class AnsiWriterTests
             .EndLink();
 
         // Then
-        fixture.Output.ShouldBe("\e]8;id=123;https://spectreconsole.net\e\\\e[1;3m\e[38;5;11mSpectre Console\e[0m\e]8;;\e\\");
+        fixture.Output.Should().Be("\e]8;id=123;https://spectreconsole.net\e\\\e[1;3m\e[38;5;11mSpectre Console\e[0m\e]8;;\e\\");
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class AnsiWriterTests
             .EndLink();
 
         // Then
-        fixture.Output.ShouldBe("\e[1;3m\e[38;5;11mSpectre Console\e[0m");
+        fixture.Output.Should().Be("\e[1;3m\e[38;5;11mSpectre Console\e[0m");
     }
 
     [Fact]
@@ -61,6 +61,6 @@ public sealed class AnsiWriterTests
             .EndLink();
 
         // Then
-        fixture.Output.ShouldBe("Spectre Console");
+        fixture.Output.Should().Be("Spectre Console");
     }
 }

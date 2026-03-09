@@ -8,7 +8,7 @@ public sealed class LiveDisplayTests
     public void Constructor_Throws_When_Console_IsNull()
     {
         // Kills L35 NoCoverage: ArgumentNullException.ThrowIfNull(console)
-        Should.Throw<ArgumentNullException>(() => new LiveDisplay(null!, new Text("x")));
+        FluentActions.Invoking(() => new LiveDisplay(null!, new Text("x"))).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -16,7 +16,7 @@ public sealed class LiveDisplayTests
     {
         // Kills L36 NoCoverage: ArgumentNullException.ThrowIfNull(target)
         var console = new TestConsole().Interactive();
-        Should.Throw<ArgumentNullException>(() => new LiveDisplay(console, null!));
+        FluentActions.Invoking(() => new LiveDisplay(console, null!)).Should().Throw<ArgumentNullException>();
     }
 
     // ── Start / Start<T> null guards and execution ────────────────────────────
@@ -27,7 +27,7 @@ public sealed class LiveDisplayTests
         // Kills L47 NoCoverage: ArgumentNullException.ThrowIfNull(action)
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
-        Should.Throw<ArgumentNullException>(() => live.Start(null!));
+        FluentActions.Invoking(() => live.Start(null!)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public sealed class LiveDisplayTests
 
         live.Start(ctx => { ran = true; });
 
-        ran.ShouldBeTrue();
+        ran.Should().BeTrue();
     }
 
     [Fact]
@@ -50,8 +50,8 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        Should.Throw<InvalidOperationException>(() =>
-            live.Start(ctx => throw new InvalidOperationException("from action")));
+        FluentActions.Invoking(() =>
+            live.Start(ctx => throw new InvalidOperationException("from action"))).Should().Throw<InvalidOperationException>();
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class LiveDisplayTests
         // Kills L66 NoCoverage: ArgumentNullException.ThrowIfNull(func)
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
-        Should.Throw<ArgumentNullException>(() => live.Start<int>(null!));
+        FluentActions.Invoking(() => live.Start<int>(null!)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class LiveDisplayTests
 
         var result = live.Start<int>(ctx => 42);
 
-        result.ShouldBe(42);
+        result.Should().Be(42);
     }
 
     // ── StartAsync null guards ────────────────────────────────────────────────
@@ -82,8 +82,7 @@ public sealed class LiveDisplayTests
         // Kills L79 NoCoverage: ArgumentNullException.ThrowIfNull(func)
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
-        await Should.ThrowAsync<ArgumentNullException>(
-            () => live.StartAsync((Func<LiveDisplayContext, Task>)null!));
+        await FluentActions.Awaiting(() => live.StartAsync((Func<LiveDisplayContext, Task>)null!)).Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -91,8 +90,7 @@ public sealed class LiveDisplayTests
     {
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
-        await Should.ThrowAsync<ArgumentNullException>(
-            () => live.StartAsync<int>((Func<LiveDisplayContext, Task<int>>)null!));
+        await FluentActions.Awaiting(() => live.StartAsync<int>((Func<LiveDisplayContext, Task<int>>)null!)).Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -108,7 +106,7 @@ public sealed class LiveDisplayTests
             return Task.CompletedTask;
         });
 
-        ran.ShouldBeTrue();
+        ran.Should().BeTrue();
     }
 
     // ── LiveDisplayContext exercised via Start ────────────────────────────────
@@ -161,7 +159,7 @@ public sealed class LiveDisplayTests
     public void AutoClear_Defaults_To_False()
     {
         var console = new TestConsole().Interactive();
-        new LiveDisplay(console, new Text("x")).AutoClear.ShouldBeFalse();
+        new LiveDisplay(console, new Text("x")).AutoClear.Should().BeFalse();
     }
 
     [Fact]
@@ -190,7 +188,7 @@ public sealed class LiveDisplayTests
     public void AutoClear_Extension_Throws_When_Live_IsNull()
     {
         // Kills L139 NoCoverage: ArgumentNullException.ThrowIfNull(live)
-        Should.Throw<ArgumentNullException>(() => ((LiveDisplay)null!).AutoClear(true));
+        FluentActions.Invoking(() => ((LiveDisplay)null!).AutoClear(true)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -199,7 +197,7 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        live.AutoClear(true).AutoClear.ShouldBeTrue();
+        live.AutoClear(true).AutoClear.Should().BeTrue();
     }
 
     [Fact]
@@ -208,14 +206,14 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        live.AutoClear(false).ShouldBeSameAs(live);
+        live.AutoClear(false).Should().BeSameAs(live);
     }
 
     [Fact]
     public void Overflow_Extension_Throws_When_Live_IsNull()
     {
         // Kills L154 NoCoverage: ArgumentNullException.ThrowIfNull(live)
-        Should.Throw<ArgumentNullException>(() => ((LiveDisplay)null!).Overflow(VerticalOverflow.Crop));
+        FluentActions.Invoking(() => ((LiveDisplay)null!).Overflow(VerticalOverflow.Crop)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -224,7 +222,7 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        live.Overflow(VerticalOverflow.Crop).Overflow.ShouldBe(VerticalOverflow.Crop);
+        live.Overflow(VerticalOverflow.Crop).Overflow.Should().Be(VerticalOverflow.Crop);
     }
 
     [Fact]
@@ -233,15 +231,15 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        live.Overflow(VerticalOverflow.Visible).ShouldBeSameAs(live);
+        live.Overflow(VerticalOverflow.Visible).Should().BeSameAs(live);
     }
 
     [Fact]
     public void Cropping_Extension_Throws_When_Live_IsNull()
     {
         // Kills L169 NoCoverage: ArgumentNullException.ThrowIfNull(live)
-        Should.Throw<ArgumentNullException>(() =>
-            ((LiveDisplay)null!).Cropping(VerticalOverflowCropping.Bottom));
+        FluentActions.Invoking(() =>
+            ((LiveDisplay)null!).Cropping(VerticalOverflowCropping.Bottom)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -250,7 +248,7 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        live.Cropping(VerticalOverflowCropping.Bottom).Cropping.ShouldBe(VerticalOverflowCropping.Bottom);
+        live.Cropping(VerticalOverflowCropping.Bottom).Cropping.Should().Be(VerticalOverflowCropping.Bottom);
     }
 
     [Fact]
@@ -259,6 +257,6 @@ public sealed class LiveDisplayTests
         var console = new TestConsole().Interactive();
         var live = new LiveDisplay(console, new Text("x"));
 
-        live.Cropping(VerticalOverflowCropping.Top).ShouldBeSameAs(live);
+        live.Cropping(VerticalOverflowCropping.Top).Should().BeSameAs(live);
     }
 }

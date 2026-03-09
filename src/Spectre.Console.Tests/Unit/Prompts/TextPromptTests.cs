@@ -14,7 +14,7 @@ public sealed class TextPromptTests
         var result = console.Prompt(new TextPrompt<string>("Enter text:"));
 
         // Then
-        result.ShouldBe("Hello World");
+        result.Should().Be("Hello World");
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public sealed class TextPromptTests
                 .WithConverter(testData => testData.Item2));
 
         // Then
-        result.Item1.ShouldBe(2);
+        result.Item1.Should().Be(2);
         return Verifier.Verify(console.Output);
     }
 
@@ -444,8 +444,8 @@ public sealed class TextPromptTests
             new TextPrompt<Uri?>("Enter URI:")
                 .AllowEmpty());
 
-        result.ShouldBeNull();
-        console.Output.ShouldNotContain("Invalid input");
+        result.Should().BeNull();
+        console.Output.Should().NotContain("Invalid input");
     }
 
     [Fact]
@@ -461,7 +461,7 @@ public sealed class TextPromptTests
                 .AddChoice("[01]")
                 .AddChoice("[02]"));
 
-        result.ShouldBe("[01]");
+        result.Should().Be("[01]");
     }
 
     [Fact]
@@ -478,6 +478,6 @@ public sealed class TextPromptTests
                 .AddChoice("[02]")
                 .DefaultValue("[01]"));
 
-        result.ShouldBe("[01]");
+        result.Should().Be("[01]");
     }
 }

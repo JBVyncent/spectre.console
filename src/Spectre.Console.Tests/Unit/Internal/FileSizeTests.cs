@@ -19,7 +19,7 @@ public sealed class FileSizeTests
         var result = filesize.ToString();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -40,7 +40,7 @@ public sealed class FileSizeTests
         var result = filesize.ToString();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -60,7 +60,7 @@ public sealed class FileSizeTests
         var result = filesize.ToString();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -80,6 +80,6 @@ public sealed class FileSizeTests
         var result = filesize.ToString();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 }

@@ -13,7 +13,7 @@ public sealed class ProgressTaskTests
         var task = new ProgressTask(1, "Foo", 100, autoStart: true, timeProvider);
 
         // Then
-        task.StartTime.ShouldBe(expectedStartTime);
+        task.StartTime.Should().Be(expectedStartTime);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public sealed class ProgressTaskTests
         var task = new ProgressTask(1, "Foo", 100, autoStart: false, timeProvider);
 
         // Then
-        task.StartTime.ShouldBeNull();
+        task.StartTime.Should().BeNull();
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class ProgressTaskTests
         task.StartTask();
 
         // Then
-        task.StartTime.ShouldBe(expectedStartTime);
+        task.StartTime.Should().Be(expectedStartTime);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public sealed class ProgressTaskTests
         task.StopTask();
 
         // Then
-        task.StopTime.ShouldBe(expectedStopTime);
+        task.StopTime.Should().Be(expectedStopTime);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class ProgressTaskTests
         timeProvider.Advance(TimeSpan.FromSeconds(42));
 
         // Then
-        task.ElapsedTime.ShouldBe(TimeSpan.FromSeconds(42));
+        task.ElapsedTime.Should().Be(TimeSpan.FromSeconds(42));
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class ProgressTaskTests
         timeProvider.Advance(TimeSpan.FromSeconds(100));
 
         // Then
-        task.ElapsedTime.ShouldBe(TimeSpan.FromSeconds(10));
+        task.ElapsedTime.Should().Be(TimeSpan.FromSeconds(10));
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public sealed class ProgressTaskTests
         task.Increment(25);
 
         // Then
-        task.Speed.ShouldNotBeNull();
-        task.Speed!.Value.ShouldBe(10.0, tolerance: 0.001);
+        task.Speed.Should().NotBeNull();
+        task.Speed!.Value.Should().BeApproximately(10.0, 0.001);
     }
 }

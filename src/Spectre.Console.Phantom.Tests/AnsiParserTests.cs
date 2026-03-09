@@ -1,4 +1,3 @@
-using Shouldly;
 using Spectre.Console.Phantom;
 
 namespace Spectre.Console.Phantom.Tests;
@@ -10,16 +9,16 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("Hello World");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.Text>()
-            .Content.ShouldBe("Hello World");
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.Text>()
+                .Which.Content.Should().Be("Hello World");
     }
 
     [Fact]
     public void Should_Parse_Empty_String()
     {
         var result = AnsiParser.Parse("");
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -27,10 +26,10 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("A\nB");
 
-        result.Count.ShouldBe(3);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
-        result[1].ShouldBeOfType<AnsiSequence.NewLine>();
-        result[2].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("B");
+        result.Count.Should().Be(3);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("A");
+        result[1].Should().BeOfType<AnsiSequence.NewLine>();
+        result[2].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("B");
     }
 
     [Fact]
@@ -38,10 +37,10 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("A\rB");
 
-        result.Count.ShouldBe(3);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
-        result[1].ShouldBeOfType<AnsiSequence.CarriageReturn>();
-        result[2].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("B");
+        result.Count.Should().Be(3);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("A");
+        result[1].Should().BeOfType<AnsiSequence.CarriageReturn>();
+        result[2].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("B");
     }
 
     [Fact]
@@ -49,9 +48,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("AB\b");
 
-        result.Count.ShouldBe(2);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("AB");
-        result[1].ShouldBeOfType<AnsiSequence.Backspace>();
+        result.Count.Should().Be(2);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("AB");
+        result[1].Should().BeOfType<AnsiSequence.Backspace>();
     }
 
     [Fact]
@@ -59,9 +58,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[0m");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.Sgr>()
-            .Parameters.ShouldBe(new[] { 0 });
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.Sgr>()
+                .Which.Parameters.Should().Equal(new[] { 0 });
     }
 
     [Fact]
@@ -69,9 +68,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[1m");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.Sgr>()
-            .Parameters.ShouldBe(new[] { 1 });
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.Sgr>()
+                .Which.Parameters.Should().Equal(new[] { 1 });
     }
 
     [Fact]
@@ -79,9 +78,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[1;3;4m");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.Sgr>()
-            .Parameters.ShouldBe(new[] { 1, 3, 4 });
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.Sgr>()
+                .Which.Parameters.Should().Equal(new[] { 1, 3, 4 });
     }
 
     [Fact]
@@ -89,8 +88,8 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[38;5;196m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 38, 5, 196 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 38, 5, 196 });
     }
 
     [Fact]
@@ -98,8 +97,8 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[38;2;128;64;32m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 38, 2, 128, 64, 32 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 38, 2, 128, 64, 32 });
     }
 
     [Fact]
@@ -107,9 +106,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[3A");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Up);
-        move.Count.ShouldBe(3);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Up);
+        move.Count.Should().Be(3);
     }
 
     [Fact]
@@ -118,9 +117,9 @@ public sealed class AnsiParserTests
         // No parameter means default of 1
         var result = AnsiParser.Parse("\x1b[B");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Down);
-        move.Count.ShouldBe(1);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Down);
+        move.Count.Should().Be(1);
     }
 
     [Fact]
@@ -128,9 +127,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[5C");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Right);
-        move.Count.ShouldBe(5);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Right);
+        move.Count.Should().Be(5);
     }
 
     [Fact]
@@ -138,9 +137,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[2D");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Left);
-        move.Count.ShouldBe(2);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Left);
+        move.Count.Should().Be(2);
     }
 
     [Fact]
@@ -148,9 +147,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[5;10H");
 
-        var pos = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorPosition>();
-        pos.Row.ShouldBe(5);
-        pos.Column.ShouldBe(10);
+        var pos = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorPosition>().Which;
+        pos.Row.Should().Be(5);
+        pos.Column.Should().Be(10);
     }
 
     [Fact]
@@ -158,9 +157,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[H");
 
-        var pos = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorPosition>();
-        pos.Row.ShouldBe(1);
-        pos.Column.ShouldBe(1);
+        var pos = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorPosition>().Which;
+        pos.Row.Should().Be(1);
+        pos.Column.Should().Be(1);
     }
 
     [Fact]
@@ -168,23 +167,23 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[15G");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.CursorHorizontalAbsolute>()
-            .Column.ShouldBe(15);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.CursorHorizontalAbsolute>()
+                .Which.Column.Should().Be(15);
     }
 
     [Fact]
     public void Should_Parse_Save_Cursor()
     {
         var result = AnsiParser.Parse("\x1b[s");
-        result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.SaveCursor>();
+        result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.SaveCursor>();
     }
 
     [Fact]
     public void Should_Parse_Restore_Cursor()
     {
         var result = AnsiParser.Parse("\x1b[u");
-        result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.RestoreCursor>();
+        result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.RestoreCursor>();
     }
 
     [Fact]
@@ -192,9 +191,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[?25h");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.CursorVisibility>()
-            .Visible.ShouldBeTrue();
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.CursorVisibility>()
+                .Which.Visible.Should().BeTrue();
     }
 
     [Fact]
@@ -202,9 +201,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[?25l");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.CursorVisibility>()
-            .Visible.ShouldBeFalse();
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.CursorVisibility>()
+                .Which.Visible.Should().BeFalse();
     }
 
     [Fact]
@@ -212,9 +211,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[0J");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
-            .Mode.ShouldBe(EraseMode.ToEnd);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInDisplay>()
+                .Which.Mode.Should().Be(EraseMode.ToEnd);
     }
 
     [Fact]
@@ -222,9 +221,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[2J");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
-            .Mode.ShouldBe(EraseMode.All);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInDisplay>()
+                .Which.Mode.Should().Be(EraseMode.All);
     }
 
     [Fact]
@@ -232,9 +231,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[2K");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInLine>()
-            .Mode.ShouldBe(EraseMode.All);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInLine>()
+                .Which.Mode.Should().Be(EraseMode.All);
     }
 
     [Fact]
@@ -242,9 +241,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[?1049h");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.AlternateScreen>()
-            .Enter.ShouldBeTrue();
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.AlternateScreen>()
+                .Which.Enter.Should().BeTrue();
     }
 
     [Fact]
@@ -252,9 +251,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[?1049l");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.AlternateScreen>()
-            .Enter.ShouldBeFalse();
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.AlternateScreen>()
+                .Which.Enter.Should().BeFalse();
     }
 
     [Fact]
@@ -262,9 +261,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b]8;;https://example.com\x1b\\");
 
-        var link = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Hyperlink>();
-        link.Url.ShouldBe("https://example.com");
-        link.Id.ShouldBeNull();
+        var link = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Hyperlink>().Which;
+        link.Url.Should().Be("https://example.com");
+        link.Id.Should().BeNull();
     }
 
     [Fact]
@@ -272,9 +271,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b]8;id=42;https://example.com\x1b\\");
 
-        var link = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Hyperlink>();
-        link.Url.ShouldBe("https://example.com");
-        link.Id.ShouldBe("42");
+        var link = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Hyperlink>().Which;
+        link.Url.Should().Be("https://example.com");
+        link.Id.Should().Be("42");
     }
 
     [Fact]
@@ -282,11 +281,11 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[1mHello\x1b[0m World");
 
-        result.Count.ShouldBe(4);
-        result[0].ShouldBeOfType<AnsiSequence.Sgr>().Parameters.ShouldBe(new[] { 1 });
-        result[1].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("Hello");
-        result[2].ShouldBeOfType<AnsiSequence.Sgr>().Parameters.ShouldBe(new[] { 0 });
-        result[3].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe(" World");
+        result.Count.Should().Be(4);
+        result[0].Should().BeOfType<AnsiSequence.Sgr>().Which.Parameters.Should().Equal(new[] { 1 });
+        result[1].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("Hello");
+        result[2].Should().BeOfType<AnsiSequence.Sgr>().Which.Parameters.Should().Equal(new[] { 0 });
+        result[3].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be(" World");
     }
 
     [Fact]
@@ -294,9 +293,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[m");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.Sgr>()
-            .Parameters.ShouldBe(new[] { 0 });
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.Sgr>()
+                .Which.Parameters.Should().Equal(new[] { 0 });
     }
 
     [Fact]
@@ -307,10 +306,10 @@ public sealed class AnsiParserTests
         var output = "\x1b[?25l\x1b[s* Working\x1b[u\x1b[0J\x1b[s* Done\x1b[u\x1b[0J\x1b[?25h";
         var result = AnsiParser.Parse(output);
 
-        result.Count.ShouldBeGreaterThan(5);
-        result[0].ShouldBeOfType<AnsiSequence.CursorVisibility>().Visible.ShouldBeFalse();
-        result[1].ShouldBeOfType<AnsiSequence.SaveCursor>();
-        result.Last().ShouldBeOfType<AnsiSequence.CursorVisibility>().Visible.ShouldBeTrue();
+        result.Count.Should().BeGreaterThan(5);
+        result[0].Should().BeOfType<AnsiSequence.CursorVisibility>().Which.Visible.Should().BeFalse();
+        result[1].Should().BeOfType<AnsiSequence.SaveCursor>();
+        result.Last().Should().BeOfType<AnsiSequence.CursorVisibility>().Which.Visible.Should().BeTrue();
     }
 
     // ── Edge Cases: Truncated/Malformed Input ────────────────────────
@@ -322,8 +321,8 @@ public sealed class AnsiParserTests
         var result = AnsiParser.Parse("Hello\x1b");
 
         // Should have Text("Hello") and nothing else (ESC consumed but no sequence produced)
-        result.Count.ShouldBe(1);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("Hello");
+        result.Count.Should().Be(1);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("Hello");
     }
 
     [Fact]
@@ -333,9 +332,9 @@ public sealed class AnsiParserTests
         var result = AnsiParser.Parse("A\x1bXB");
 
         // The unknown sequence (\x1bX) is skipped, leaving text "A" and "B"
-        result.Count.ShouldBe(2);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
-        result[1].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("B");
+        result.Count.Should().Be(2);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("A");
+        result[1].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("B");
     }
 
     [Fact]
@@ -344,8 +343,8 @@ public sealed class AnsiParserTests
         // ESC [ at end of string (no command)
         var result = AnsiParser.Parse("A\x1b[");
 
-        result.Count.ShouldBe(1);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+        result.Count.Should().Be(1);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("A");
     }
 
     [Fact]
@@ -354,8 +353,8 @@ public sealed class AnsiParserTests
         // ESC [ 1;2 at end of string (params but no command)
         var result = AnsiParser.Parse("A\x1b[1;2");
 
-        result.Count.ShouldBe(1);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+        result.Count.Should().Be(1);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("A");
     }
 
     [Fact]
@@ -363,7 +362,7 @@ public sealed class AnsiParserTests
     {
         // Unknown CSI command letter 'Z' — should not produce any sequence
         var result = AnsiParser.Parse("\x1b[5Z");
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -371,7 +370,7 @@ public sealed class AnsiParserTests
     {
         // Unknown DEC private mode param 999 — should not produce any sequence
         var result = AnsiParser.Parse("\x1b[?999h");
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     // ── Edge Cases: OSC ──────────────────────────────────────────────
@@ -382,10 +381,10 @@ public sealed class AnsiParserTests
         // BEL (\a) as OSC terminator instead of ST (ESC \)
         var result = AnsiParser.Parse("\x1b]8;;https://bel.example\aLink\x1b]8;;\a");
 
-        result.Count.ShouldBe(3);
-        result[0].ShouldBeOfType<AnsiSequence.Hyperlink>().Url.ShouldBe("https://bel.example");
-        result[1].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("Link");
-        result[2].ShouldBeOfType<AnsiSequence.Hyperlink>().Url.ShouldBeEmpty();
+        result.Count.Should().Be(3);
+        result[0].Should().BeOfType<AnsiSequence.Hyperlink>().Which.Url.Should().Be("https://bel.example");
+        result[1].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("Link");
+        result[2].Should().BeOfType<AnsiSequence.Hyperlink>().Which.Url.Should().BeEmpty();
     }
 
     [Fact]
@@ -394,8 +393,8 @@ public sealed class AnsiParserTests
         // OSC sequence that runs to end of input without ST or BEL
         var result = AnsiParser.Parse("A\x1b]8;;https://unterminated");
 
-        result.Count.ShouldBe(1);
-        result[0].ShouldBeOfType<AnsiSequence.Text>().Content.ShouldBe("A");
+        result.Count.Should().Be(1);
+        result[0].Should().BeOfType<AnsiSequence.Text>().Which.Content.Should().Be("A");
     }
 
     [Fact]
@@ -404,7 +403,7 @@ public sealed class AnsiParserTests
         // OSC sequence that is NOT 8; (e.g., OSC 0 — set title)
         var result = AnsiParser.Parse("\x1b]0;My Title\a");
 
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -415,7 +414,7 @@ public sealed class AnsiParserTests
         // falling through to misparse this as a hyperlink.
         var result = AnsiParser.Parse("\x1b]2;Title;Extra\a");
 
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -425,7 +424,7 @@ public sealed class AnsiParserTests
         var result = AnsiParser.Parse("\x1b]8;no-second-semi\a");
 
         // ParseOscContent finds "8;" prefix but no second ";" in the rest → returns without adding
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -434,9 +433,9 @@ public sealed class AnsiParserTests
         // Closing hyperlink: 8;; (empty URL)
         var result = AnsiParser.Parse("\x1b]8;;\x1b\\");
 
-        var link = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Hyperlink>();
-        link.Url.ShouldBeEmpty();
-        link.Id.ShouldBeNull();
+        var link = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Hyperlink>().Which;
+        link.Url.Should().BeEmpty();
+        link.Id.Should().BeNull();
     }
 
     // ── Edge Cases: Erase Modes ──────────────────────────────────────
@@ -446,9 +445,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[1J");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
-            .Mode.ShouldBe(EraseMode.ToStart);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInDisplay>()
+                .Which.Mode.Should().Be(EraseMode.ToStart);
     }
 
     [Fact]
@@ -456,9 +455,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[3J");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
-            .Mode.ShouldBe(EraseMode.Scrollback);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInDisplay>()
+                .Which.Mode.Should().Be(EraseMode.Scrollback);
     }
 
     [Fact]
@@ -467,9 +466,9 @@ public sealed class AnsiParserTests
         // No parameter defaults to 0 (ToEnd)
         var result = AnsiParser.Parse("\x1b[J");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInDisplay>()
-            .Mode.ShouldBe(EraseMode.ToEnd);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInDisplay>()
+                .Which.Mode.Should().Be(EraseMode.ToEnd);
     }
 
     [Fact]
@@ -477,9 +476,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[0K");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInLine>()
-            .Mode.ShouldBe(EraseMode.ToEnd);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInLine>()
+                .Which.Mode.Should().Be(EraseMode.ToEnd);
     }
 
     [Fact]
@@ -487,9 +486,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[1K");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInLine>()
-            .Mode.ShouldBe(EraseMode.ToStart);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInLine>()
+                .Which.Mode.Should().Be(EraseMode.ToStart);
     }
 
     [Fact]
@@ -498,9 +497,9 @@ public sealed class AnsiParserTests
         // No parameter defaults to 0 (ToEnd)
         var result = AnsiParser.Parse("\x1b[K");
 
-        result.ShouldHaveSingleItem()
-            .ShouldBeOfType<AnsiSequence.EraseInLine>()
-            .Mode.ShouldBe(EraseMode.ToEnd);
+        result.Should().ContainSingle().Which
+            .Should().BeOfType<AnsiSequence.EraseInLine>()
+                .Which.Mode.Should().Be(EraseMode.ToEnd);
     }
 
     // ── Edge Cases: SGR extended colors ──────────────────────────────
@@ -510,8 +509,8 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[48;5;42m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 48, 5, 42 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 48, 5, 42 });
     }
 
     [Fact]
@@ -519,8 +518,8 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[48;2;10;20;30m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 48, 2, 10, 20, 30 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 48, 2, 10, 20, 30 });
     }
 
     [Fact]
@@ -528,8 +527,8 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[39m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 39 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 39 });
     }
 
     [Fact]
@@ -537,8 +536,8 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[49m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 49 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 49 });
     }
 
     [Fact]
@@ -547,8 +546,8 @@ public sealed class AnsiParserTests
         // SGR codes 1-9 for decorations
         var result = AnsiParser.Parse("\x1b[1;2;3;4;5;6;7;8;9m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
     }
 
     [Fact]
@@ -557,8 +556,8 @@ public sealed class AnsiParserTests
         // SGR 90-97 for bright foreground
         var result = AnsiParser.Parse("\x1b[91m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 91 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 91 });
     }
 
     [Fact]
@@ -567,8 +566,8 @@ public sealed class AnsiParserTests
         // SGR 100-107 for bright background
         var result = AnsiParser.Parse("\x1b[104m");
 
-        var sgr = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Sgr>();
-        sgr.Parameters.ShouldBe(new[] { 104 });
+        var sgr = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Sgr>().Which;
+        sgr.Parameters.Should().Equal(new[] { 104 });
     }
 
     // ── Null input ───────────────────────────────────────────────────
@@ -576,7 +575,7 @@ public sealed class AnsiParserTests
     [Fact]
     public void Should_Throw_For_Null_Input()
     {
-        Should.Throw<ArgumentNullException>(() => AnsiParser.Parse(null!));
+        FluentActions.Invoking(() => AnsiParser.Parse(null!)).Should().Throw<ArgumentNullException>();
     }
 
     // ── Cursor Up default ────────────────────────────────────────────
@@ -586,9 +585,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[A");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Up);
-        move.Count.ShouldBe(1);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Up);
+        move.Count.Should().Be(1);
     }
 
     [Fact]
@@ -596,9 +595,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[D");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Left);
-        move.Count.ShouldBe(1);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Left);
+        move.Count.Should().Be(1);
     }
 
     [Fact]
@@ -606,9 +605,9 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[C");
 
-        var move = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.CursorMove>();
-        move.Direction.ShouldBe(CursorDirection.Right);
-        move.Count.ShouldBe(1);
+        var move = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.CursorMove>().Which;
+        move.Direction.Should().Be(CursorDirection.Right);
+        move.Count.Should().Be(1);
     }
 
     // ── Multiple sequences in one string ─────────────────────────────
@@ -618,11 +617,11 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\n\r\b\n");
 
-        result.Count.ShouldBe(4);
-        result[0].ShouldBeOfType<AnsiSequence.NewLine>();
-        result[1].ShouldBeOfType<AnsiSequence.CarriageReturn>();
-        result[2].ShouldBeOfType<AnsiSequence.Backspace>();
-        result[3].ShouldBeOfType<AnsiSequence.NewLine>();
+        result.Count.Should().Be(4);
+        result[0].Should().BeOfType<AnsiSequence.NewLine>();
+        result[1].Should().BeOfType<AnsiSequence.CarriageReturn>();
+        result[2].Should().BeOfType<AnsiSequence.Backspace>();
+        result[3].Should().BeOfType<AnsiSequence.NewLine>();
     }
 
     [Fact]
@@ -630,11 +629,11 @@ public sealed class AnsiParserTests
     {
         var result = AnsiParser.Parse("\x1b[1A\x1b[2B\x1b[3C\x1b[4D");
 
-        result.Count.ShouldBe(4);
-        result[0].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Up);
-        result[1].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Down);
-        result[2].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Right);
-        result[3].ShouldBeOfType<AnsiSequence.CursorMove>().Direction.ShouldBe(CursorDirection.Left);
+        result.Count.Should().Be(4);
+        result[0].Should().BeOfType<AnsiSequence.CursorMove>().Which.Direction.Should().Be(CursorDirection.Up);
+        result[1].Should().BeOfType<AnsiSequence.CursorMove>().Which.Direction.Should().Be(CursorDirection.Down);
+        result[2].Should().BeOfType<AnsiSequence.CursorMove>().Which.Direction.Should().Be(CursorDirection.Right);
+        result[3].Should().BeOfType<AnsiSequence.CursorMove>().Which.Direction.Should().Be(CursorDirection.Left);
     }
 
     // ── OSC: ST terminator boundary conditions ────────────────────────
@@ -648,7 +647,7 @@ public sealed class AnsiParserTests
 
         // ESC at end of input without a following `\\` is not an ST terminator,
         // so the OSC is unterminated — result should be empty (no text escapes)
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
@@ -659,8 +658,8 @@ public sealed class AnsiParserTests
         var result = AnsiParser.Parse("\x1b]8;;http://a.com/x\x5cy\x1b\\");
 
         // Backslash in URL is valid; only ESC+\\ terminates the sequence
-        var link = result.ShouldHaveSingleItem().ShouldBeOfType<AnsiSequence.Hyperlink>();
-        link.Url.ShouldBe("http://a.com/x\x5cy");
+        var link = result.Should().ContainSingle().Which.Should().BeOfType<AnsiSequence.Hyperlink>().Which;
+        link.Url.Should().Be("http://a.com/x\x5cy");
     }
 
     // ── Private sequence with unrecognized command ────────────────────
@@ -670,13 +669,13 @@ public sealed class AnsiParserTests
     {
         // ? prefix with recognized param (25) but unrecognized command ('x')
         var result = AnsiParser.Parse("\x1b[?25x");
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Fact]
     public void Should_Handle_CSI_Private_With_No_Params()
     {
         var result = AnsiParser.Parse("\x1b[?h");
-        result.ShouldBeEmpty();
+        result.Should().BeEmpty();
     }
 }

@@ -70,7 +70,7 @@ public class TreeTests
         var result = Record.Exception(() => console.Write(tree));
 
         // Then
-        result.ShouldBeOfType<CircularTreeException>();
+        result.Should().BeOfType<CircularTreeException>();
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class TreeTests
         console.Output.SplitLines()
             .Select(x => x.Trim())
             .ToArray()
-            .ShouldBeEquivalentTo(new[]
+            .Should().BeEquivalentTo(new[]
             {
                 "Root node",
                 "└── Node level 1",
@@ -119,7 +119,7 @@ public class TreeTests
         console.Output.SplitLines()
             .Select(x => x.Trim())
             .ToArray()
-            .ShouldBeEquivalentTo(new[]
+            .Should().BeEquivalentTo(new[]
             {
                 "Root node",
                 string.Empty,

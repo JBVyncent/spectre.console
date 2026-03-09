@@ -16,7 +16,7 @@ public sealed class ColorTests
             var color2 = Color.FromHex(color);
 
             // Then
-            color2.ShouldBe(color1);
+            color2.Should().Be(color1);
         }
 
         [Theory]
@@ -31,8 +31,8 @@ public sealed class ColorTests
             var result = Color.TryFromHex(color, out var color2);
 
             // Then
-            result.ShouldBeTrue();
-            color2.ShouldBe(color1);
+            result.Should().BeTrue();
+            color2.Should().Be(color1);
         }
 
         [Theory]
@@ -47,7 +47,7 @@ public sealed class ColorTests
             var result = Record.Exception(() => Color.FromHex(input!));
 
             // Then
-            result.ShouldBeAssignableTo<Exception>();
+            result.Should().BeAssignableTo<Exception>();
         }
 
         [Theory]
@@ -62,8 +62,8 @@ public sealed class ColorTests
             var result = Color.TryFromHex(input!, out var color);
 
             // Then
-            result.ShouldBeFalse();
-            color.ShouldBe(Color.Default);
+            result.Should().BeFalse();
+            color.Should().Be(Color.Default);
         }
 
         [Theory]
@@ -80,7 +80,7 @@ public sealed class ColorTests
             var result = Color.FromHex(color);
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ public sealed class ColorTests
             var result = color1.Equals("Foo");
 
             // Then
-            result.ShouldBeFalse();
+            result.Should().BeFalse();
         }
 
         [Fact]
@@ -107,7 +107,7 @@ public sealed class ColorTests
             var result = color1.Equals(color2);
 
             // Then
-            result.ShouldBeTrue();
+            result.Should().BeTrue();
         }
 
         [Fact]
@@ -121,7 +121,7 @@ public sealed class ColorTests
             var result = color1.Equals(color2);
 
             // Then
-            result.ShouldBeTrue();
+            result.Should().BeTrue();
         }
 
         [Fact]
@@ -135,7 +135,7 @@ public sealed class ColorTests
             var result = color1.Equals(color2);
 
             // Then
-            result.ShouldBeTrue();
+            result.Should().BeTrue();
         }
 
         [Fact]
@@ -149,7 +149,7 @@ public sealed class ColorTests
             var result = color1.Equals(color2);
 
             // Then
-            result.ShouldBeFalse();
+            result.Should().BeFalse();
         }
 
         [Fact]
@@ -163,7 +163,7 @@ public sealed class ColorTests
             var result = color1.Equals(color2);
 
             // Then
-            result.ShouldBeFalse();
+            result.Should().BeFalse();
         }
     }
 
@@ -181,7 +181,7 @@ public sealed class ColorTests
             var hash2 = color2.GetHashCode();
 
             // Then
-            hash1.ShouldBe(hash2);
+            hash1.Should().Be(hash2);
         }
 
         [Fact]
@@ -196,7 +196,7 @@ public sealed class ColorTests
             var hash2 = color2.GetHashCode();
 
             // Then
-            hash1.ShouldNotBe(hash2);
+            hash1.Should().NotBe(hash2);
         }
     }
 
@@ -216,7 +216,7 @@ public sealed class ColorTests
                 var result = (Color)number;
 
                 // Then
-                result.ShouldBe(Color.FromInt32(number));
+                result.Should().Be(Color.FromInt32(number));
             }
 
             [Fact]
@@ -226,8 +226,8 @@ public sealed class ColorTests
                 var result = Record.Exception(() => (Color)(-1));
 
                 // Then
-                result.ShouldBeOfType<InvalidOperationException>();
-                result.Message.ShouldBe("Color number must be between 0 and 255");
+                result.Should().BeOfType<InvalidOperationException>();
+                result.Message.Should().Be("Color number must be between 0 and 255");
             }
 
             [Fact]
@@ -237,8 +237,8 @@ public sealed class ColorTests
                 var result = Record.Exception(() => (Color)256);
 
                 // Then
-                result.ShouldBeOfType<InvalidOperationException>();
-                result.Message.ShouldBe("Color number must be between 0 and 255");
+                result.Should().BeOfType<InvalidOperationException>();
+                result.Message.Should().Be("Color number must be between 0 and 255");
             }
         }
 
@@ -267,7 +267,7 @@ public sealed class ColorTests
                 var result = (Color)color;
 
                 // Then
-                result.ShouldBe(Color.FromInt32(expected));
+                result.Should().Be(Color.FromInt32(expected));
             }
         }
 
@@ -296,7 +296,7 @@ public sealed class ColorTests
                 var result = (ConsoleColor)Color.FromInt32(color);
 
                 // Then
-                result.ShouldBe(expected);
+                result.Should().Be(expected);
             }
         }
     }
@@ -310,7 +310,7 @@ public sealed class ColorTests
             var result = Color.Default.ToMarkup();
 
             // Then
-            result.ShouldBe("default");
+            result.Should().Be("default");
         }
 
         [Fact]
@@ -320,7 +320,7 @@ public sealed class ColorTests
             var result = Color.Red.ToMarkup();
 
             // Then
-            result.ShouldBe("red");
+            result.Should().Be("red");
         }
 
         [Fact]
@@ -330,7 +330,7 @@ public sealed class ColorTests
             var result = new Color(255, 1, 12).ToMarkup();
 
             // Then
-            result.ShouldBe("#FF010C");
+            result.Should().Be("#FF010C");
         }
     }
 
@@ -343,7 +343,7 @@ public sealed class ColorTests
             var name = Color.Fuchsia.ToString();
 
             // Then
-            name.ShouldBe("fuchsia");
+            name.Should().Be("fuchsia");
         }
 
         [Fact]
@@ -353,7 +353,7 @@ public sealed class ColorTests
             var name = new Color(128, 0, 128).ToString();
 
             // Then
-            name.ShouldBe("#800080 (RGB=128,0,128)");
+            name.Should().Be("#800080 (RGB=128,0,128)");
         }
     }
 }

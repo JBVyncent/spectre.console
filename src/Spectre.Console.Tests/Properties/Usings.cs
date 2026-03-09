@@ -7,7 +7,7 @@ global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Text.RegularExpressions;
 global using System.Threading.Tasks;
-global using Shouldly;
+global using FluentAssertions;
 global using Spectre.Console.Json;
 global using Spectre.Console.Rendering;
 global using Spectre.Console.Testing;

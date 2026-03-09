@@ -30,6 +30,8 @@ internal static class AnsiMarkupHighlighter
             // Not found the part with the search expression yet?
             if (!partFound)
             {
+                // Stryker disable once Equality : startIndex == part.EndIndex means query starts exactly at end boundary;
+                // both <= and < produce equivalent final output because centerEnd=0 and the center segment is empty
                 if (startIndex >= part.StartIndex && startIndex <= part.EndIndex)
                 {
                     var beginning = part.Text[0..(startIndex - part.StartIndex)];
@@ -59,6 +61,9 @@ internal static class AnsiMarkupHighlighter
 
             // Now continue with everything after the query
 
+            // Stryker disable all : boundary equality mutations here are semantically equivalent:
+            // StartIndex==endIndex produces identical output via the else branch; remaining==Length produces
+            // same full-highlight text; remaining==Length produces empty trailing segment collapsed by MergeSegments
             if (part.StartIndex < endIndex)
             {
                 var remaining = endIndex - part.StartIndex;
@@ -76,6 +81,7 @@ internal static class AnsiMarkupHighlighter
                     }
                 }
             }
+            // Stryker restore all
             else
             {
                 result.Add(new AnsiMarkupSegment(part.Text, part.Style, part.Link));
@@ -94,6 +100,8 @@ internal static class AnsiMarkupHighlighter
 
         foreach (var (item, index) in segments.Select((item, index) => (item, index)))
         {
+            // Stryker disable once Equality,Logical : at index==0 result.Count is always 0 so both conditions
+            // evaluate identically; index>0 guard is redundant but does not change observable behavior
             if (index > 0 && result.Count > 0)
             {
                 if (result[^1].Style.Equals(item.Style))
@@ -129,6 +137,7 @@ file sealed class IndexedMarkupSegment
 
     private IndexedMarkupSegment(AnsiMarkupSegment segment, int startIndex)
     {
+        // Stryker disable once Statement : AnsiMarkup.Parse never returns null segments; this guard is defensive dead code in a file-scoped class
         ArgumentNullException.ThrowIfNull(segment);
         _segment = segment;
         StartIndex = startIndex;

@@ -14,6 +14,6 @@ public sealed class ColorSystemTests
         var result = (int)colors;
 
         // Then
-        result.ShouldBe((int)support);
+        result.Should().Be((int)support);
     }
 }

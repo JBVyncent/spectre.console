@@ -54,7 +54,7 @@ public sealed class StatusTests
     [Fact]
     public void Constructor_Throws_When_Console_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => new Status(null!));
+        FluentActions.Invoking(() => new Status(null!)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class StatusTests
     {
         // Kills L24 mutant: AutoRefresh = true → AutoRefresh = false
         var console = new TestConsole().Interactive();
-        new Status(console).AutoRefresh.ShouldBeTrue();
+        new Status(console).AutoRefresh.Should().BeTrue();
     }
 
     // ── Status.Start overloads ────────────────────────────────────────────────
@@ -75,8 +75,8 @@ public sealed class StatusTests
         var console = new TestConsole().Interactive();
         var status = new Status(console) { AutoRefresh = false };
 
-        Should.Throw<InvalidOperationException>(() =>
-            status.Start("test", ctx => throw new InvalidOperationException("from action")));
+        FluentActions.Invoking(() =>
+            status.Start("test", ctx => throw new InvalidOperationException("from action"))).Should().Throw<InvalidOperationException>();
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class StatusTests
 
         status.Start("test", ctx => { ran = true; });
 
-        ran.ShouldBeTrue();
+        ran.Should().BeTrue();
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class StatusTests
 
         var result = status.Start("test", ctx => 42);
 
-        result.ShouldBe(42);
+        result.Should().Be(42);
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public sealed class StatusTests
             await Task.CompletedTask;
         });
 
-        ran.ShouldBeTrue();
+        ran.Should().BeTrue();
     }
 
     [Fact]
@@ -124,8 +124,7 @@ public sealed class StatusTests
         var console = new TestConsole().Interactive();
         var status = new Status(console);
 
-        await Should.ThrowAsync<ArgumentNullException>(
-            () => status.StartAsync("test", null!));
+        await FluentActions.Awaiting(() => status.StartAsync("test", null!)).Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -140,7 +139,7 @@ public sealed class StatusTests
             return 99;
         });
 
-        result.ShouldBe(99);
+        result.Should().Be(99);
     }
 
     [Fact]
@@ -149,8 +148,7 @@ public sealed class StatusTests
         var console = new TestConsole().Interactive();
         var status = new Status(console);
 
-        await Should.ThrowAsync<ArgumentNullException>(
-            () => status.StartAsync<int>("test", null!));
+        await FluentActions.Awaiting(() => status.StartAsync<int>("test", null!)).Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -159,8 +157,7 @@ public sealed class StatusTests
         var console = new TestConsole().Interactive();
         var status = new Status(console) { AutoRefresh = false };
 
-        Should.Throw<ArgumentNullException>(
-            () => status.Start("test", (Action<StatusContext>)null!));
+        FluentActions.Invoking(() => status.Start("test", (Action<StatusContext>)null!)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -169,8 +166,7 @@ public sealed class StatusTests
         var console = new TestConsole().Interactive();
         var status = new Status(console) { AutoRefresh = false };
 
-        Should.Throw<ArgumentNullException>(
-            () => status.Start<int>("test", (Func<StatusContext, int>)null!));
+        FluentActions.Invoking(() => status.Start<int>("test", (Func<StatusContext, int>)null!)).Should().Throw<ArgumentNullException>();
     }
 
     // ── SpinnerStyle is applied to SpinnerColumn ─────────────────────────────
@@ -197,7 +193,7 @@ public sealed class StatusTests
         status.Start("foo", ctx => ctx.Refresh());
 
         // With Style.Plain the spinner emits no color codes; mutant uses Color.Yellow → [38;5;11m
-        console.Output.ShouldNotContain("[38;5;11m");
+        console.Output.Should().NotContain("[38;5;11m");
     }
 
     // ── Null Spinner falls back to BypassSpinner ─────────────────────────────
@@ -212,7 +208,7 @@ public sealed class StatusTests
         // Should NOT throw even when Spinner is null
         status.Start("test", ctx => { ran = true; });
 
-        ran.ShouldBeTrue();
+        ran.Should().BeTrue();
     }
 
     // ── Null SpinnerStyle falls back to Style.Plain ───────────────────────────
@@ -227,7 +223,7 @@ public sealed class StatusTests
         // Should NOT throw even when SpinnerStyle is null
         status.Start("test", ctx => { ran = true; });
 
-        ran.ShouldBeTrue();
+        ran.Should().BeTrue();
     }
 }
 
@@ -242,8 +238,8 @@ public sealed class StatusContextMutationTests
         var console = new TestConsole().Interactive();
         var status = new Status(console) { AutoRefresh = false };
 
-        Should.Throw<ArgumentNullException>(() =>
-            status.Start("test", ctx => { ctx.Status = null!; }));
+        FluentActions.Invoking(() =>
+            status.Start("test", ctx => { ctx.Status = null!; })).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -259,7 +255,7 @@ public sealed class StatusContextMutationTests
             captured = ctx.Status;
         });
 
-        captured.ShouldBe("updated");
+        captured.Should().Be("updated");
     }
 
     // ── SetSpinner null guard ──────────────────────────────────────────────────
@@ -271,8 +267,8 @@ public sealed class StatusContextMutationTests
         var console = new TestConsole().Interactive();
         var status = new Status(console) { AutoRefresh = false };
 
-        Should.Throw<ArgumentNullException>(() =>
-            status.Start("test", ctx => { ctx.Spinner = null!; }));
+        FluentActions.Invoking(() =>
+            status.Start("test", ctx => { ctx.Spinner = null!; })).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -285,7 +281,7 @@ public sealed class StatusContextMutationTests
         status.Start("test", ctx =>
         {
             ctx.Spinner = spinner;
-            ctx.Spinner.ShouldBeSameAs(spinner);
+            ctx.Spinner.Should().BeSameAs(spinner);
         });
     }
 
@@ -300,7 +296,7 @@ public sealed class StatusContextMutationTests
         status.Start("test", ctx =>
         {
             ctx.SpinnerStyle = Color.Red;
-            ctx.SpinnerStyle.ShouldBe(Color.Red);
+            ctx.SpinnerStyle.Should().Be((Style)Color.Red);
         });
     }
 
@@ -310,8 +306,7 @@ public sealed class StatusContextMutationTests
     public void StatusExtension_Throws_When_Context_IsNull()
     {
         // Kills L85 Survived: ArgumentNullException.ThrowIfNull(context)
-        Should.Throw<ArgumentNullException>(
-            () => ((StatusContext)null!).Status("test"));
+        FluentActions.Invoking(() => ((StatusContext)null!).Status("test")).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -323,8 +318,8 @@ public sealed class StatusContextMutationTests
         status.Start("initial", ctx =>
         {
             var returned = ctx.Status("new status");
-            returned.ShouldBeSameAs(ctx);
-            ctx.Status.ShouldBe("new status");
+            returned.Should().BeSameAs(ctx);
+            ctx.Status.Should().Be("new status");
         });
     }
 
@@ -332,16 +327,14 @@ public sealed class StatusContextMutationTests
     public void SpinnerExtension_Throws_When_Context_IsNull()
     {
         // Kills L99 Survived: ArgumentNullException.ThrowIfNull(context)
-        Should.Throw<ArgumentNullException>(
-            () => ((StatusContext)null!).Spinner(Spinner.Known.Default));
+        FluentActions.Invoking(() => ((StatusContext)null!).Spinner(Spinner.Known.Default)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void SpinnerStyleExtension_Throws_When_Context_IsNull()
     {
         // Kills L113 NoCoverage: ArgumentNullException.ThrowIfNull(context)
-        Should.Throw<ArgumentNullException>(
-            () => ((StatusContext)null!).SpinnerStyle(Color.Red));
+        FluentActions.Invoking(() => ((StatusContext)null!).SpinnerStyle(Color.Red)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -353,8 +346,8 @@ public sealed class StatusContextMutationTests
         status.Start("test", ctx =>
         {
             var returned = ctx.SpinnerStyle(Color.Blue);
-            returned.ShouldBeSameAs(ctx);
-            ctx.SpinnerStyle.ShouldBe(Color.Blue);
+            returned.Should().BeSameAs(ctx);
+            ctx.SpinnerStyle.Should().Be((Style)Color.Blue);
         });
     }
 }
@@ -371,7 +364,7 @@ public sealed class StatusExtensionsTests
 
         var result = status.AutoRefresh(false);
 
-        result.ShouldBeSameAs(status);
+        result.Should().BeSameAs(status);
     }
 
     [Fact]
@@ -382,7 +375,7 @@ public sealed class StatusExtensionsTests
 
         status.AutoRefresh(false);
 
-        status.AutoRefresh.ShouldBeFalse();
+        status.AutoRefresh.Should().BeFalse();
     }
 
     [Fact]
@@ -393,13 +386,13 @@ public sealed class StatusExtensionsTests
 
         status.AutoRefresh(true);
 
-        status.AutoRefresh.ShouldBeTrue();
+        status.AutoRefresh.Should().BeTrue();
     }
 
     [Fact]
     public void AutoRefresh_Extension_Throws_When_Status_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((Status)null!).AutoRefresh(true));
+        FluentActions.Invoking(() => ((Status)null!).AutoRefresh(true)).Should().Throw<ArgumentNullException>();
     }
 
     // ── Spinner extension ─────────────────────────────────────────────────────
@@ -413,7 +406,7 @@ public sealed class StatusExtensionsTests
 
         var result = status.Spinner(spinner);
 
-        result.ShouldBeSameAs(status);
+        result.Should().BeSameAs(status);
     }
 
     [Fact]
@@ -425,13 +418,13 @@ public sealed class StatusExtensionsTests
 
         status.Spinner(spinner);
 
-        status.Spinner.ShouldBeSameAs(spinner);
+        status.Spinner.Should().BeSameAs(spinner);
     }
 
     [Fact]
     public void Spinner_Extension_Throws_When_Status_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((Status)null!).Spinner(Spinner.Known.Default));
+        FluentActions.Invoking(() => ((Status)null!).Spinner(Spinner.Known.Default)).Should().Throw<ArgumentNullException>();
     }
 
     // ── SpinnerStyle extension ────────────────────────────────────────────────
@@ -444,7 +437,7 @@ public sealed class StatusExtensionsTests
 
         var result = status.SpinnerStyle(Color.Red);
 
-        result.ShouldBeSameAs(status);
+        result.Should().BeSameAs(status);
     }
 
     [Fact]
@@ -455,13 +448,13 @@ public sealed class StatusExtensionsTests
 
         status.SpinnerStyle(Color.Red);
 
-        status.SpinnerStyle.ShouldBe(Color.Red);
+        status.SpinnerStyle.Should().Be((Style)Color.Red);
     }
 
     [Fact]
     public void SpinnerStyle_Extension_Throws_When_Status_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((Status)null!).SpinnerStyle(Color.Red));
+        FluentActions.Invoking(() => ((Status)null!).SpinnerStyle(Color.Red)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -472,7 +465,7 @@ public sealed class StatusExtensionsTests
 
         status.SpinnerStyle(null);
 
-        status.SpinnerStyle.ShouldBeNull();
+        status.SpinnerStyle.Should().BeNull();
     }
 }
 
@@ -481,21 +474,18 @@ public sealed class StatusContextExtensionsTests
     [Fact]
     public void Status_Extension_Throws_When_Context_IsNull()
     {
-        Should.Throw<ArgumentNullException>(
-            () => StatusContextExtensions.Status(null!, "test"));
+        FluentActions.Invoking(() => StatusContextExtensions.Status(null!, "test")).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void Spinner_Extension_Throws_When_Context_IsNull()
     {
-        Should.Throw<ArgumentNullException>(
-            () => StatusContextExtensions.Spinner(null!, Spinner.Known.Default));
+        FluentActions.Invoking(() => StatusContextExtensions.Spinner(null!, Spinner.Known.Default)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void SpinnerStyle_Extension_Throws_When_Context_IsNull()
     {
-        Should.Throw<ArgumentNullException>(
-            () => StatusContextExtensions.SpinnerStyle(null!, Color.Red));
+        FluentActions.Invoking(() => StatusContextExtensions.SpinnerStyle(null!, Color.Red)).Should().Throw<ArgumentNullException>();
     }
 }

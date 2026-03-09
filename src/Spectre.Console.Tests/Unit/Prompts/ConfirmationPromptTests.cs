@@ -9,8 +9,8 @@ public sealed class ConfirmationPromptTests
         var result = Record.Exception(() => new ConfirmationPrompt(null!));
 
         // Then
-        result.ShouldBeOfType<ArgumentNullException>()
-            .ParamName.ShouldBe("prompt");
+        result.Should().BeOfType<ArgumentNullException>()
+                .Which.ParamName.Should().Be("prompt");
     }
 
     [Fact]
@@ -25,7 +25,7 @@ public sealed class ConfirmationPromptTests
         var result = console.Prompt(new ConfirmationPrompt("Continue?"));
 
         // Then
-        result.ShouldBeTrue();
+        result.Should().BeTrue();
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public sealed class ConfirmationPromptTests
         var result = console.Prompt(new ConfirmationPrompt("Continue?"));
 
         // Then
-        result.ShouldBeFalse();
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class ConfirmationPromptTests
         var result = console.Prompt(prompt);
 
         // Then
-        result.ShouldBeFalse();
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class ConfirmationPromptTests
         console.Prompt(new ConfirmationPrompt("Continue?"));
 
         // Then
-        console.Output.ShouldContain("y/n");
+        console.Output.Should().Contain("y/n");
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class ConfirmationPromptTests
         console.Prompt(prompt);
 
         // Then
-        console.Output.ShouldNotContain("y/n");
+        console.Output.Should().NotContain("y/n");
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public sealed class ConfirmationPromptTests
         console.Prompt(new ConfirmationPrompt("Continue?"));
 
         // Then
-        console.Output.ShouldContain("y");
+        console.Output.Should().Contain("y");
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public sealed class ConfirmationPromptTests
         // Then
         // When ShowDefaultValue is false, the default value indicator is not shown.
         // The output should still contain "Continue?" but the default value style indicator is absent.
-        console.Output.ShouldContain("Continue?");
+        console.Output.Should().Contain("Continue?");
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public sealed class ConfirmationPromptTests
         var result = console.Prompt(prompt);
 
         // Then
-        result.ShouldBeTrue();
+        result.Should().BeTrue();
     }
 
     public sealed class ExtensionNullGuards
@@ -145,56 +145,56 @@ public sealed class ConfirmationPromptTests
         public void ShowChoices_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.ShowChoices(null!, true));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
 
         [Fact]
         public void ChoicesStyle_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.ChoicesStyle(null!, null));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
 
         [Fact]
         public void ShowDefaultValue_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.ShowDefaultValue(null!, true));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
 
         [Fact]
         public void DefaultValueStyle_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.DefaultValueStyle(null!, null));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
 
         [Fact]
         public void InvalidChoiceMessage_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.InvalidChoiceMessage(null!, string.Empty));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
 
         [Fact]
         public void Yes_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.Yes(null!, 'y'));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
 
         [Fact]
         public void No_Should_Throw_If_Prompt_Is_Null()
         {
             var result = Record.Exception(() => ConfirmationPromptExtensions.No(null!, 'n'));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("obj");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("obj");
         }
     }
 
@@ -210,8 +210,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.ShowChoices();
 
             // Then
-            result.ShowChoices.ShouldBeTrue();
-            result.ShouldBeSameAs(prompt);
+            result.ShowChoices.Should().BeTrue();
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -224,8 +224,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.HideChoices();
 
             // Then
-            result.ShowChoices.ShouldBeFalse();
-            result.ShouldBeSameAs(prompt);
+            result.ShowChoices.Should().BeFalse();
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -238,8 +238,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.ShowDefaultValue();
 
             // Then
-            result.ShowDefaultValue.ShouldBeTrue();
-            result.ShouldBeSameAs(prompt);
+            result.ShowDefaultValue.Should().BeTrue();
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -252,8 +252,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.HideDefaultValue();
 
             // Then
-            result.ShowDefaultValue.ShouldBeFalse();
-            result.ShouldBeSameAs(prompt);
+            result.ShowDefaultValue.Should().BeFalse();
+            result.Should().BeSameAs(prompt);
         }
     }
 
@@ -269,8 +269,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.ShowChoices(false);
 
             // Then
-            result.ShowChoices.ShouldBeFalse();
-            result.ShouldBeSameAs(prompt);
+            result.ShowChoices.Should().BeFalse();
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -284,8 +284,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.ChoicesStyle(style);
 
             // Then
-            result.ChoicesStyle.ShouldBe(style);
-            result.ShouldBeSameAs(prompt);
+            result.ChoicesStyle.Should().Be(style);
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -298,8 +298,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.ShowDefaultValue(false);
 
             // Then
-            result.ShowDefaultValue.ShouldBeFalse();
-            result.ShouldBeSameAs(prompt);
+            result.ShowDefaultValue.Should().BeFalse();
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -313,8 +313,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.DefaultValueStyle(style);
 
             // Then
-            result.DefaultValueStyle.ShouldBe(style);
-            result.ShouldBeSameAs(prompt);
+            result.DefaultValueStyle.Should().Be(style);
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -327,8 +327,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.InvalidChoiceMessage("[red]Bad choice[/]");
 
             // Then
-            result.InvalidChoiceMessage.ShouldBe("[red]Bad choice[/]");
-            result.ShouldBeSameAs(prompt);
+            result.InvalidChoiceMessage.Should().Be("[red]Bad choice[/]");
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -341,8 +341,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.Yes('s');
 
             // Then
-            result.Yes.ShouldBe('s');
-            result.ShouldBeSameAs(prompt);
+            result.Yes.Should().Be('s');
+            result.Should().BeSameAs(prompt);
         }
 
         [Fact]
@@ -355,8 +355,8 @@ public sealed class ConfirmationPromptTests
             var result = prompt.No('x');
 
             // Then
-            result.No.ShouldBe('x');
-            result.ShouldBeSameAs(prompt);
+            result.No.Should().Be('x');
+            result.Should().BeSameAs(prompt);
         }
     }
 }

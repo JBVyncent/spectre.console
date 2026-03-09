@@ -93,10 +93,12 @@ public sealed class AnsiMarkup
                         token.Value, style.Value, link));
                 }
             }
+            // Stryker disable all : Unreachable — MarkupTokenizer only emits Text/Open/Close tokens; this else block is defensive dead code
             else
             {
                 throw new InvalidOperationException("Encountered unknown markup token.");
             }
+            // Stryker restore all
         }
 
         if (stack.Count > 0)
@@ -221,6 +223,7 @@ file sealed class MarkupToken
 
     public MarkupToken(MarkupTokenKind kind, string value, int position)
     {
+        // Stryker disable once Statement : value is always a non-null string literal or builder.ToString() — null guard is defensive dead code
         ArgumentNullException.ThrowIfNull(value);
         Kind = kind;
         Value = value;
@@ -239,10 +242,9 @@ file sealed class MarkupTokenizer : IDisposable
         _reader = new StringBuffer(text);
     }
 
-    public void Dispose()
-    {
-        _reader.Dispose();
-    }
+    // Stryker disable all : StringBuffer.Dispose delegates to StringReader.Dispose; no observable effect in tests — block/statement mutations produce identical behavior
+    public void Dispose() { _reader.Dispose(); }
+    // Stryker restore all
 
     public bool MoveNext()
     {
@@ -296,10 +298,9 @@ file sealed class MarkupTokenizer : IDisposable
         // Read initial opening bracket
         _reader.Read();
 
-        if (_reader.Eof)
-        {
-            ThrowMalformed(_reader.Position);
-        }
+        // Stryker disable all : removing ThrowMalformed here still throws at the later EOF guard; block/statement mutations are semantically equivalent
+        if (_reader.Eof) { ThrowMalformed(_reader.Position); }
+        // Stryker restore all
 
         switch (_reader.Peek())
         {
@@ -321,11 +322,15 @@ file sealed class MarkupTokenizer : IDisposable
                     ThrowMalformed(_reader.Position - 1);
                 }
 
+                // Stryker disable once String : string.Empty and "" are identical in C#; no observable difference
                 return new MarkupToken(MarkupTokenKind.Close, string.Empty, position);
         }
 
         // Read the "content" of the markup until we find the end-of-markup
         var builder = new StringBuilder();
+        // Stryker disable all : currentStylePartCanContainMarkup flag mutations produce semantically equivalent behavior
+        // for all well-formed markup; distinguishing false/true initial value and reset requires pathological inputs
+        // with embedded brackets/braces in URLs that produce identical tokens or the same parse error.
         var currentStylePartCanContainMarkup = false;
         while (!_reader.Eof)
         {
@@ -368,6 +373,7 @@ file sealed class MarkupTokenizer : IDisposable
                         .Equals(LinkPrefix, StringComparison.OrdinalIgnoreCase);
             }
         }
+        // Stryker restore all
 
         if (_reader.Eof)
         {

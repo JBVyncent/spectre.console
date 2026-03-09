@@ -2,7 +2,7 @@ global using System;
 global using System.Collections.Generic;
 global using System.IO;
 global using System.Linq;
-global using Shouldly;
+global using FluentAssertions;
 global using Spectre.Console;
 global using Spectre.Console.Rendering;
 global using Spectre.Console.Testing;

@@ -27,7 +27,7 @@ public partial class AnsiConsoleTests
             }
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -54,7 +54,7 @@ public partial class AnsiConsoleTests
             }
 
             // Then
-            dateTime.ShouldBe(new DateTime(1998, 2, 1));
+            dateTime.Should().Be(new DateTime(1998, 2, 1));
         }
 
         [Theory]
@@ -78,7 +78,7 @@ public partial class AnsiConsoleTests
             }
 
             // Then
-            dateTime.ShouldBe(new DateTime(1998, 2, 1));
+            dateTime.Should().Be(new DateTime(1998, 2, 1));
         }
     }
 }

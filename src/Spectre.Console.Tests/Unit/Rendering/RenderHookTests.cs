@@ -21,7 +21,7 @@ public sealed class RenderHookTests
         console.Write(new Text("World"));
 
         // Then
-        console.Lines[0].ShouldBe("Hello");
-        console.Lines[1].ShouldBe("World");
+        console.Lines[0].Should().Be("Hello");
+        console.Lines[1].Should().Be("World");
     }
 }

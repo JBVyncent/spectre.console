@@ -23,7 +23,7 @@ public sealed class NestedProgressTests
             var parent = ctx.AddTask("Parent");
             var child = ctx.AddChildTask(parent, "Child");
 
-            child.Parent.ShouldBeSameAs(parent);
+            child.Parent.Should().BeSameAs(parent);
         });
     }
 
@@ -35,7 +35,7 @@ public sealed class NestedProgressTests
             var parent = ctx.AddTask("Parent");
             var child = ctx.AddChildTask(parent, "Child");
 
-            parent.Children.ShouldContain(child);
+            parent.Children.Should().Contain(child);
         });
     }
 
@@ -48,9 +48,9 @@ public sealed class NestedProgressTests
             var c1 = ctx.AddChildTask(parent, "Child1");
             var c2 = ctx.AddChildTask(parent, "Child2");
 
-            parent.Children.Count.ShouldBe(2);
-            parent.Children[0].ShouldBeSameAs(c1);
-            parent.Children[1].ShouldBeSameAs(c2);
+            parent.Children.Count.Should().Be(2);
+            parent.Children[0].Should().BeSameAs(c1);
+            parent.Children[1].Should().BeSameAs(c2);
         });
     }
 
@@ -61,7 +61,7 @@ public sealed class NestedProgressTests
         {
             var root = ctx.AddTask("Root");
 
-            root.Parent.ShouldBeNull();
+            root.Parent.Should().BeNull();
         });
     }
 
@@ -72,7 +72,7 @@ public sealed class NestedProgressTests
         {
             var leaf = ctx.AddTask("Leaf");
 
-            leaf.Children.ShouldBeEmpty();
+            leaf.Children.Should().BeEmpty();
         });
     }
 
@@ -85,9 +85,9 @@ public sealed class NestedProgressTests
             var child = ctx.AddChildTask(root, "Child");
             var grandchild = ctx.AddChildTask(child, "Grandchild");
 
-            grandchild.Parent.ShouldBeSameAs(child);
-            child.Children.ShouldContain(grandchild);
-            root.Children.ShouldNotContain(grandchild);
+            grandchild.Parent.Should().BeSameAs(child);
+            child.Children.Should().Contain(grandchild);
+            root.Children.Should().NotContain(grandchild);
         });
     }
 
@@ -99,7 +99,7 @@ public sealed class NestedProgressTests
             var parent = ctx.AddTask("Parent");
             var child = ctx.AddChildTask(parent, "My Child");
 
-            child.Description.ShouldBe("My Child");
+            child.Description.Should().Be("My Child");
         });
     }
 
@@ -111,7 +111,7 @@ public sealed class NestedProgressTests
             var parent = ctx.AddTask("Parent");
             var child = ctx.AddChildTask(parent, "Child", new ProgressTaskSettings { MaxValue = 50 });
 
-            child.MaxValue.ShouldBe(50);
+            child.MaxValue.Should().Be(50);
         });
     }
 
@@ -123,7 +123,7 @@ public sealed class NestedProgressTests
             var parent = ctx.AddTask("Parent");
             var child = ctx.AddChildTask(parent, "Child", new ProgressTaskSettings { AutoStart = false });
 
-            child.IsStarted.ShouldBeFalse();
+            child.IsStarted.Should().BeFalse();
         });
     }
 
@@ -136,7 +136,7 @@ public sealed class NestedProgressTests
         {
             var root = ctx.AddTask("Root");
 
-            root.IndentLevel.ShouldBe(0);
+            root.IndentLevel.Should().Be(0);
         });
     }
 
@@ -148,7 +148,7 @@ public sealed class NestedProgressTests
             var root = ctx.AddTask("Root");
             var child = ctx.AddChildTask(root, "Child");
 
-            child.IndentLevel.ShouldBe(1);
+            child.IndentLevel.Should().Be(1);
         });
     }
 
@@ -161,7 +161,7 @@ public sealed class NestedProgressTests
             var child = ctx.AddChildTask(root, "Child");
             var grandchild = ctx.AddChildTask(child, "Grandchild");
 
-            grandchild.IndentLevel.ShouldBe(2);
+            grandchild.IndentLevel.Should().Be(2);
         });
     }
 
@@ -174,8 +174,8 @@ public sealed class NestedProgressTests
             var c1 = ctx.AddChildTask(root, "C1");
             var c2 = ctx.AddChildTask(root, "C2");
 
-            c1.IndentLevel.ShouldBe(1);
-            c2.IndentLevel.ShouldBe(1);
+            c1.IndentLevel.Should().Be(1);
+            c2.IndentLevel.Should().Be(1);
         });
     }
 
@@ -191,9 +191,9 @@ public sealed class NestedProgressTests
             var child = ctx.AddChildTask(parent, "Child");
 
             var tasks = ctx.GetTasks();
-            tasks[0].ShouldBeSameAs(parent);
-            tasks[1].ShouldBeSameAs(child);
-            tasks[2].ShouldBeSameAs(sibling);
+            tasks[0].Should().BeSameAs(parent);
+            tasks[1].Should().BeSameAs(child);
+            tasks[2].Should().BeSameAs(sibling);
         });
     }
 
@@ -208,10 +208,10 @@ public sealed class NestedProgressTests
             var c2 = ctx.AddChildTask(parent, "Child2");
 
             var tasks = ctx.GetTasks();
-            tasks[0].ShouldBeSameAs(parent);
-            tasks[1].ShouldBeSameAs(c1);
-            tasks[2].ShouldBeSameAs(c2);
-            tasks[3].ShouldBeSameAs(sibling);
+            tasks[0].Should().BeSameAs(parent);
+            tasks[1].Should().BeSameAs(c1);
+            tasks[2].Should().BeSameAs(c2);
+            tasks[3].Should().BeSameAs(sibling);
         });
     }
 
@@ -227,10 +227,10 @@ public sealed class NestedProgressTests
 
             var tasks = ctx.GetTasks();
             // Expected order: Root → Child → Grandchild → Child2
-            tasks[0].ShouldBeSameAs(root);
-            tasks[1].ShouldBeSameAs(child);
-            tasks[2].ShouldBeSameAs(grandchild);
-            tasks[3].ShouldBeSameAs(child2);
+            tasks[0].Should().BeSameAs(root);
+            tasks[1].Should().BeSameAs(child);
+            tasks[2].Should().BeSameAs(grandchild);
+            tasks[3].Should().BeSameAs(child2);
         });
     }
 
@@ -242,8 +242,8 @@ public sealed class NestedProgressTests
             var orphan = new ProgressTask(999, "Orphan", 100);
             var ex = Record.Exception(() => ctx.AddChildTask(orphan, "Child"));
 
-            ex.ShouldBeOfType<InvalidOperationException>()
-              .Message.ShouldContain("does not belong");
+            ex.Should().BeOfType<InvalidOperationException>()
+                  .Which.Message.Should().Contain("does not belong");
         });
     }
 
@@ -253,7 +253,7 @@ public sealed class NestedProgressTests
         MakeProgress().Start(ctx =>
         {
             var ex = Record.Exception(() => ctx.AddChildTask(null!, "Child"));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         });
     }
 
@@ -263,7 +263,7 @@ public sealed class NestedProgressTests
     public void AutoCompleteWithChildren_Default_Should_Be_False()
     {
         var task = new ProgressTask(1, "Task", 100);
-        task.AutoCompleteWithChildren.ShouldBeFalse();
+        task.AutoCompleteWithChildren.Should().BeFalse();
     }
 
     [Fact]
@@ -282,7 +282,7 @@ public sealed class NestedProgressTests
             // GetTasks() triggers PropagateAutoComplete — but flag is false.
             ctx.GetTasks();
 
-            parent.IsFinished.ShouldBeFalse();
+            parent.IsFinished.Should().BeFalse();
         });
     }
 
@@ -303,7 +303,7 @@ public sealed class NestedProgressTests
             // GetTasks drives auto-completion.
             ctx.GetTasks();
 
-            parent.IsFinished.ShouldBeTrue();
+            parent.IsFinished.Should().BeTrue();
         });
     }
 
@@ -320,7 +320,7 @@ public sealed class NestedProgressTests
             c1.Value = c1.MaxValue; // only one done
             ctx.GetTasks();
 
-            parent.IsFinished.ShouldBeFalse();
+            parent.IsFinished.Should().BeFalse();
         });
     }
 
@@ -337,7 +337,7 @@ public sealed class NestedProgressTests
 
             ctx.GetTasks();
 
-            parent.IsFinished.ShouldBeFalse();
+            parent.IsFinished.Should().BeFalse();
         });
     }
 
@@ -355,7 +355,7 @@ public sealed class NestedProgressTests
             ctx.GetTasks(); // first propagation — parent stops
             ctx.GetTasks(); // second call — should be idempotent
 
-            parent.IsFinished.ShouldBeTrue();
+            parent.IsFinished.Should().BeTrue();
         });
     }
 
@@ -375,8 +375,8 @@ public sealed class NestedProgressTests
             ctx.AddTask("RootTask");
         });
 
-        console.Output.ShouldContain("RootTask");
-        console.Output.ShouldNotContain("  RootTask");
+        console.Output.Should().Contain("RootTask");
+        console.Output.Should().NotContain("  RootTask");
     }
 
     [Fact]
@@ -394,7 +394,7 @@ public sealed class NestedProgressTests
             ctx.AddChildTask(parent, "ChildTask");
         });
 
-        console.Output.ShouldContain("  ChildTask");
+        console.Output.Should().Contain("  ChildTask");
     }
 
     [Fact]
@@ -413,6 +413,6 @@ public sealed class NestedProgressTests
             ctx.AddChildTask(child, "GrandchildTask");
         });
 
-        console.Output.ShouldContain("    GrandchildTask");
+        console.Output.Should().Contain("    GrandchildTask");
     }
 }

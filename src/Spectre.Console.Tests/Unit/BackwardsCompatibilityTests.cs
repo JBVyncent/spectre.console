@@ -44,8 +44,8 @@ public class BackwardsCompatibilityTests
             }
         }
 
-        missing.ShouldBeEmpty($"Missing colors: {string.Join(", ", missing)}");
-        valueMismatches.ShouldBeEmpty($"Color value mismatches:\n{string.Join("\n", valueMismatches)}");
+        missing.Should().BeEmpty($"Missing colors: {string.Join(", ", missing)}");
+        valueMismatches.Should().BeEmpty($"Color value mismatches:\n{string.Join("\n", valueMismatches)}");
     }
 
     [Fact]
@@ -82,8 +82,8 @@ public class BackwardsCompatibilityTests
             }
         }
 
-        missing.ShouldBeEmpty($"Missing spinners: {string.Join(", ", missing)}");
-        valueMismatches.ShouldBeEmpty($"Spinner value mismatches:\n{string.Join("\n", valueMismatches)}");
+        missing.Should().BeEmpty($"Missing spinners: {string.Join(", ", missing)}");
+        valueMismatches.Should().BeEmpty($"Spinner value mismatches:\n{string.Join("\n", valueMismatches)}");
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public class BackwardsCompatibilityTests
             }
         }
 
-        missing.ShouldBeEmpty($"Missing emojis: {string.Join(", ", missing)}");
-        valueMismatches.ShouldBeEmpty($"Emoji value mismatches:\n{string.Join("\n", valueMismatches)}");
+        missing.Should().BeEmpty($"Missing emojis: {string.Join(", ", missing)}");
+        valueMismatches.Should().BeEmpty($"Emoji value mismatches:\n{string.Join("\n", valueMismatches)}");
     }
 }

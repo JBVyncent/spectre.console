@@ -12,7 +12,7 @@ public sealed class ParagraphMutationTests
         {
             // Kills: Line 48, ThrowIfNull removal
             var ex = Record.Exception(() => new Paragraph(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -21,7 +21,7 @@ public sealed class ParagraphMutationTests
             // Kills: Line 62, ThrowIfNull removal
             var paragraph = new Paragraph("Hello");
             var ex = Record.Exception(() => paragraph.Append(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -31,7 +31,7 @@ public sealed class ParagraphMutationTests
             var paragraph = new Paragraph("Hello");
             var renderable = (IRenderable)paragraph;
             var ex = Record.Exception(() => renderable.Render(null!, 80));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
     }
 
@@ -44,7 +44,7 @@ public sealed class ParagraphMutationTests
             var paragraph = new Paragraph("Hello World");
             var console = new TestConsole().Width(1);
             console.Write(paragraph);
-            console.Output.ShouldNotBeEmpty();
+            console.Output.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -55,7 +55,7 @@ public sealed class ParagraphMutationTests
             var paragraph = new Paragraph("Hello");
             var console = new TestConsole().Width(5);
             console.Write(paragraph);
-            console.Output.TrimEnd().ShouldBe("Hello");
+            console.Output.TrimEnd().Should().Be("Hello");
         }
 
         [Fact]
@@ -70,7 +70,7 @@ public sealed class ParagraphMutationTests
             var console = new TestConsole().Width(6);
             console.Write(paragraph);
             var lines = console.Output.TrimEnd().Split('\n');
-            lines.Length.ShouldBeGreaterThan(2); // "CDEFGHIJ" must be wrapped
+            lines.Length.Should().BeGreaterThan(2); // "CDEFGHIJ" must be wrapped
         }
 
         [Fact]
@@ -80,8 +80,8 @@ public sealed class ParagraphMutationTests
             var console = new TestConsole().Width(5);
             console.Write(paragraph);
             var lines = console.Output.TrimEnd().Split('\n');
-            lines.Length.ShouldBe(2);
-            lines[0].TrimEnd().ShouldBe("ABCDE");
+            lines.Length.Should().Be(2);
+            lines[0].TrimEnd().Should().Be("ABCDE");
         }
 
         [Fact]
@@ -92,7 +92,7 @@ public sealed class ParagraphMutationTests
             var console = new TestConsole().Width(10);
             console.Write(paragraph);
             var lines = console.Output.TrimEnd().Split('\n');
-            lines.Length.ShouldBeGreaterThan(1);
+            lines.Length.Should().BeGreaterThan(1);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ public sealed class ParagraphMutationTests
             var console = new TestConsole().Width(6);
             console.Write(paragraph);
             var lines = console.Output.TrimEnd().Split('\n');
-            lines.Length.ShouldBeGreaterThan(1);
+            lines.Length.Should().BeGreaterThan(1);
         }
 
         [Fact]
@@ -115,9 +115,9 @@ public sealed class ParagraphMutationTests
             var console = new TestConsole().Width(80);
             console.Write(paragraph);
             var lines = console.Output.TrimEnd().Split('\n');
-            lines.Length.ShouldBe(2);
-            lines[0].TrimEnd().ShouldBe("Hello");
-            lines[1].TrimEnd().ShouldBe("World");
+            lines.Length.Should().Be(2);
+            lines[0].TrimEnd().Should().Be("Hello");
+            lines[1].TrimEnd().Should().Be("World");
         }
 
         [Fact]
@@ -128,9 +128,9 @@ public sealed class ParagraphMutationTests
             var console = new TestConsole().Width(5);
             console.Write(paragraph);
             var lines = console.Output.TrimEnd().Split('\n');
-            lines.Length.ShouldBe(2);
+            lines.Length.Should().Be(2);
             // Leading space after "Hello" should be skipped when wrapping
-            lines[1].TrimEnd().ShouldBe("World");
+            lines[1].TrimEnd().Should().Be("World");
         }
     }
 }
