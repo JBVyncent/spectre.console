@@ -29,7 +29,7 @@ namespace Spectre.Console;
 /// nearest-neighbour mapping for the remaining pixels.
 /// </para>
 /// </remarks>
-public sealed class SixelImage : Renderable
+public sealed class SixelImage : Renderable, IDisposable
 {
     private static readonly IResampler _defaultResampler = KnownResamplers.Bicubic;
 
@@ -43,7 +43,21 @@ public sealed class SixelImage : Renderable
     /// Gets or sets the maximum render width (in terminal columns).
     /// When <c>null</c> the image is rendered at its native pixel width (each pixel = 1 column).
     /// </summary>
-    public int? MaxWidth { get; set; }
+    public int? MaxWidth
+    {
+        get => _maxWidth;
+        set
+        {
+            if (value is <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "MaxWidth must be greater than zero.");
+            }
+
+            _maxWidth = value;
+        }
+    }
+
+    private int? _maxWidth;
 
     /// <summary>
     /// Gets or sets the resampler used when scaling the image.
@@ -89,6 +103,14 @@ public sealed class SixelImage : Renderable
         _image = Image.Load<Rgba32>(data);
     }
 
+    /// <summary>
+    /// Disposes the underlying image resources.
+    /// </summary>
+    public void Dispose()
+    {
+        _image.Dispose();
+    }
+
     /// <inheritdoc/>
     protected override Measurement Measure(RenderOptions options, int maxWidth)
     {
@@ -104,7 +126,8 @@ public sealed class SixelImage : Renderable
             return new Measurement(width, width);
         }
 
-        return ((IRenderable)BuildCanvasImage()).Measure(options, maxWidth);
+        using var fallback = BuildCanvasImage();
+        return ((IRenderable)fallback).Measure(options, maxWidth);
         // Stryker restore all
     }
 
@@ -117,7 +140,8 @@ public sealed class SixelImage : Renderable
             return RenderAsSixel(maxWidth);
         }
 
-        return ((IRenderable)BuildCanvasImage()).Render(options, maxWidth);
+        using var fallback = BuildCanvasImage();
+        return ((IRenderable)fallback).Render(options, maxWidth);
         // Stryker restore all
     }
 
@@ -129,36 +153,45 @@ public sealed class SixelImage : Renderable
         var image = _image;
         var width = Width;
         var height = Height;
+        Image<Rgba32>? clonedImage = null;
 
-        if (MaxWidth != null)
+        try
         {
-            height = (int)(height * ((float)MaxWidth.Value / Width));
-            width = MaxWidth.Value;
+            if (MaxWidth != null)
+            {
+                height = (int)(height * ((float)MaxWidth.Value / Width));
+                width = MaxWidth.Value;
+            }
+
+            if (width > maxWidth)
+            {
+                height = (int)(height * (maxWidth / (float)width));
+                width = maxWidth;
+            }
+
+            if (width != Width || height != Height)
+            {
+                var resampler = Resampler ?? _defaultResampler;
+                clonedImage = image.Clone();
+                clonedImage.Mutate(i => i.Resize(width, height, resampler));
+                image = clonedImage;
+            }
+
+            var sixelData = SixelEncoder.Encode(image, MaxColors);
+
+            return new[] { Segment.Control(sixelData), Segment.LineBreak };
+        }
+        finally
+        {
+            clonedImage?.Dispose();
         }
 
-        if (width > maxWidth)
-        {
-            height = (int)(height * (maxWidth / (float)width));
-            width = maxWidth;
-        }
-
-        if (width != Width || height != Height)
-        {
-            var resampler = Resampler ?? _defaultResampler;
-            image = image.Clone();
-            image.Mutate(i => i.Resize(width, height, resampler));
-        }
-
-        var sixelData = SixelEncoder.Encode(image, MaxColors);
-
-        yield return Segment.Control(sixelData);
-        yield return Segment.LineBreak;
         // Stryker restore all
     }
 
     // ─── Block-character fallback ────────────────────────────────────────────
 
-    private Renderable BuildCanvasImage()
+    private CanvasImage BuildCanvasImage()
     {
         // Stryker disable all : BuildCanvasImage — object initializer forwarding
         return new CanvasImage(_image.Clone())

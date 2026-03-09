@@ -289,7 +289,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
 
         if (requestedPageSize > console.Profile.Height - extra)
         {
-            return console.Profile.Height - extra;
+            return Math.Max(1, console.Profile.Height - extra);
         }
 
         return requestedPageSize;

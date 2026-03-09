@@ -3,7 +3,6 @@ namespace Spectre.Console;
 internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
 {
     private readonly IAnsiConsole _console;
-    private readonly AnsiWriter _writer;
 
     public IAnsiConsoleCursor Cursor { get; }
     public Capabilities Capabilities => _console.Profile.Capabilities;
@@ -13,7 +12,6 @@ internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
         // Stryker disable once all : Equivalent — internal constructor only called from AnsiConsoleFacade with non-null console
         ArgumentNullException.ThrowIfNull(console);
         _console = console;
-        _writer = new AnsiWriter(_console.Profile.Out.Writer, _console.Profile.Capabilities);
 
         Cursor = new AnsiConsoleCursor(this);
     }
@@ -31,11 +29,18 @@ internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
 
     public void Write(IRenderable renderable)
     {
-        _writer.Write(_console, renderable);
+        CreateWriter().Write(_console, renderable);
     }
 
     public void Write(Action<AnsiWriter> action)
     {
-        action(_writer);
+        action(CreateWriter());
+    }
+
+    // Resolve the writer from the current Profile.Out each time, so that
+    // swapping Profile.Out at runtime is correctly honored by subsequent writes.
+    private AnsiWriter CreateWriter()
+    {
+        return new AnsiWriter(_console.Profile.Out.Writer, _console.Profile.Capabilities);
     }
 }

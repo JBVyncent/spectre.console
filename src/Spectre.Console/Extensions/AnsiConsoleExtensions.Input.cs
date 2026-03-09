@@ -17,8 +17,16 @@ public static partial class AnsiConsoleExtensions
         var text = initialText ?? string.Empty;
         if (!string.IsNullOrEmpty(initialText))
         {
-            var displayText = (secret && mask != null) ? initialText.Mask(mask) : initialText;
-            console.Write(displayText, style);
+            if (!secret)
+            {
+                console.Write(initialText, style);
+            }
+            else if (mask != null)
+            {
+                console.Write(initialText.Mask(mask), style);
+            }
+
+            // When secret && mask == null, write nothing (fully hidden input).
         }
 
         var autocomplete = new List<string>(items ?? []);
@@ -86,9 +94,19 @@ public static partial class AnsiConsoleExtensions
                 var replace = AutoComplete(autocomplete, text, autoCompleteDirection);
                 if (!string.IsNullOrEmpty(replace))
                 {
-                    // Render the suggestion
-                    console.Write("\b \b".Repeat(text.Length), style);
-                    console.Write(replace);
+                    // Erase current visible text and render the suggestion.
+                    // When secret, use masked output or nothing (mask == null).
+                    if (!secret)
+                    {
+                        console.Write("\b \b".Repeat(text.Length), style);
+                        console.Write(replace);
+                    }
+                    else if (mask != null)
+                    {
+                        console.Write("\b \b".Repeat(text.Length), style);
+                        console.Write(replace.Mask(mask), style);
+                    }
+
                     text = replace;
                     continue;
                 }
@@ -142,14 +160,24 @@ public static partial class AnsiConsoleExtensions
     private static void ReplaceInputLine(IAnsiConsole console, Style? style, bool secret, char? mask, string currentText, string newText)
     {
         // Erase the current visible characters (1 \b \b cycle per displayed cell).
-        if (currentText.Length > 0)
+        // When secret && mask == null, nothing was displayed so nothing to erase.
+        if (currentText.Length > 0 && (!secret || mask != null))
         {
             console.Write("\b \b".Repeat(currentText.Length), style);
         }
 
         if (!string.IsNullOrEmpty(newText))
         {
-            console.Write((secret && mask != null) ? newText.Mask(mask) : newText, style);
+            if (!secret)
+            {
+                console.Write(newText, style);
+            }
+            else if (mask != null)
+            {
+                console.Write(newText.Mask(mask), style);
+            }
+
+            // When secret && mask == null, write nothing (fully hidden input).
         }
     }
 

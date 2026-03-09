@@ -96,7 +96,8 @@ public sealed class Tree : Renderable, IHasTreeNodes
             }
 
             var prefix = levels.Skip(1).ToList();
-            var renderableLines = Segment.SplitLines(current.Renderable.Render(options, maxWidth - Segment.CellCount(prefix)));
+            var childWidth = Math.Max(1, maxWidth - Segment.CellCount(prefix));
+            var renderableLines = Segment.SplitLines(current.Renderable.Render(options, childWidth));
 
             foreach (var (_, isFirstLine, _, line) in renderableLines.Enumerate())
             {

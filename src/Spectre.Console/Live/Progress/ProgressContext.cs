@@ -91,7 +91,7 @@ public sealed class ProgressContext
         {
             // Stryker disable once all : Equivalent — ProgressTaskSettings defaults match method parameter defaults
             var settings = new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue, };
-            var indexOfReference = _tasks.IndexOf(referenceProgressTask);
+            var indexOfReference = ValidateReferenceTask(referenceProgressTask);
 
             return AddTaskAtInternal(description, settings, indexOfReference);
         }
@@ -111,7 +111,7 @@ public sealed class ProgressContext
         {
             // Stryker disable once all : Equivalent — ProgressTaskSettings defaults match method parameter defaults
             var settings = new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue, };
-            var indexOfReference = _tasks.IndexOf(referenceProgressTask);
+            var indexOfReference = ValidateReferenceTask(referenceProgressTask);
 
             return AddTaskAtInternal(description, settings, indexOfReference + 1);
         }
@@ -157,7 +157,7 @@ public sealed class ProgressContext
     {
         lock (_taskLock)
         {
-            var indexOfReference = _tasks.IndexOf(referenceProgressTask);
+            var indexOfReference = ValidateReferenceTask(referenceProgressTask);
 
             return AddTaskAtInternal(description, settings, indexOfReference);
         }
@@ -174,7 +174,7 @@ public sealed class ProgressContext
     {
         lock (_taskLock)
         {
-            var indexOfReference = _tasks.IndexOf(referenceProgressTask);
+            var indexOfReference = ValidateReferenceTask(referenceProgressTask);
 
             return AddTaskAtInternal(description, settings, indexOfReference + 1);
         }
@@ -264,6 +264,20 @@ public sealed class ProgressContext
         _tasks.Insert(position, task);
 
         return task;
+    }
+
+    // Must be called with _taskLock held.
+    // Returns the index of referenceTask within _tasks, or throws if it doesn't belong to this context.
+    private int ValidateReferenceTask(ProgressTask referenceTask)
+    {
+        ArgumentNullException.ThrowIfNull(referenceTask);
+        var index = _tasks.IndexOf(referenceTask);
+        if (index < 0)
+        {
+            throw new InvalidOperationException("The reference task does not belong to this progress context.");
+        }
+
+        return index;
     }
 
     // Must be called with _taskLock held.

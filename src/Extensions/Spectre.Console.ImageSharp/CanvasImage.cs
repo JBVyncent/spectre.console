@@ -12,7 +12,7 @@ namespace Spectre.Console;
 /// <summary>
 /// Represents a renderable image.
 /// </summary>
-public sealed class CanvasImage : Renderable
+public sealed class CanvasImage : Renderable, IDisposable
 {
     private static readonly IResampler _defaultResampler = KnownResamplers.Bicubic;
 
@@ -29,7 +29,21 @@ public sealed class CanvasImage : Renderable
     /// <summary>
     /// Gets or sets the render width of the canvas.
     /// </summary>
-    public int? MaxWidth { get; set; }
+    public int? MaxWidth
+    {
+        get => _maxWidth;
+        set
+        {
+            if (value is <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "MaxWidth must be greater than zero.");
+            }
+
+            _maxWidth = value;
+        }
+    }
+
+    private int? _maxWidth;
 
     /// <summary>
     /// Gets or sets the render width of the canvas.
@@ -79,6 +93,14 @@ public sealed class CanvasImage : Renderable
         Image = SixLabors.ImageSharp.Image.Load<Rgba32>(data);
     }
 
+    /// <summary>
+    /// Disposes the underlying image resources.
+    /// </summary>
+    public void Dispose()
+    {
+        Image.Dispose();
+    }
+
     /// <inheritdoc/>
     protected override Measurement Measure(RenderOptions options, int maxWidth)
     {
@@ -119,34 +141,43 @@ public sealed class CanvasImage : Renderable
         }
 
         // Need to rescale the pixel buffer?
-        if (width != Width || height != Height)
+        SixLabors.ImageSharp.Image<Rgba32>? clonedImage = null;
+        try
         {
-            var resampler = Resampler ?? _defaultResampler;
-            image = image.Clone(); // Clone the original image
-            image.Mutate(i => i.Resize(width, height, resampler));
-        }
-
-        var canvas = new Canvas(width, height)
-        {
-            MaxWidth = MaxWidth,
-            Scale = false,
-        };
-
-        for (var y = 0; y < image.Height; y++)
-        {
-            for (var x = 0; x < image.Width; x++)
+            if (width != Width || height != Height)
             {
-                if (image[x, y].A == 0)
-                {
-                    continue;
-                }
-
-                canvas.SetPixel(x, y, new Color(
-                    image[x, y].R, image[x, y].G, image[x, y].B));
+                var resampler = Resampler ?? _defaultResampler;
+                clonedImage = image.Clone();
+                clonedImage.Mutate(i => i.Resize(width, height, resampler));
+                image = clonedImage;
             }
-        }
 
-        return ((IRenderable)canvas).Render(options, maxWidth);
+            var canvas = new Canvas(width, height)
+            {
+                MaxWidth = MaxWidth,
+                Scale = false,
+            };
+
+            for (var y = 0; y < image.Height; y++)
+            {
+                for (var x = 0; x < image.Width; x++)
+                {
+                    if (image[x, y].A == 0)
+                    {
+                        continue;
+                    }
+
+                    canvas.SetPixel(x, y, new Color(
+                        image[x, y].R, image[x, y].G, image[x, y].B));
+                }
+            }
+
+            return ((IRenderable)canvas).Render(options, maxWidth);
+        }
+        finally
+        {
+            clonedImage?.Dispose();
+        }
         // Stryker restore all
     }
 }

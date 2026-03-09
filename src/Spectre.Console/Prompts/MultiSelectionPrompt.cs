@@ -240,7 +240,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         var pageSize = requestedPageSize;
         if (pageSize > console.Profile.Height - extra)
         {
-            pageSize = console.Profile.Height - extra;
+            pageSize = Math.Max(1, console.Profile.Height - extra);
         }
 
         return pageSize;

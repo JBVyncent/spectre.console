@@ -55,38 +55,43 @@ internal sealed class ListPrompt<T>
 
         using var scope = new RenderHookScope(_console, hook);
         _console.Cursor.Hide();
-        hook.Refresh();
-
-        while (true)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var rawKey = await _console.Input.ReadKeyAsync(true, cancellationToken).ConfigureAwait(false);
-            if (rawKey == null)
-            {
-                continue;
-            }
+            hook.Refresh();
 
-            var key = rawKey.Value;
-            var result = _strategy.HandleInput(key, state);
-            if (result == ListPromptInputResult.Submit)
+            while (true)
             {
-                break;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                var rawKey = await _console.Input.ReadKeyAsync(true, cancellationToken).ConfigureAwait(false);
+                if (rawKey == null)
+                {
+                    continue;
+                }
 
-            if (result == ListPromptInputResult.Abort)
-            {
-                state.Cancel();
-                break;
-            }
+                var key = rawKey.Value;
+                var result = _strategy.HandleInput(key, state);
+                if (result == ListPromptInputResult.Submit)
+                {
+                    break;
+                }
 
-            if (state.Update(key) || result == ListPromptInputResult.Refresh)
-            {
-                hook.Refresh();
+                if (result == ListPromptInputResult.Abort)
+                {
+                    state.Cancel();
+                    break;
+                }
+
+                if (state.Update(key) || result == ListPromptInputResult.Refresh)
+                {
+                    hook.Refresh();
+                }
             }
         }
-
-        hook.Clear();
-        _console.Cursor.Show();
+        finally
+        {
+            hook.Clear();
+            _console.Cursor.Show();
+        }
 
         return state;
     }

@@ -8,6 +8,7 @@ internal sealed class ProgressRefreshThread : IDisposable
     private readonly ManualResetEvent _running;
     private readonly ManualResetEvent _stopped;
     private readonly Thread? _thread;
+    private Exception? _backgroundException;
 
     public ProgressRefreshThread(ProgressContext context, TimeSpan refreshRate)
     {
@@ -33,6 +34,15 @@ internal sealed class ProgressRefreshThread : IDisposable
 
         _stopped.Dispose();
         _running.Dispose();
+
+        // If the background thread captured an exception, rethrow it
+        // on the calling thread so callers can observe the failure.
+        if (_backgroundException != null)
+        {
+            throw new InvalidOperationException(
+                "An error occurred during progress auto-refresh.",
+                _backgroundException);
+        }
     }
 
     private void Run()
@@ -43,7 +53,15 @@ internal sealed class ProgressRefreshThread : IDisposable
         {
             while (!_stopped.WaitOne(_refreshRate))
             {
-                _context.Refresh();
+                try
+                {
+                    _context.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    _backgroundException = ex;
+                    return;
+                }
             }
         }
         finally

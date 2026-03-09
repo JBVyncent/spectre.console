@@ -290,10 +290,14 @@ public sealed class AnsiWriter
         {
             _linkCount++;
 
+            // Strip control characters that could break out of the OSC 8 sequence.
+            // ESC, BEL, and other C0/C1 controls can terminate or corrupt the DCS/OSC context.
+            var safeLink = SanitizeLinkUrl(link);
+
             WriteOsc(
                 linkId != null
-                    ? $"8;id={linkId};{link}\e\\"
-                    : $"8;;{link}\e\\");
+                    ? $"8;id={linkId};{safeLink}\e\\"
+                    : $"8;;{safeLink}\e\\");
         }
 
         return this;
@@ -605,6 +609,40 @@ public sealed class AnsiWriter
         Write(decPrivateMode ? $"\e[?{parameters}" : $"\e[{parameters}");
         // Stryker disable once Boolean : return value of WriteCsi is not observed by any caller
         return true;
+    }
+
+    /// <summary>
+    /// Strips control characters (C0: 0x00-0x1F, DEL: 0x7F, C1: 0x80-0x9F) from a URL
+    /// to prevent OSC/DCS escape injection when embedding URLs in terminal sequences.
+    /// </summary>
+    private static string SanitizeLinkUrl(string url)
+    {
+        // Fast path: most URLs contain no control characters.
+        foreach (var ch in url)
+        {
+            if (ch <= '\x1f' || ch == '\x7f' || (ch >= '\x80' && ch <= '\x9f'))
+            {
+                return SanitizeLinkUrlSlow(url);
+            }
+        }
+
+        return url;
+    }
+
+    private static string SanitizeLinkUrlSlow(string url)
+    {
+        var sb = new System.Text.StringBuilder(url.Length);
+        foreach (var ch in url)
+        {
+            if (ch <= '\x1f' || ch == '\x7f' || (ch >= '\x80' && ch <= '\x9f'))
+            {
+                continue;
+            }
+
+            sb.Append(ch);
+        }
+
+        return sb.ToString();
     }
 
     private bool WriteOsc(string parameters)

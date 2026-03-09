@@ -69,7 +69,14 @@ public sealed class TextPath : IRenderable, IHasJustification
     public Measurement Measure(RenderOptions options, int maxWidth)
     {
         var fitted = Fit(options, maxWidth);
+        // Rooted Unix paths don't emit a separator after the root component,
+        // so the separator count is one less than for other paths.
         var separatorCount = fitted.Length - 1;
+        if (_rooted && !_windows && fitted.Length > 1)
+        {
+            separatorCount--;
+        }
+
         var length = fitted.Sum(Cell.GetCellLength) + separatorCount;
 
         return new Measurement(

@@ -403,7 +403,7 @@ public sealed class ProgressTask : IProgress<double>
             }
 
             var speed = GetSpeed();
-            if (speed == null || speed == 0)
+            if (speed == null || speed <= 0)
             {
                 return null;
             }
