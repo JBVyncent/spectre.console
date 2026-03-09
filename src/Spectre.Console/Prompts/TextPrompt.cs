@@ -329,6 +329,8 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
     {
         if (AsyncValidator != null)
         {
+            // Stryker disable once Boolean : ConfigureAwait(false) vs ConfigureAwait(true) is
+            // equivalent in test environments — both resume on the same thread context.
             var result = await AsyncValidator(value, cancellationToken).ConfigureAwait(false);
             if (!result.Successful)
             {

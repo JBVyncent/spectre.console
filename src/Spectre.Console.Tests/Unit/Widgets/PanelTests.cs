@@ -491,4 +491,46 @@ public sealed class PanelTests
         // Then
         return Verifier.Verify(console.Output);
     }
+
+    [Fact]
+    public void PanelHeader_SetAlignment_Sets_Justification_And_Returns_Self()
+    {
+        // Given
+        var header = new PanelHeader("title");
+
+        // When
+        var result = header.SetAlignment(Justify.Right);
+
+        // Then
+        result.Should().BeSameAs(header);
+        header.Justification.Should().Be(Justify.Right);
+    }
+
+    [Fact]
+    public void PanelHeader_SetAlignment_Center_Sets_Justification()
+    {
+        // Given
+        var header = new PanelHeader("title");
+
+        // When
+        header.SetAlignment(Justify.Center);
+
+        // Then
+        header.Justification.Should().Be(Justify.Center);
+    }
+
+#pragma warning disable CS0618
+    [Fact]
+    public void PanelHeader_SetStyle_String_Returns_Self()
+    {
+        // Given
+        var header = new PanelHeader("title");
+
+        // When
+        var result = header.SetStyle("red");
+
+        // Then
+        result.Should().BeSameAs(header);
+    }
+#pragma warning restore CS0618
 }
