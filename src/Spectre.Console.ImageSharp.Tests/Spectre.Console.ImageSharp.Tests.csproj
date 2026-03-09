@@ -6,15 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\example.json" />
-    <EmbeddedResource Include="Data\starwars.flf" />
-    <EmbeddedResource Include="Data\poison.flf" />
-    <None Remove="Data\example.json" />
-    <None Remove="Data\starwars.flf" />
-    <None Remove="Data\poison.flf" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="coverlet.collector">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -25,8 +16,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="Spectre.Verify.Extensions" />
-    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
@@ -35,9 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Extensions\Spectre.Console.ImageSharp\Spectre.Console.ImageSharp.csproj" />
     <ProjectReference Include="..\Spectre.Console.Testing\Spectre.Console.Testing.csproj" />
-    <ProjectReference Include="..\Spectre.Console\Spectre.Console.csproj" />
-    <ProjectReference Include="..\Extensions\Spectre.Console.Json\Spectre.Console.Json.csproj" />
   </ItemGroup>
 
 </Project>

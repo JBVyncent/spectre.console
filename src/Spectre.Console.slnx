@@ -20,6 +20,9 @@
     <Project Path="Extensions/Spectre.Console.ImageSharp/Spectre.Console.ImageSharp.csproj" />
     <Project Path="Extensions/Spectre.Console.Json/Spectre.Console.Json.csproj" />
   </Folder>
+  <Folder Name="/Extensions/Tests/">
+    <Project Path="Spectre.Console.ImageSharp.Tests/Spectre.Console.ImageSharp.Tests.csproj" />
+  </Folder>
   <Project Path="Benchmarks/Benchmarks.csproj" />
   <Project Path="Spectre.Console.Ansi.Tests/Spectre.Console.Ansi.Tests.csproj" />
   <Project Path="Spectre.Console.Ansi/Spectre.Console.Ansi.csproj" />
