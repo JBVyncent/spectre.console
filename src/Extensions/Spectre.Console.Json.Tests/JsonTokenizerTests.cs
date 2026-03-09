@@ -195,6 +195,13 @@ public sealed class JsonTokenizerTests
     [Fact] public void Tokenize_InvalidKeyword_Throws() { ((Action)(() => JsonTokenizer.Tokenize("invalid"))).Should().Throw<InvalidOperationException>(); }
     [Fact] public void Tokenize_InvalidCharacter_Throws() { ((Action)(() => JsonTokenizer.Tokenize("@"))).Should().Throw<InvalidOperationException>(); }
 
+    [Fact]
+    public void Tokenize_InvalidKeyword_ErrorMessage_ContainsActualKeyword()
+    {
+        var act = () => JsonTokenizer.Tokenize("foobar");
+        act.Should().Throw<InvalidOperationException>().WithMessage("*foobar*");
+    }
+
     // ── Multi-token sequences ─────────────────────────────────────────────────
 
     [Fact]

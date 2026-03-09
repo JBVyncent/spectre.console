@@ -79,7 +79,7 @@ internal static class JsonTokenizer
                 if (!_keywords.TryGetValue(accumulator.ToString(), out var keyword))
                 {
                     // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
-                    throw new InvalidOperationException($"Encountered invalid keyword '{keyword}'");
+                    throw new InvalidOperationException($"Encountered invalid keyword '{accumulator}'");
                 }
 
                 result.Add(new JsonToken(keyword, accumulator.ToString()));
