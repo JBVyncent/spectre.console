@@ -12,7 +12,7 @@ public sealed class TextPromptMutationTests
         {
             // Kills: Line 105, ThrowIfNull removal
             var ex = Record.Exception(() => new TextPrompt<string>(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -25,7 +25,7 @@ public sealed class TextPromptMutationTests
             var console = new TestConsole();
             console.Input.PushTextWithEnter("hello");
             var result = prompt.Show(console);
-            result.ShouldBe("hello");
+            result.Should().Be("hello");
         }
 
         [Fact]
@@ -33,7 +33,7 @@ public sealed class TextPromptMutationTests
         {
             // Kills: Line 252, ThrowIfNull removal
             var ex = Record.Exception(() => TextPromptExtensions.PromptStyle<string>(null!, Style.Plain));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
     }
 
@@ -55,7 +55,7 @@ public sealed class TextPromptMutationTests
             console.Input.PushTextWithEnter("42");
             prompt.Show(console);
             // The prompt output should contain the custom-formatted default value
-            console.Output.ShouldContain("num_42");
+            console.Output.Should().Contain("num_42");
         }
     }
 
@@ -73,7 +73,7 @@ public sealed class TextPromptMutationTests
             var console = new TestConsole();
             console.Input.PushTextWithEnter("hello");
             var result = prompt.Show(console);
-            result.ShouldBe("hello");
+            result.Should().Be("hello");
         }
     }
 }

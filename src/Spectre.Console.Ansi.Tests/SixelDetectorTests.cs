@@ -36,7 +36,7 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", null);
 
-        SixelDetector.Detect().ShouldBeFalse();
+        SixelDetector.Detect().Should().BeFalse();
     }
 
     // ── MLTERM variable ───────────────────────────────────────────────────────
@@ -48,7 +48,7 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", null);
 
-        SixelDetector.Detect().ShouldBeTrue();
+        SixelDetector.Detect().Should().BeTrue();
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", null);
 
-        SixelDetector.Detect().ShouldBeFalse();
+        SixelDetector.Detect().Should().BeFalse();
     }
 
     // ── TERM_PROGRAM variable ─────────────────────────────────────────────────
@@ -75,7 +75,7 @@ public sealed class SixelDetectorTests
         using var tp = SetEnv("TERM_PROGRAM", termProgram);
         using var term = SetEnv("TERM", null);
 
-        SixelDetector.Detect().ShouldBeTrue();
+        SixelDetector.Detect().Should().BeTrue();
     }
 
     [Theory]
@@ -89,7 +89,7 @@ public sealed class SixelDetectorTests
         using var tp = SetEnv("TERM_PROGRAM", termProgram);
         using var term = SetEnv("TERM", null);
 
-        SixelDetector.Detect().ShouldBeTrue();
+        SixelDetector.Detect().Should().BeTrue();
     }
 
     [Theory]
@@ -103,7 +103,7 @@ public sealed class SixelDetectorTests
         using var tp = SetEnv("TERM_PROGRAM", termProgram);
         using var term = SetEnv("TERM", null);
 
-        SixelDetector.Detect().ShouldBeFalse();
+        SixelDetector.Detect().Should().BeFalse();
     }
 
     // ── TERM variable ─────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", termValue);
 
-        SixelDetector.Detect().ShouldBeTrue();
+        SixelDetector.Detect().Should().BeTrue();
     }
 
     [Theory]
@@ -129,7 +129,7 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", termValue);
 
-        SixelDetector.Detect().ShouldBeTrue();
+        SixelDetector.Detect().Should().BeTrue();
     }
 
     [Theory]
@@ -144,7 +144,7 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", termValue);
 
-        SixelDetector.Detect().ShouldBeTrue();
+        SixelDetector.Detect().Should().BeTrue();
     }
 
     [Theory]
@@ -160,6 +160,6 @@ public sealed class SixelDetectorTests
         using var termProgram = SetEnv("TERM_PROGRAM", null);
         using var term = SetEnv("TERM", termValue);
 
-        SixelDetector.Detect().ShouldBeFalse();
+        SixelDetector.Detect().Should().BeFalse();
     }
 }

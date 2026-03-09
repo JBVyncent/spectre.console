@@ -12,7 +12,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.None.Visible;
 
             // Then
-            visibility.ShouldBeFalse();
+            visibility.Should().BeFalse();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -24,7 +24,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.None.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.None);
+                border.Should().BeSameAs(TableBorder.None);
             }
         }
 
@@ -53,7 +53,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Ascii.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -65,7 +65,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Ascii.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Ascii);
+                border.Should().BeSameAs(TableBorder.Ascii);
             }
         }
 
@@ -94,7 +94,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Ascii2.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -106,7 +106,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Ascii2.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Ascii2);
+                border.Should().BeSameAs(TableBorder.Ascii2);
             }
         }
 
@@ -135,7 +135,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.AsciiDoubleHead.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -147,7 +147,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.AsciiDoubleHead.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.AsciiDoubleHead);
+                border.Should().BeSameAs(TableBorder.AsciiDoubleHead);
             }
         }
 
@@ -176,7 +176,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Square.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -188,7 +188,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Square.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Square);
+                border.Should().BeSameAs(TableBorder.Square);
             }
         }
 
@@ -217,7 +217,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Rounded.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -229,7 +229,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Rounded.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Square);
+                border.Should().BeSameAs(TableBorder.Square);
             }
         }
 
@@ -258,7 +258,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Minimal.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -270,7 +270,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Minimal.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Minimal);
+                border.Should().BeSameAs(TableBorder.Minimal);
             }
         }
 
@@ -299,7 +299,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.MinimalHeavyHead.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -311,7 +311,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.MinimalHeavyHead.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Minimal);
+                border.Should().BeSameAs(TableBorder.Minimal);
             }
         }
 
@@ -340,7 +340,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.MinimalDoubleHead.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -352,7 +352,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.MinimalDoubleHead.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.MinimalDoubleHead);
+                border.Should().BeSameAs(TableBorder.MinimalDoubleHead);
             }
         }
 
@@ -381,7 +381,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Simple.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -393,7 +393,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Simple.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Simple);
+                border.Should().BeSameAs(TableBorder.Simple);
             }
         }
 
@@ -422,7 +422,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Horizontal.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -434,7 +434,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Horizontal.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Horizontal);
+                border.Should().BeSameAs(TableBorder.Horizontal);
             }
         }
 
@@ -463,7 +463,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.SimpleHeavy.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -475,7 +475,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.SimpleHeavy.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Simple);
+                border.Should().BeSameAs(TableBorder.Simple);
             }
         }
 
@@ -504,7 +504,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Heavy.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -516,7 +516,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Heavy.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Square);
+                border.Should().BeSameAs(TableBorder.Square);
             }
         }
 
@@ -545,7 +545,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.HeavyEdge.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -557,7 +557,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.HeavyEdge.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Square);
+                border.Should().BeSameAs(TableBorder.Square);
             }
         }
 
@@ -586,7 +586,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.HeavyHead.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -598,7 +598,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.HeavyHead.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Square);
+                border.Should().BeSameAs(TableBorder.Square);
             }
         }
 
@@ -627,7 +627,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Double.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -639,7 +639,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Double.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Double);
+                border.Should().BeSameAs(TableBorder.Double);
             }
         }
 
@@ -668,7 +668,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.DoubleEdge.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -680,7 +680,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.DoubleEdge.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.DoubleEdge);
+                border.Should().BeSameAs(TableBorder.DoubleEdge);
             }
         }
 
@@ -709,7 +709,7 @@ public sealed class TableBorderTests
             var visibility = TableBorder.Markdown.Visible;
 
             // Then
-            visibility.ShouldBeTrue();
+            visibility.Should().BeTrue();
         }
 
         public sealed class TheSafeGetBorderMethod
@@ -721,7 +721,7 @@ public sealed class TableBorderTests
                 var border = TableBorder.Markdown.GetSafeBorder(safe: true);
 
                 // Then
-                border.ShouldBeSameAs(TableBorder.Markdown);
+                border.Should().BeSameAs(TableBorder.Markdown);
             }
         }
 

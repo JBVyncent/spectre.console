@@ -17,7 +17,7 @@ public partial class AnsiConsoleTests
             console.MarkupInterpolated($"[Green]{Path}[/]");
 
             // Then
-            console.Output.ShouldBe($"[32m{Path}[0m");
+            console.Output.Should().Be($"[32m{Path}[0m");
         }
 
         [Fact]
@@ -34,7 +34,7 @@ public partial class AnsiConsoleTests
 
             // Then
             var pathAsRegEx = Regex.Replace(Path, "([/\\[\\]\\\\])", "\\$1", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            console.Output.ShouldMatch($"\\]8;id=[0-9]+;{pathAsRegEx}\\\\{pathAsRegEx}\\]8;;\\\\");
+            console.Output.Should().MatchRegex($"\\]8;id=[0-9]+;{pathAsRegEx}\\\\{pathAsRegEx}\\]8;;\\\\");
         }
 
         [Fact]
@@ -46,7 +46,7 @@ public partial class AnsiConsoleTests
 
             // When / Then (should not throw — regression for #1763/#1348)
             console.MarkupLineInterpolated($"I have a {thing}");
-            console.Output.ShouldContain("This[contains, braces].");
+            console.Output.Should().Contain("This[contains, braces].");
         }
 
         [Fact]
@@ -60,7 +60,7 @@ public partial class AnsiConsoleTests
             console.MarkupInterpolated(CultureInfo.InvariantCulture, $"Value: {value:F1}");
 
             // Then
-            console.Output.ShouldBe("Value: 1234.5");
+            console.Output.Should().Be("Value: 1234.5");
         }
     }
 }

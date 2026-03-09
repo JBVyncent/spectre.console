@@ -17,8 +17,8 @@ public sealed class GridTests
             var result = Record.Exception(() => grid.AddColumn());
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Cannot add new columns to grid with existing rows.");
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be("Cannot add new columns to grid with existing rows.");
         }
     }
 
@@ -34,8 +34,8 @@ public sealed class GridTests
             var result = Record.Exception(() => grid.AddRow(null!));
 
             // Then
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("columns");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("columns");
         }
 
         [Fact]
@@ -50,7 +50,7 @@ public sealed class GridTests
             grid.AddRow("Foo");
 
             // Then
-            grid.Rows.Count.ShouldBe(1);
+            grid.Rows.Count.Should().Be(1);
         }
 
         [Fact]
@@ -64,8 +64,8 @@ public sealed class GridTests
             var result = Record.Exception(() => grid.AddRow("Foo", "Bar"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldBe("The number of row columns are greater than the number of grid columns.");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Be("The number of row columns are greater than the number of grid columns.");
         }
     }
 

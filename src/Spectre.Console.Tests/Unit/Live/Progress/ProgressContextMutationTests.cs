@@ -22,7 +22,7 @@ public sealed class ProgressContextMutationTests
                 var t2 = ctx.AddTask("Task2");
                 t1.Value = 100;
                 t2.Value = 100;
-                ctx.IsFinished.ShouldBeTrue();
+                ctx.IsFinished.Should().BeTrue();
             });
     }
 
@@ -38,7 +38,7 @@ public sealed class ProgressContextMutationTests
                 var t2 = ctx.AddTask("Task2");
                 t1.Value = 100; // Finished
                 // t2 still running at 0%
-                ctx.IsFinished.ShouldBeFalse();
+                ctx.IsFinished.Should().BeFalse();
             });
     }
 
@@ -52,7 +52,7 @@ public sealed class ProgressContextMutationTests
                 var t1 = ctx.AddTask("Started");
                 var t2 = ctx.AddTask("NotStarted", autoStart: false);
                 t1.Value = 100;
-                ctx.IsFinished.ShouldBeTrue();
+                ctx.IsFinished.Should().BeTrue();
             });
     }
 
@@ -69,8 +69,8 @@ public sealed class ProgressContextMutationTests
                 var t2 = ctx.AddTask("Second");
                 var t3 = ctx.AddTask("Third");
 
-                t2.Id.ShouldBe(t1.Id + 1);
-                t3.Id.ShouldBe(t2.Id + 1);
+                t2.Id.Should().Be(t1.Id + 1);
+                t3.Id.Should().Be(t2.Id + 1);
             });
     }
 
@@ -84,7 +84,7 @@ public sealed class ProgressContextMutationTests
             .Start(ctx =>
             {
                 var task = ctx.AddTask("Task", autoStart: false, maxValue: 100);
-                task.IsStarted.ShouldBeFalse();
+                task.IsStarted.Should().BeFalse();
             });
     }
 
@@ -96,7 +96,7 @@ public sealed class ProgressContextMutationTests
             .Start(ctx =>
             {
                 var task = ctx.AddTask("Task", autoStart: true, maxValue: 200);
-                task.MaxValue.ShouldBe(200);
+                task.MaxValue.Should().Be(200);
             });
     }
 
@@ -112,8 +112,8 @@ public sealed class ProgressContextMutationTests
                     AutoStart = false,
                     MaxValue = 50,
                 });
-                task.IsStarted.ShouldBeFalse();
-                task.MaxValue.ShouldBe(50);
+                task.IsStarted.Should().BeFalse();
+                task.MaxValue.Should().Be(50);
             });
     }
 
@@ -124,8 +124,7 @@ public sealed class ProgressContextMutationTests
         new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
             .Start(ctx =>
             {
-                Should.Throw<ArgumentNullException>(
-                    () => ctx.AddTask("Task", (ProgressTaskSettings)null!));
+                FluentActions.Invoking(() => ctx.AddTask("Task", (ProgressTaskSettings)null!)).Should().Throw<ArgumentNullException>();
             });
     }
 
@@ -139,8 +138,8 @@ public sealed class ProgressContextMutationTests
             .Start(ctx =>
             {
                 var task = ctx.AddTaskAt("Task", 0, autoStart: false, maxValue: 75);
-                task.IsStarted.ShouldBeFalse();
-                task.MaxValue.ShouldBe(75);
+                task.IsStarted.Should().BeFalse();
+                task.MaxValue.Should().Be(75);
             });
     }
 
@@ -155,7 +154,7 @@ public sealed class ProgressContextMutationTests
             {
                 var reference = ctx.AddTask("Reference");
                 var before = ctx.AddTaskBefore("Before", reference, autoStart: true, maxValue: 150);
-                before.MaxValue.ShouldBe(150);
+                before.MaxValue.Should().Be(150);
             });
     }
 
@@ -168,8 +167,8 @@ public sealed class ProgressContextMutationTests
             {
                 var reference = ctx.AddTask("Reference");
                 var after = ctx.AddTaskAfter("After", reference, autoStart: false, maxValue: 300);
-                after.MaxValue.ShouldBe(300);
-                after.IsStarted.ShouldBeFalse();
+                after.MaxValue.Should().Be(300);
+                after.IsStarted.Should().BeFalse();
             });
     }
 
@@ -188,9 +187,9 @@ public sealed class ProgressContextMutationTests
                 var t3 = ctx.AddTaskAfter("AfterFirst", t1);
 
                 // t3 should be a valid task (not null) and have a unique ID
-                t3.ShouldNotBeNull();
-                t3.Id.ShouldNotBe(t1.Id);
-                t3.Id.ShouldNotBe(t2.Id);
+                t3.Should().NotBeNull();
+                t3.Id.Should().NotBe(t1.Id);
+                t3.Id.Should().NotBe(t2.Id);
             });
     }
 
@@ -204,9 +203,9 @@ public sealed class ProgressContextMutationTests
                 var t2 = ctx.AddTask("Second");
                 var t3 = ctx.AddTaskBefore("BeforeSecond", t2);
 
-                t3.ShouldNotBeNull();
-                t3.Id.ShouldNotBe(t1.Id);
-                t3.Id.ShouldNotBe(t2.Id);
+                t3.Should().NotBeNull();
+                t3.Id.Should().NotBe(t1.Id);
+                t3.Id.Should().NotBe(t2.Id);
             });
     }
 
@@ -219,7 +218,7 @@ public sealed class ProgressContextMutationTests
             .Start(ctx =>
             {
                 var task = ctx.AddTask("Removable");
-                ctx.RemoveTask(task).ShouldBeTrue();
+                ctx.RemoveTask(task).Should().BeTrue();
             });
     }
 
@@ -232,7 +231,7 @@ public sealed class ProgressContextMutationTests
                 var task1 = ctx.AddTask("Task1");
                 var task2 = ctx.AddTask("Task2");
                 ctx.RemoveTask(task1);
-                ctx.RemoveTask(task1).ShouldBeFalse(); // Already removed
+                ctx.RemoveTask(task1).Should().BeFalse(); // Already removed
             });
     }
 
@@ -261,9 +260,9 @@ public sealed class ProgressContextMutationTests
             {
                 var settings = new ProgressTaskSettings { AutoStart = false, MaxValue = 77 };
                 var task = ctx.AddTaskAt("InsertedAt0", settings, 0);
-                task.ShouldNotBeNull();
-                task.MaxValue.ShouldBe(77);
-                task.IsStarted.ShouldBeFalse();
+                task.Should().NotBeNull();
+                task.MaxValue.Should().Be(77);
+                task.IsStarted.Should().BeFalse();
             });
     }
 
@@ -277,9 +276,9 @@ public sealed class ProgressContextMutationTests
                 var reference = ctx.AddTask("Reference");
                 var settings = new ProgressTaskSettings { AutoStart = true, MaxValue = 88 };
                 var before = ctx.AddTaskBefore("Before", settings, reference);
-                before.ShouldNotBeNull();
-                before.MaxValue.ShouldBe(88);
-                before.Id.ShouldNotBe(reference.Id);
+                before.Should().NotBeNull();
+                before.MaxValue.Should().Be(88);
+                before.Id.Should().NotBe(reference.Id);
             });
     }
 
@@ -294,10 +293,10 @@ public sealed class ProgressContextMutationTests
                 var t2 = ctx.AddTask("Second");
                 var settings = new ProgressTaskSettings { AutoStart = false, MaxValue = 99 };
                 var after = ctx.AddTaskAfter("AfterFirst", settings, t1);
-                after.ShouldNotBeNull();
-                after.MaxValue.ShouldBe(99);
-                after.Id.ShouldNotBe(t1.Id);
-                after.Id.ShouldNotBe(t2.Id);
+                after.Should().NotBeNull();
+                after.MaxValue.Should().Be(99);
+                after.Id.Should().NotBe(t1.Id);
+                after.Id.Should().NotBe(t2.Id);
             });
     }
 }

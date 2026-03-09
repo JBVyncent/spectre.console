@@ -18,7 +18,7 @@ public partial class AnsiConsoleTests
             console.Markup(markup);
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ public partial class AnsiConsoleTests
             console.Markup("[link=https://patriksvensson.se]Click to visit my blog[/]");
 
             // Then
-            console.Output.ShouldMatch("]8;id=[0-9]*;https:\\/\\/patriksvensson\\.se\\\\Click to visit my blog]8;;\\\\");
+            console.Output.Should().MatchRegex("]8;id=[0-9]*;https:\\/\\/patriksvensson\\.se\\\\Click to visit my blog]8;;\\\\");
         }
 
         [Fact]
@@ -46,7 +46,7 @@ public partial class AnsiConsoleTests
             console.Markup("[link]https://patriksvensson.se[/]");
 
             // Then
-            console.Output.ShouldMatch("]8;id=[0-9]*;https:\\/\\/patriksvensson\\.se\\\\https:\\/\\/patriksvensson\\.se]8;;\\\\");
+            console.Output.Should().MatchRegex("]8;id=[0-9]*;https:\\/\\/patriksvensson\\.se\\\\https:\\/\\/patriksvensson\\.se]8;;\\\\");
         }
 
         [Fact]
@@ -61,7 +61,7 @@ public partial class AnsiConsoleTests
             console.Markup($"[link]{Path.EscapeMarkup()}[/]");
 
             // Then
-            console.Output.ShouldMatch("]8;id=[0-9]*;file:\\/\\/c:\\/temp\\/\\[x\\].txt\\\\file:\\/\\/c:\\/temp\\/\\[x\\].txt]8;;\\\\");
+            console.Output.Should().MatchRegex("]8;id=[0-9]*;file:\\/\\/c:\\/temp\\/\\[x\\].txt\\\\file:\\/\\/c:\\/temp\\/\\[x\\].txt]8;;\\\\");
         }
 
         [Fact]
@@ -76,7 +76,7 @@ public partial class AnsiConsoleTests
             console.Markup($"[link={Path.EscapeMarkup()}]{Path.EscapeMarkup()}[/]");
 
             // Then
-            console.Output.ShouldMatch("]8;id=[0-9]*;file:\\/\\/c:\\/temp\\/\\[x\\].txt\\\\file:\\/\\/c:\\/temp\\/\\[x\\].txt]8;;\\\\");
+            console.Output.Should().MatchRegex("]8;id=[0-9]*;file:\\/\\/c:\\/temp\\/\\[x\\].txt\\\\file:\\/\\/c:\\/temp\\/\\[x\\].txt]8;;\\\\");
         }
 
         [Theory]
@@ -92,7 +92,7 @@ public partial class AnsiConsoleTests
             console.Markup(markup);
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Theory]
@@ -110,8 +110,8 @@ public partial class AnsiConsoleTests
             var result = Record.Exception(() => console.Markup(markup));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe(expected);
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be(expected);
         }
 
         [Fact]
@@ -124,8 +124,8 @@ public partial class AnsiConsoleTests
             var result = Record.Exception(() => console.Markup("[yellow][blue]Hello[/]"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Unbalanced markup stack. Did you forget to close a tag?");
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be("Unbalanced markup stack. Did you forget to close a tag?");
         }
 
         [Fact]
@@ -138,8 +138,8 @@ public partial class AnsiConsoleTests
             var result = Record.Exception(() => console.Markup("Hello[/]World"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Encountered closing tag when none was expected near position 5.");
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be("Encountered closing tag when none was expected near position 5.");
         }
 
         [Fact]
@@ -152,7 +152,7 @@ public partial class AnsiConsoleTests
             console.Markup("[grey][[grey]][/][white][[white]][/]");
 
             // Then
-            console.Output.ShouldBe("[grey][white]");
+            console.Output.Should().Be("[grey][white]");
         }
 
         [Theory]
@@ -172,7 +172,7 @@ public partial class AnsiConsoleTests
             console.Markup(markup);
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
     }
 }

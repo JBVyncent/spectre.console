@@ -14,7 +14,7 @@ public sealed class BoxBorderTests
                 var border = BoxExtensions.GetSafeBorder(BoxBorder.None, safe: true);
 
                 // Then
-                border.ShouldBeSameAs(BoxBorder.None);
+                border.Should().BeSameAs(BoxBorder.None);
             }
         }
 
@@ -61,7 +61,7 @@ public sealed class BoxBorderTests
                 var border = BoxExtensions.GetSafeBorder(BoxBorder.Ascii, safe: true);
 
                 // Then
-                border.ShouldBeSameAs(BoxBorder.Ascii);
+                border.Should().BeSameAs(BoxBorder.Ascii);
             }
         }
 
@@ -92,7 +92,7 @@ public sealed class BoxBorderTests
                 var border = BoxExtensions.GetSafeBorder(BoxBorder.Double, safe: true);
 
                 // Then
-                border.ShouldBeSameAs(BoxBorder.Double);
+                border.Should().BeSameAs(BoxBorder.Double);
             }
         }
 
@@ -123,7 +123,7 @@ public sealed class BoxBorderTests
                 var border = BoxExtensions.GetSafeBorder(BoxBorder.Heavy, safe: true);
 
                 // Then
-                border.ShouldBeSameAs(BoxBorder.Square);
+                border.Should().BeSameAs(BoxBorder.Square);
             }
         }
 
@@ -152,7 +152,7 @@ public sealed class BoxBorderTests
             var border = BoxExtensions.GetSafeBorder(BoxBorder.Rounded, safe: true);
 
             // Then
-            border.ShouldBeSameAs(BoxBorder.Square);
+            border.Should().BeSameAs(BoxBorder.Square);
         }
 
         [Fact]
@@ -180,7 +180,7 @@ public sealed class BoxBorderTests
             var border = BoxExtensions.GetSafeBorder(BoxBorder.Square, safe: true);
 
             // Then
-            border.ShouldBeSameAs(BoxBorder.Square);
+            border.Should().BeSameAs(BoxBorder.Square);
         }
 
         [Fact]

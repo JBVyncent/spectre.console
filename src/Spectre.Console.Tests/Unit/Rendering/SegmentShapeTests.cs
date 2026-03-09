@@ -14,7 +14,7 @@ public sealed class SegmentShapeTests
         var shape = SegmentShape.Calculate(options, lines);
 
         // Then
-        shape.Width.ShouldBe(0);
-        shape.Height.ShouldBe(0);
+        shape.Width.Should().Be(0);
+        shape.Height.Should().Be(0);
     }
 }

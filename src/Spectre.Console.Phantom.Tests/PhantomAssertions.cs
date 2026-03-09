@@ -1,4 +1,3 @@
-using Shouldly;
 using Spectre.Console.Phantom;
 
 namespace Spectre.Console.Phantom.Tests;
@@ -18,7 +17,7 @@ public static class PhantomAssertions
     public static void AssertRowContains(this ScreenBuffer buffer, int row, string expected)
     {
         var rowText = buffer.GetRowText(row);
-        rowText.ShouldContain(expected);
+        rowText.Should().Contain(expected);
     }
 
     /// <summary>
@@ -26,7 +25,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertRowEquals(this ScreenBuffer buffer, int row, string expected)
     {
-        buffer.GetRowText(row).ShouldBe(expected);
+        buffer.GetRowText(row).Should().Be(expected);
     }
 
     /// <summary>
@@ -34,7 +33,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertRowStartsWith(this ScreenBuffer buffer, int row, string expected)
     {
-        buffer.GetRowText(row).ShouldStartWith(expected);
+        buffer.GetRowText(row).Should().StartWith(expected);
     }
 
     /// <summary>
@@ -42,7 +41,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertRowEmpty(this ScreenBuffer buffer, int row)
     {
-        buffer.GetRowText(row).ShouldBeEmpty();
+        buffer.GetRowText(row).Should().BeEmpty();
     }
 
     /// <summary>
@@ -50,7 +49,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertContainsText(this ScreenBuffer buffer, string text)
     {
-        buffer.ContainsText(text).ShouldBeTrue(
+        buffer.ContainsText(text).Should().BeTrue(
             $"Screen should contain \"{text}\" but it was not found.\nScreen content:\n{buffer.GetText()}");
     }
 
@@ -59,7 +58,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertNotContainsText(this ScreenBuffer buffer, string text)
     {
-        buffer.ContainsText(text).ShouldBeFalse(
+        buffer.ContainsText(text).Should().BeFalse(
             $"Screen should NOT contain \"{text}\" but it was found.");
     }
 
@@ -70,7 +69,7 @@ public static class PhantomAssertions
     {
         for (var i = 0; i < expected.Length; i++)
         {
-            buffer[row, col + i].Character.ShouldBe(expected[i],
+            buffer[row, col + i].Character.Should().Be(expected[i],
                 $"Expected '{expected[i]}' at ({row}, {col + i}) but found '{buffer[row, col + i].Character}'");
         }
     }
@@ -83,9 +82,9 @@ public static class PhantomAssertions
     public static void AssertCellForeground(this ScreenBuffer buffer, int row, int col, ColorMode mode, int index)
     {
         var cell = buffer[row, col];
-        cell.Foreground.ShouldNotBeNull($"Cell ({row}, {col}) should have a foreground color");
-        cell.Foreground!.Value.Mode.ShouldBe(mode);
-        cell.Foreground!.Value.Index.ShouldBe(index);
+        cell.Foreground.Should().NotBeNull($"Cell ({row}, {col}) should have a foreground color");
+        cell.Foreground!.Value.Mode.Should().Be(mode);
+        cell.Foreground!.Value.Index.Should().Be(index);
     }
 
     /// <summary>
@@ -94,11 +93,11 @@ public static class PhantomAssertions
     public static void AssertCellForegroundRgb(this ScreenBuffer buffer, int row, int col, byte r, byte g, byte b)
     {
         var cell = buffer[row, col];
-        cell.Foreground.ShouldNotBeNull($"Cell ({row}, {col}) should have a foreground color");
-        cell.Foreground!.Value.Mode.ShouldBe(ColorMode.TrueColor);
-        cell.Foreground!.Value.R.ShouldBe(r);
-        cell.Foreground!.Value.G.ShouldBe(g);
-        cell.Foreground!.Value.B.ShouldBe(b);
+        cell.Foreground.Should().NotBeNull($"Cell ({row}, {col}) should have a foreground color");
+        cell.Foreground!.Value.Mode.Should().Be(ColorMode.TrueColor);
+        cell.Foreground!.Value.R.Should().Be(r);
+        cell.Foreground!.Value.G.Should().Be(g);
+        cell.Foreground!.Value.B.Should().Be(b);
     }
 
     /// <summary>
@@ -107,9 +106,9 @@ public static class PhantomAssertions
     public static void AssertCellBackground(this ScreenBuffer buffer, int row, int col, ColorMode mode, int index)
     {
         var cell = buffer[row, col];
-        cell.Background.ShouldNotBeNull($"Cell ({row}, {col}) should have a background color");
-        cell.Background!.Value.Mode.ShouldBe(mode);
-        cell.Background!.Value.Index.ShouldBe(index);
+        cell.Background.Should().NotBeNull($"Cell ({row}, {col}) should have a background color");
+        cell.Background!.Value.Mode.Should().Be(mode);
+        cell.Background!.Value.Index.Should().Be(index);
     }
 
     /// <summary>
@@ -118,11 +117,11 @@ public static class PhantomAssertions
     public static void AssertCellBackgroundRgb(this ScreenBuffer buffer, int row, int col, byte r, byte g, byte b)
     {
         var cell = buffer[row, col];
-        cell.Background.ShouldNotBeNull($"Cell ({row}, {col}) should have a background color");
-        cell.Background!.Value.Mode.ShouldBe(ColorMode.TrueColor);
-        cell.Background!.Value.R.ShouldBe(r);
-        cell.Background!.Value.G.ShouldBe(g);
-        cell.Background!.Value.B.ShouldBe(b);
+        cell.Background.Should().NotBeNull($"Cell ({row}, {col}) should have a background color");
+        cell.Background!.Value.Mode.Should().Be(ColorMode.TrueColor);
+        cell.Background!.Value.R.Should().Be(r);
+        cell.Background!.Value.G.Should().Be(g);
+        cell.Background!.Value.B.Should().Be(b);
     }
 
     /// <summary>
@@ -130,7 +129,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCellDefaultForeground(this ScreenBuffer buffer, int row, int col)
     {
-        buffer[row, col].Foreground.ShouldBeNull(
+        buffer[row, col].Foreground.Should().BeNull(
             $"Cell ({row}, {col}) should have default foreground (null)");
     }
 
@@ -139,7 +138,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCellDefaultBackground(this ScreenBuffer buffer, int row, int col)
     {
-        buffer[row, col].Background.ShouldBeNull(
+        buffer[row, col].Background.Should().BeNull(
             $"Cell ({row}, {col}) should have default background (null)");
     }
 
@@ -149,7 +148,7 @@ public static class PhantomAssertions
     public static void AssertCellDecoration(this ScreenBuffer buffer, int row, int col, CellDecoration expected)
     {
         var actual = buffer[row, col].Decoration;
-        actual.HasFlag(expected).ShouldBeTrue(
+        actual.HasFlag(expected).Should().BeTrue(
             $"Cell ({row}, {col}) should have decoration {expected} but has {actual}");
     }
 
@@ -158,7 +157,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCellNoDecoration(this ScreenBuffer buffer, int row, int col)
     {
-        buffer[row, col].Decoration.ShouldBe(CellDecoration.None,
+        buffer[row, col].Decoration.Should().Be(CellDecoration.None,
             $"Cell ({row}, {col}) should have no decoration");
     }
 
@@ -167,7 +166,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCellHyperlink(this ScreenBuffer buffer, int row, int col, string expectedUrl)
     {
-        buffer[row, col].HyperlinkUrl.ShouldBe(expectedUrl,
+        buffer[row, col].HyperlinkUrl.Should().Be(expectedUrl,
             $"Cell ({row}, {col}) should have hyperlink \"{expectedUrl}\"");
     }
 
@@ -176,7 +175,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCellNoHyperlink(this ScreenBuffer buffer, int row, int col)
     {
-        buffer[row, col].HyperlinkUrl.ShouldBeNull(
+        buffer[row, col].HyperlinkUrl.Should().BeNull(
             $"Cell ({row}, {col}) should have no hyperlink");
     }
 
@@ -185,7 +184,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCharAt(this ScreenBuffer buffer, int row, int col, char expected)
     {
-        buffer[row, col].Character.ShouldBe(expected,
+        buffer[row, col].Character.Should().Be(expected,
             $"Expected '{expected}' at ({row}, {col}) but found '{buffer[row, col].Character}'");
     }
 
@@ -196,8 +195,8 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCursorAt(this PhantomTerminal terminal, int row, int col)
     {
-        terminal.CursorRow.ShouldBe(row, $"Expected cursor row {row}");
-        terminal.CursorCol.ShouldBe(col, $"Expected cursor col {col}");
+        terminal.CursorRow.Should().Be(row, $"Expected cursor row {row}");
+        terminal.CursorCol.Should().Be(col, $"Expected cursor col {col}");
     }
 
     /// <summary>
@@ -205,7 +204,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertCursorVisible(this PhantomTerminal terminal, bool visible)
     {
-        terminal.CursorVisible.ShouldBe(visible);
+        terminal.CursorVisible.Should().Be(visible);
     }
 
     /// <summary>
@@ -213,7 +212,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertAlternateScreen(this PhantomTerminal terminal, bool expected)
     {
-        terminal.IsAlternateScreen.ShouldBe(expected);
+        terminal.IsAlternateScreen.Should().Be(expected);
     }
 
     /// <summary>
@@ -221,7 +220,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertHistoryContains<T>(this PhantomTerminal terminal) where T : AnsiSequence
     {
-        terminal.SequenceHistory.OfType<T>().ShouldNotBeEmpty(
+        terminal.SequenceHistory.OfType<T>().Should().NotBeEmpty(
             $"Sequence history should contain {typeof(T).Name}");
     }
 
@@ -230,7 +229,7 @@ public static class PhantomAssertions
     /// </summary>
     public static void AssertHistoryCount<T>(this PhantomTerminal terminal, int expected) where T : AnsiSequence
     {
-        terminal.SequenceHistory.OfType<T>().Count().ShouldBe(expected,
+        terminal.SequenceHistory.OfType<T>().Count().Should().Be(expected,
             $"Expected {expected} instances of {typeof(T).Name} in history");
     }
 }

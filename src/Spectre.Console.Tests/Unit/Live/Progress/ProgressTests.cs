@@ -23,7 +23,7 @@ public sealed class ProgressTests
         // Then
         console.Output
             .NormalizeLineEndings()
-            .ShouldBe(
+            .Should().Be(
                 "[?25l" + // Hide cursor
                 "[s          \n" + // Save cursor + top padding
                 "[38;5;8m━━━━━━━━━━[0m\n" + // Task
@@ -51,7 +51,7 @@ public sealed class ProgressTests
         // Then
         console.Output
             .NormalizeLineEndings()
-            .ShouldBe(
+            .Should().Be(
                 "[?25l" + // Hide cursor
                 "[s          \n" + // Save cursor + top padding
                 "[38;5;8m━━━━━━━━━━[0m\n" + // Task
@@ -107,9 +107,9 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.MaxValue.ShouldBe(20);
-        task.Value.ShouldBe(20);
+        task.Should().NotBeNull();
+        task.MaxValue.Should().Be(20);
+        task.Value.Should().Be(20);
     }
 
     [Fact]
@@ -133,9 +133,9 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.Value.ShouldBe(0);
-        task.Percentage.ShouldBe(100);
+        task.Should().NotBeNull();
+        task.Value.Should().Be(0);
+        task.Percentage.Should().Be(100);
     }
 
     [Fact]
@@ -160,9 +160,9 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.MaxValue.ShouldBe(100);
-        task.Value.ShouldBe(20);
+        task.Should().NotBeNull();
+        task.MaxValue.Should().Be(100);
+        task.Value.Should().Be(20);
     }
 
     [Fact]
@@ -186,8 +186,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.IsFinished.ShouldBe(true);
+        task.Should().NotBeNull();
+        task.IsFinished.Should().Be(true);
     }
 
     [Fact]
@@ -212,8 +212,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.Value.ShouldBe(60);
+        task.Should().NotBeNull();
+        task.Value.Should().Be(60);
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public sealed class ProgressTests
         // Then
         console.Output
             .NormalizeLineEndings()
-            .ShouldBe(
+            .Should().Be(
                 "[?25l" + // Hide cursor
                 "[s          \n" + // Save cursor + top padding
                 "[38;5;8m━━━━━━━━━━[0m\n" + // taskInProgress1
@@ -283,8 +283,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.RemainingTime.ShouldBe(TimeSpan.MaxValue);
+        task.Should().NotBeNull();
+        task.RemainingTime.Should().Be(TimeSpan.MaxValue);
     }
 
     [Fact]
@@ -314,7 +314,7 @@ public sealed class ProgressTests
 
         // Then
         console.Output.SplitLines().Select(x => x.Trim()).ToArray()
-            .ShouldBeEquivalentTo(new[]
+            .Should().BeEquivalentTo(new[]
             {
                 "[?25l[s", "foo1", "afterFoo1", "foo2", "beforeFoo3", "foo3",
                 "[u[0J[?25h",
@@ -348,7 +348,7 @@ public sealed class ProgressTests
 
         // Then
         console.Output.SplitLines().Select(x => x.Trim()).ToArray()
-            .ShouldBeEquivalentTo(new[]
+            .Should().BeEquivalentTo(new[]
             {
                 "[?25l[s", "foo1", "afterFoo1", "foo2", "beforeFoo3", "foo3",
                 "[u[0J[?25h",
@@ -375,8 +375,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.Tag.ShouldBe("my custom tag");
+        task.Should().NotBeNull();
+        task.Tag.Should().Be("my custom tag");
     }
 
     [Fact]
@@ -405,7 +405,7 @@ public sealed class ProgressTests
         });
 
         // Then
-        capturedTag.ShouldBeSameAs(tag);
+        capturedTag.Should().BeSameAs(tag);
     }
 
     [Fact]
@@ -423,10 +423,10 @@ public sealed class ProgressTests
         {
             var task = ctx.AddTask("foo");
             var removed = ctx.RemoveTask(task);
-            removed.ShouldBeTrue();
+            removed.Should().BeTrue();
 
             var removedAgain = ctx.RemoveTask(task);
-            removedAgain.ShouldBeFalse();
+            removedAgain.Should().BeFalse();
         });
     }
 
@@ -449,12 +449,12 @@ public sealed class ProgressTests
         {
             var removedTask = ctx.AddTask("removed");
             ctx.AddTask("kept");
-            ctx.RemoveTask(removedTask).ShouldBeTrue();
+            ctx.RemoveTask(removedTask).Should().BeTrue();
         });
 
         // Then
-        console.Output.ShouldContain("kept");
-        console.Output.ShouldNotContain("removed");
+        console.Output.Should().Contain("kept");
+        console.Output.Should().NotContain("removed");
     }
 
     [Fact]
@@ -484,8 +484,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        console.Output.ShouldContain("foo");
-        console.Output.ShouldNotContain("bar");
+        console.Output.Should().Contain("foo");
+        console.Output.Should().NotContain("bar");
     }
 
     [Fact]
@@ -515,8 +515,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        console.Output.ShouldNotContain("foo");
-        console.Output.ShouldContain("bar");
+        console.Output.Should().NotContain("foo");
+        console.Output.Should().Contain("bar");
     }
 
     [Fact]
@@ -549,9 +549,9 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        speed.ShouldNotBeNull();
-        speed.Value.ShouldBe(300); // 30 over 100ms = 300 over 1 sec
+        task.Should().NotBeNull();
+        speed.Should().NotBeNull();
+        speed.Value.Should().Be(300); // 30 over 100ms = 300 over 1 sec
     }
 
     [Fact]
@@ -578,7 +578,7 @@ public sealed class ProgressTests
         });
 
         // Then
-        console.Output.ShouldContain("**:**:**");
+        console.Output.Should().Contain("**:**:**");
     }
 
     [Fact]
@@ -605,8 +605,8 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        task.Speed.ShouldBeNull();
+        task.Should().NotBeNull();
+        task.Speed.Should().BeNull();
     }
 
     [Fact]
@@ -639,9 +639,9 @@ public sealed class ProgressTests
         });
 
         // Then
-        task.ShouldNotBeNull();
-        speedBeforeStop.ShouldNotBeNull();
-        speedBeforeStop.Value.ShouldBe(200); // at 40/200ms  that is 200/s or so
+        task.Should().NotBeNull();
+        speedBeforeStop.Should().NotBeNull();
+        speedBeforeStop.Value.Should().Be(200); // at 40/200ms  that is 200/s or so
     }
 
     [Fact]
@@ -667,8 +667,7 @@ public sealed class ProgressTests
         });
 
         // Then
-        task?.Speed
-            .ShouldNotBeNull()
-            .ShouldBeGreaterThan(0);
+        task?.Speed.Should().NotBeNull();
+        task?.Speed.Should().BeGreaterThan(0.0);
     }
 }

@@ -1,4 +1,3 @@
-using Shouldly;
 using Spectre.Console.Phantom;
 
 namespace Spectre.Console.Phantom.Tests;
@@ -11,9 +10,9 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("Hello");
 
-        terminal.GetRowText(0).ShouldBe("Hello");
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(5);
+        terminal.GetRowText(0).Should().Be("Hello");
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(5);
     }
 
     [Fact]
@@ -22,9 +21,9 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("Line 1\nLine 2");
 
-        terminal.GetRowText(0).ShouldBe("Line 1");
-        terminal.GetRowText(1).ShouldBe("Line 2");
-        terminal.CursorRow.ShouldBe(1);
+        terminal.GetRowText(0).Should().Be("Line 1");
+        terminal.GetRowText(1).Should().Be("Line 2");
+        terminal.CursorRow.Should().Be(1);
     }
 
     [Fact]
@@ -34,8 +33,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("Hello!\rWorld");
 
         // CR moves to col 0, "World" overwrites "Hello" but "!" at col 5 remains
-        terminal.GetRowText(0).ShouldBe("World!");
-        terminal.CursorCol.ShouldBe(5);
+        terminal.GetRowText(0).Should().Be("World!");
+        terminal.CursorCol.Should().Be(5);
     }
 
     [Fact]
@@ -44,8 +43,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(5, 24);
         terminal.Write("HelloWorld");
 
-        terminal.GetRowText(0).ShouldBe("Hello");
-        terminal.GetRowText(1).ShouldBe("World");
+        terminal.GetRowText(0).Should().Be("Hello");
+        terminal.GetRowText(1).Should().Be("World");
     }
 
     [Fact]
@@ -55,9 +54,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("Line 1\nLine 2\nLine 3\nLine 4");
 
         // Line 1 should have scrolled off
-        terminal.GetRowText(0).ShouldBe("Line 2");
-        terminal.GetRowText(1).ShouldBe("Line 3");
-        terminal.GetRowText(2).ShouldBe("Line 4");
+        terminal.GetRowText(0).Should().Be("Line 2");
+        terminal.GetRowText(1).Should().Be("Line 3");
+        terminal.GetRowText(2).Should().Be("Line 4");
     }
 
     [Fact]
@@ -66,9 +65,9 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("Line 1\nLine 2\x1b[1AX");
 
-        terminal.GetRowText(0).ShouldStartWith("Line 1");
+        terminal.GetRowText(0).Should().StartWith("Line 1");
         // X should be written at row 0, col 6 (cursor was at row 1, moved up 1)
-        terminal.Screen[0, 6].Character.ShouldBe('X');
+        terminal.Screen[0, 6].Character.Should().Be('X');
     }
 
     [Fact]
@@ -77,8 +76,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("A\x1b[2BB");
 
-        terminal.CursorRow.ShouldBe(2);
-        terminal.Screen[2, 1].Character.ShouldBe('B');
+        terminal.CursorRow.Should().Be(2);
+        terminal.Screen[2, 1].Character.Should().Be('B');
     }
 
     [Fact]
@@ -88,8 +87,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("Hello\x1b[s World\x1b[u!");
 
         // After save at col 5, write " World", then restore to col 5 and write "!"
-        terminal.CursorCol.ShouldBe(6);
-        terminal.Screen[0, 5].Character.ShouldBe('!');
+        terminal.CursorCol.Should().Be(6);
+        terminal.Screen[0, 5].Character.Should().Be('!');
     }
 
     [Fact]
@@ -100,9 +99,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[1;1H"); // Move to top-left
         terminal.Write("\x1b[0J");   // Erase from cursor to end
 
-        terminal.GetRowText(0).ShouldBe("");
-        terminal.GetRowText(1).ShouldBe("");
-        terminal.GetRowText(2).ShouldBe("");
+        terminal.GetRowText(0).Should().Be("");
+        terminal.GetRowText(1).Should().Be("");
+        terminal.GetRowText(2).Should().Be("");
     }
 
     [Fact]
@@ -113,7 +112,7 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[6G");   // Move to column 6 (0-indexed: 5)
         terminal.Write("\x1b[0K");   // Erase from cursor to end of line
 
-        terminal.GetRowText(0).ShouldBe("Hello");
+        terminal.GetRowText(0).Should().Be("Hello");
     }
 
     [Fact]
@@ -123,20 +122,20 @@ public sealed class PhantomTerminalTests
         terminal.Write("Hello World");
         terminal.Write("\x1b[2K");
 
-        terminal.GetRowText(0).ShouldBe("");
+        terminal.GetRowText(0).Should().Be("");
     }
 
     [Fact]
     public void Should_Handle_Hide_Show_Cursor()
     {
         var terminal = new PhantomTerminal(80, 24);
-        terminal.CursorVisible.ShouldBeTrue();
+        terminal.CursorVisible.Should().BeTrue();
 
         terminal.Write("\x1b[?25l");
-        terminal.CursorVisible.ShouldBeFalse();
+        terminal.CursorVisible.Should().BeFalse();
 
         terminal.Write("\x1b[?25h");
-        terminal.CursorVisible.ShouldBeTrue();
+        terminal.CursorVisible.Should().BeTrue();
     }
 
     [Fact]
@@ -144,18 +143,18 @@ public sealed class PhantomTerminalTests
     {
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("Main screen");
-        terminal.IsAlternateScreen.ShouldBeFalse();
+        terminal.IsAlternateScreen.Should().BeFalse();
 
         terminal.Write("\x1b[?1049h");
-        terminal.IsAlternateScreen.ShouldBeTrue();
-        terminal.GetRowText(0).ShouldBe(""); // Alternate is empty
+        terminal.IsAlternateScreen.Should().BeTrue();
+        terminal.GetRowText(0).Should().Be(""); // Alternate is empty
 
         terminal.Write("Alt screen");
-        terminal.GetRowText(0).ShouldBe("Alt screen");
+        terminal.GetRowText(0).Should().Be("Alt screen");
 
         terminal.Write("\x1b[?1049l");
-        terminal.IsAlternateScreen.ShouldBeFalse();
-        terminal.GetRowText(0).ShouldBe("Main screen"); // Main preserved
+        terminal.IsAlternateScreen.Should().BeFalse();
+        terminal.GetRowText(0).Should().Be("Main screen"); // Main preserved
     }
 
     [Fact]
@@ -164,14 +163,14 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[31mR\x1b[32mG\x1b[34mB\x1b[0m");
 
-        terminal.Screen[0, 0].Foreground.ShouldNotBeNull();
-        terminal.Screen[0, 0].Foreground!.Value.Index.ShouldBe(31); // Red
+        terminal.Screen[0, 0].Foreground.Should().NotBeNull();
+        terminal.Screen[0, 0].Foreground!.Value.Index.Should().Be(31); // Red
 
-        terminal.Screen[0, 1].Foreground.ShouldNotBeNull();
-        terminal.Screen[0, 1].Foreground!.Value.Index.ShouldBe(32); // Green
+        terminal.Screen[0, 1].Foreground.Should().NotBeNull();
+        terminal.Screen[0, 1].Foreground!.Value.Index.Should().Be(32); // Green
 
-        terminal.Screen[0, 2].Foreground.ShouldNotBeNull();
-        terminal.Screen[0, 2].Foreground!.Value.Index.ShouldBe(34); // Blue
+        terminal.Screen[0, 2].Foreground.Should().NotBeNull();
+        terminal.Screen[0, 2].Foreground!.Value.Index.Should().Be(34); // Blue
     }
 
     [Fact]
@@ -181,9 +180,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[38;5;196mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Foreground.ShouldNotBeNull();
-        cell.Foreground!.Value.Mode.ShouldBe(ColorMode.EightBit);
-        cell.Foreground!.Value.Index.ShouldBe(196);
+        cell.Foreground.Should().NotBeNull();
+        cell.Foreground!.Value.Mode.Should().Be(ColorMode.EightBit);
+        cell.Foreground!.Value.Index.Should().Be(196);
     }
 
     [Fact]
@@ -193,11 +192,11 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[38;2;128;64;32mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Foreground.ShouldNotBeNull();
-        cell.Foreground!.Value.Mode.ShouldBe(ColorMode.TrueColor);
-        cell.Foreground!.Value.R.ShouldBe((byte)128);
-        cell.Foreground!.Value.G.ShouldBe((byte)64);
-        cell.Foreground!.Value.B.ShouldBe((byte)32);
+        cell.Foreground.Should().NotBeNull();
+        cell.Foreground!.Value.Mode.Should().Be(ColorMode.TrueColor);
+        cell.Foreground!.Value.R.Should().Be((byte)128);
+        cell.Foreground!.Value.G.Should().Be((byte)64);
+        cell.Foreground!.Value.B.Should().Be((byte)32);
     }
 
     [Fact]
@@ -207,9 +206,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[1;3;4mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
-        cell.Decoration.HasFlag(CellDecoration.Italic).ShouldBeTrue();
-        cell.Decoration.HasFlag(CellDecoration.Underline).ShouldBeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Italic).Should().BeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Underline).Should().BeTrue();
     }
 
     [Fact]
@@ -218,8 +217,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[1mA\x1b[0mB");
 
-        terminal.Screen[0, 0].Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
-        terminal.Screen[0, 1].Decoration.ShouldBe(CellDecoration.None);
+        terminal.Screen[0, 0].Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
+        terminal.Screen[0, 1].Decoration.Should().Be(CellDecoration.None);
     }
 
     [Fact]
@@ -229,7 +228,7 @@ public sealed class PhantomTerminalTests
         terminal.Write("AB\bC");
 
         // Backspace moves cursor left, then C overwrites B
-        terminal.GetRowText(0).ShouldBe("AC");
+        terminal.GetRowText(0).Should().Be("AC");
     }
 
     [Fact]
@@ -238,13 +237,13 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("Hello\nWorld\nFoo");
 
-        terminal.ContainsText("World").ShouldBeTrue();
-        terminal.ContainsText("Missing").ShouldBeFalse();
+        terminal.ContainsText("World").Should().BeTrue();
+        terminal.ContainsText("Missing").Should().BeFalse();
 
         var pos = terminal.FindText("World");
-        pos.ShouldNotBeNull();
-        pos!.Value.Row.ShouldBe(1);
-        pos!.Value.Col.ShouldBe(0);
+        pos.Should().NotBeNull();
+        pos!.Value.Row.Should().Be(1);
+        pos!.Value.Col.Should().Be(0);
     }
 
     [Fact]
@@ -254,7 +253,7 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[3;10HX");
 
         // CSI 3;10 H = row 3, col 10 (1-indexed) = row 2, col 9 (0-indexed)
-        terminal.Screen[2, 9].Character.ShouldBe('X');
+        terminal.Screen[2, 9].Character.Should().Be('X');
     }
 
     [Fact]
@@ -263,10 +262,10 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(10, 5);
 
         terminal.Write("\x1b[100A"); // Try to move up 100 from row 0
-        terminal.CursorRow.ShouldBe(0);
+        terminal.CursorRow.Should().Be(0);
 
         terminal.Write("\x1b[100B"); // Try to move down 100
-        terminal.CursorRow.ShouldBe(4); // Clamped to last row
+        terminal.CursorRow.Should().Be(4); // Clamped to last row
     }
 
     [Fact]
@@ -275,10 +274,10 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[sHello\x1b[u");
 
-        terminal.SequenceHistory.Count.ShouldBe(3);
-        terminal.SequenceHistory[0].ShouldBeOfType<AnsiSequence.SaveCursor>();
-        terminal.SequenceHistory[1].ShouldBeOfType<AnsiSequence.Text>();
-        terminal.SequenceHistory[2].ShouldBeOfType<AnsiSequence.RestoreCursor>();
+        terminal.SequenceHistory.Count.Should().Be(3);
+        terminal.SequenceHistory[0].Should().BeOfType<AnsiSequence.SaveCursor>();
+        terminal.SequenceHistory[1].Should().BeOfType<AnsiSequence.Text>();
+        terminal.SequenceHistory[2].Should().BeOfType<AnsiSequence.RestoreCursor>();
     }
 
     [Fact]
@@ -289,11 +288,11 @@ public sealed class PhantomTerminalTests
 
         terminal.Reset();
 
-        terminal.GetRowText(0).ShouldBe("");
-        terminal.CursorVisible.ShouldBeTrue();
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(0);
-        terminal.SequenceHistory.ShouldBeEmpty();
+        terminal.GetRowText(0).Should().Be("");
+        terminal.CursorVisible.Should().BeTrue();
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(0);
+        terminal.SequenceHistory.Should().BeEmpty();
     }
 
     [Fact]
@@ -305,10 +304,10 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[1K");  // Erase from start of line to cursor
 
         // Characters 0-5 should be erased, "World" (6-10) should remain
-        terminal.Screen[0, 0].Character.ShouldBe(' ');
-        terminal.Screen[0, 4].Character.ShouldBe(' ');
-        terminal.Screen[0, 5].Character.ShouldBe(' ');
-        terminal.Screen[0, 6].Character.ShouldBe('W');
+        terminal.Screen[0, 0].Character.Should().Be(' ');
+        terminal.Screen[0, 4].Character.Should().Be(' ');
+        terminal.Screen[0, 5].Character.Should().Be(' ');
+        terminal.Screen[0, 6].Character.Should().Be('W');
     }
 
     [Fact]
@@ -320,10 +319,10 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[1J");   // Erase from start to cursor
 
         // Row 0 should be fully erased
-        terminal.GetRowText(0).ShouldBe("");
+        terminal.GetRowText(0).Should().Be("");
         // Row 1 should be erased up to col 3 (0-indexed)
-        terminal.Screen[1, 0].Character.ShouldBe(' ');
-        terminal.Screen[1, 3].Character.ShouldBe(' ');
+        terminal.Screen[1, 0].Character.Should().Be(' ');
+        terminal.Screen[1, 3].Character.Should().Be(' ');
     }
 
     [Fact]
@@ -332,8 +331,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b]8;;https://example.com\x1b\\Link\x1b]8;;\x1b\\");
 
-        terminal.Screen[0, 0].HyperlinkUrl.ShouldBe("https://example.com");
-        terminal.Screen[0, 3].HyperlinkUrl.ShouldBe("https://example.com");
+        terminal.Screen[0, 0].HyperlinkUrl.Should().Be("https://example.com");
+        terminal.Screen[0, 3].HyperlinkUrl.Should().Be("https://example.com");
         // After closing hyperlink, next char has no URL
     }
 
@@ -346,9 +345,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[42mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Background.ShouldNotBeNull();
-        cell.Background!.Value.Mode.ShouldBe(ColorMode.Legacy);
-        cell.Background!.Value.Index.ShouldBe(42);
+        cell.Background.Should().NotBeNull();
+        cell.Background!.Value.Mode.Should().Be(ColorMode.Legacy);
+        cell.Background!.Value.Index.Should().Be(42);
     }
 
     [Fact]
@@ -358,8 +357,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[104mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Background.ShouldNotBeNull();
-        cell.Background!.Value.Index.ShouldBe(104);
+        cell.Background.Should().NotBeNull();
+        cell.Background!.Value.Index.Should().Be(104);
     }
 
     [Fact]
@@ -369,9 +368,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[48;5;220mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Background.ShouldNotBeNull();
-        cell.Background!.Value.Mode.ShouldBe(ColorMode.EightBit);
-        cell.Background!.Value.Index.ShouldBe(220);
+        cell.Background.Should().NotBeNull();
+        cell.Background!.Value.Mode.Should().Be(ColorMode.EightBit);
+        cell.Background!.Value.Index.Should().Be(220);
     }
 
     [Fact]
@@ -381,11 +380,11 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[48;2;10;20;30mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Background.ShouldNotBeNull();
-        cell.Background!.Value.Mode.ShouldBe(ColorMode.TrueColor);
-        cell.Background!.Value.R.ShouldBe((byte)10);
-        cell.Background!.Value.G.ShouldBe((byte)20);
-        cell.Background!.Value.B.ShouldBe((byte)30);
+        cell.Background.Should().NotBeNull();
+        cell.Background!.Value.Mode.Should().Be(ColorMode.TrueColor);
+        cell.Background!.Value.R.Should().Be((byte)10);
+        cell.Background!.Value.G.Should().Be((byte)20);
+        cell.Background!.Value.B.Should().Be((byte)30);
     }
 
     // ── SGR: Default Color Reset ─────────────────────────────────────
@@ -396,8 +395,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[31mA\x1b[39mB");
 
-        terminal.Screen[0, 0].Foreground.ShouldNotBeNull();
-        terminal.Screen[0, 1].Foreground.ShouldBeNull();
+        terminal.Screen[0, 0].Foreground.Should().NotBeNull();
+        terminal.Screen[0, 1].Foreground.Should().BeNull();
     }
 
     [Fact]
@@ -406,8 +405,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[42mA\x1b[49mB");
 
-        terminal.Screen[0, 0].Background.ShouldNotBeNull();
-        terminal.Screen[0, 1].Background.ShouldBeNull();
+        terminal.Screen[0, 0].Background.Should().NotBeNull();
+        terminal.Screen[0, 1].Background.Should().BeNull();
     }
 
     // ── SGR: All Decorations ─────────────────────────────────────────
@@ -424,7 +423,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write($"\x1b[{sgrCode}mX");
 
-        terminal.Screen[0, 0].Decoration.HasFlag(expected).ShouldBeTrue();
+        terminal.Screen[0, 0].Decoration.HasFlag(expected).Should().BeTrue();
     }
 
     // ── SGR: Extended Color Edge Cases ───────────────────────────────
@@ -435,7 +434,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[38mX");
 
-        terminal.GetRowText(0).ShouldBe("X");
+        terminal.GetRowText(0).Should().Be("X");
     }
 
     [Fact]
@@ -444,7 +443,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[38;9mX");
 
-        terminal.GetRowText(0).ShouldBe("X");
+        terminal.GetRowText(0).Should().Be("X");
     }
 
     [Fact]
@@ -453,7 +452,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[38;5mX");
 
-        terminal.GetRowText(0).ShouldBe("X");
+        terminal.GetRowText(0).Should().Be("X");
     }
 
     [Fact]
@@ -462,7 +461,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b[38;2;100;200mX");
 
-        terminal.GetRowText(0).ShouldBe("X");
+        terminal.GetRowText(0).Should().Be("X");
     }
 
     // ── Cursor Movement ──────────────────────────────────────────────
@@ -473,7 +472,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("ABCD\x1b[2DXY");
 
-        terminal.GetRowText(0).ShouldBe("ABXY");
+        terminal.GetRowText(0).Should().Be("ABXY");
     }
 
     [Fact]
@@ -482,8 +481,8 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("A\x1b[3CB");
 
-        terminal.Screen[0, 0].Character.ShouldBe('A');
-        terminal.Screen[0, 4].Character.ShouldBe('B');
+        terminal.Screen[0, 0].Character.Should().Be('A');
+        terminal.Screen[0, 4].Character.Should().Be('B');
     }
 
     [Fact]
@@ -491,7 +490,7 @@ public sealed class PhantomTerminalTests
     {
         var terminal = new PhantomTerminal(10, 5);
         terminal.Write("\x1b[100D");
-        terminal.CursorCol.ShouldBe(0);
+        terminal.CursorCol.Should().Be(0);
     }
 
     [Fact]
@@ -499,7 +498,7 @@ public sealed class PhantomTerminalTests
     {
         var terminal = new PhantomTerminal(10, 5);
         terminal.Write("\x1b[100C");
-        terminal.CursorCol.ShouldBe(9);
+        terminal.CursorCol.Should().Be(9);
     }
 
     // ── Cursor Position ──────────────────────────────────────────────
@@ -511,8 +510,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("Hello\nWorld");
         terminal.Write("\x1b[H");
 
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(0);
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(0);
     }
 
     [Fact]
@@ -522,7 +521,7 @@ public sealed class PhantomTerminalTests
         terminal.Write("Hello");
         terminal.Write("\x1b[3G");
 
-        terminal.CursorCol.ShouldBe(2);
+        terminal.CursorCol.Should().Be(2);
     }
 
     [Fact]
@@ -531,10 +530,10 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(10, 5);
 
         terminal.Write("\x1b[100;3H");
-        terminal.CursorRow.ShouldBe(4);
+        terminal.CursorRow.Should().Be(4);
 
         terminal.Write("\x1b[1;100H");
-        terminal.CursorCol.ShouldBe(9);
+        terminal.CursorCol.Should().Be(9);
     }
 
     [Fact]
@@ -542,7 +541,7 @@ public sealed class PhantomTerminalTests
     {
         var terminal = new PhantomTerminal(10, 5);
         terminal.Write("\x1b[100G");
-        terminal.CursorCol.ShouldBe(9);
+        terminal.CursorCol.Should().Be(9);
     }
 
     // ── Erase Modes ──────────────────────────────────────────────────
@@ -554,9 +553,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("Line 1\nLine 2\nLine 3");
         terminal.Write("\x1b[2J");
 
-        terminal.GetRowText(0).ShouldBeEmpty();
-        terminal.GetRowText(1).ShouldBeEmpty();
-        terminal.GetRowText(2).ShouldBeEmpty();
+        terminal.GetRowText(0).Should().BeEmpty();
+        terminal.GetRowText(1).Should().BeEmpty();
+        terminal.GetRowText(2).Should().BeEmpty();
     }
 
     [Fact]
@@ -566,7 +565,7 @@ public sealed class PhantomTerminalTests
         terminal.Write("Content");
         terminal.Write("\x1b[3J");
 
-        terminal.GetRowText(0).ShouldBeEmpty();
+        terminal.GetRowText(0).Should().BeEmpty();
     }
 
     // ── Line Wrap With Scroll ────────────────────────────────────────
@@ -577,12 +576,12 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(5, 2);
 
         terminal.Write("1234567890");
-        terminal.GetRowText(0).ShouldBe("12345");
-        terminal.GetRowText(1).ShouldBe("67890");
+        terminal.GetRowText(0).Should().Be("12345");
+        terminal.GetRowText(1).Should().Be("67890");
 
         terminal.Write("X");
-        terminal.GetRowText(0).ShouldBe("67890");
-        terminal.GetRowText(1).ShouldBe("X");
+        terminal.GetRowText(0).Should().Be("67890");
+        terminal.GetRowText(1).Should().Be("X");
     }
 
     // ── Alternate Screen ─────────────────────────────────────────────
@@ -595,8 +594,8 @@ public sealed class PhantomTerminalTests
 
         terminal.Write("\x1b[?1049h");
 
-        terminal.CursorRow.ShouldBe(0);
-        terminal.CursorCol.ShouldBe(0);
+        terminal.CursorRow.Should().Be(0);
+        terminal.CursorCol.Should().Be(0);
     }
 
     [Fact]
@@ -611,8 +610,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("Alt content");
 
         terminal.Write("\x1b[?1049l");
-        terminal.CursorRow.ShouldBe(mainRow);
-        terminal.CursorCol.ShouldBe(mainCol);
+        terminal.CursorRow.Should().Be(mainRow);
+        terminal.CursorCol.Should().Be(mainCol);
     }
 
     [Fact]
@@ -625,7 +624,7 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[?1049l");
 
         terminal.Write("\x1b[?1049h");
-        terminal.IsAlternateScreen.ShouldBeTrue();
+        terminal.IsAlternateScreen.Should().BeTrue();
     }
 
     // ── GetScreenText / GetCell ───────────────────────────────────────
@@ -637,8 +636,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("Hello\nWorld");
 
         var text = terminal.GetScreenText();
-        text.ShouldContain("Hello");
-        text.ShouldContain("World");
+        text.Should().Contain("Hello");
+        text.Should().Contain("World");
     }
 
     [Fact]
@@ -648,9 +647,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[1;31mX");
 
         var cell = terminal.GetCell(0, 0);
-        cell.Character.ShouldBe('X');
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
-        cell.Foreground.ShouldNotBeNull();
+        cell.Character.Should().Be('X');
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
+        cell.Foreground.Should().NotBeNull();
     }
 
     // ── Width / Height ───────────────────────────────────────────────
@@ -659,16 +658,16 @@ public sealed class PhantomTerminalTests
     public void Width_And_Height_Should_Match_Constructor()
     {
         var terminal = new PhantomTerminal(132, 50);
-        terminal.Width.ShouldBe(132);
-        terminal.Height.ShouldBe(50);
+        terminal.Width.Should().Be(132);
+        terminal.Height.Should().Be(50);
     }
 
     [Fact]
     public void Default_Constructor_Should_Use_80x24()
     {
         var terminal = new PhantomTerminal();
-        terminal.Width.ShouldBe(80);
-        terminal.Height.ShouldBe(24);
+        terminal.Width.Should().Be(80);
+        terminal.Height.Should().Be(24);
     }
 
     // ── Null Input ───────────────────────────────────────────────────
@@ -677,7 +676,7 @@ public sealed class PhantomTerminalTests
     public void Write_Should_Throw_For_Null()
     {
         var terminal = new PhantomTerminal(80, 24);
-        Should.Throw<ArgumentNullException>(() => terminal.Write(null!));
+        FluentActions.Invoking(() => terminal.Write(null!)).Should().Throw<ArgumentNullException>();
     }
 
     // ── Backspace at column 0 ────────────────────────────────────────
@@ -687,7 +686,7 @@ public sealed class PhantomTerminalTests
     {
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\b");
-        terminal.CursorCol.ShouldBe(0);
+        terminal.CursorCol.Should().Be(0);
     }
 
     // ── Hyperlink Tracking ───────────────────────────────────────────
@@ -698,10 +697,10 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write("\x1b]8;;https://example.com\x1b\\AB\x1b]8;;\x1b\\CD");
 
-        terminal.Screen[0, 0].HyperlinkUrl.ShouldBe("https://example.com");
-        terminal.Screen[0, 1].HyperlinkUrl.ShouldBe("https://example.com");
-        terminal.Screen[0, 2].HyperlinkUrl.ShouldBeNull();
-        terminal.Screen[0, 3].HyperlinkUrl.ShouldBeNull();
+        terminal.Screen[0, 0].HyperlinkUrl.Should().Be("https://example.com");
+        terminal.Screen[0, 1].HyperlinkUrl.Should().Be("https://example.com");
+        terminal.Screen[0, 2].HyperlinkUrl.Should().BeNull();
+        terminal.Screen[0, 3].HyperlinkUrl.Should().BeNull();
     }
 
     // ── Assertion Helper Integration ─────────────────────────────────
@@ -751,8 +750,8 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[31;42mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Foreground!.Value.Index.ShouldBe(31);
-        cell.Background!.Value.Index.ShouldBe(42);
+        cell.Foreground!.Value.Index.Should().Be(31);
+        cell.Background!.Value.Index.Should().Be(42);
     }
 
     [Fact]
@@ -762,9 +761,9 @@ public sealed class PhantomTerminalTests
         terminal.Write("\x1b[1;3;31mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
-        cell.Decoration.HasFlag(CellDecoration.Italic).ShouldBeTrue();
-        cell.Foreground!.Value.Index.ShouldBe(31);
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Italic).Should().BeTrue();
+        cell.Foreground!.Value.Index.Should().Be(31);
     }
 
     // ── SGR foreground range ─────────────────────────────────────────
@@ -778,7 +777,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write($"\x1b[{sgrCode}mX");
 
-        terminal.Screen[0, 0].Foreground!.Value.Index.ShouldBe(sgrCode);
+        terminal.Screen[0, 0].Foreground!.Value.Index.Should().Be(sgrCode);
     }
 
     [Theory]
@@ -790,7 +789,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write($"\x1b[{sgrCode}mX");
 
-        terminal.Screen[0, 0].Background!.Value.Index.ShouldBe(sgrCode);
+        terminal.Screen[0, 0].Background!.Value.Index.Should().Be(sgrCode);
     }
 
     // ── Reset: complete state check ──────────────────────────────────
@@ -802,11 +801,11 @@ public sealed class PhantomTerminalTests
 
         // Enter alternate screen, then reset
         terminal.Write("\x1b[?1049h");
-        terminal.IsAlternateScreen.ShouldBeTrue();
+        terminal.IsAlternateScreen.Should().BeTrue();
 
         terminal.Reset();
 
-        terminal.IsAlternateScreen.ShouldBeFalse();
+        terminal.IsAlternateScreen.Should().BeFalse();
     }
 
     [Fact]
@@ -821,9 +820,9 @@ public sealed class PhantomTerminalTests
         // After reset, new text should have no decoration or color
         terminal.Write("X");
         var cell = terminal.Screen[0, 0];
-        cell.Character.ShouldBe('X');
-        cell.Decoration.ShouldBe(CellDecoration.None);
-        cell.Foreground.ShouldBeNull();
+        cell.Character.Should().Be('X');
+        cell.Decoration.Should().Be(CellDecoration.None);
+        cell.Foreground.Should().BeNull();
     }
 
     // ── Alternate screen: buffer preservation (??= semantics) ────────
@@ -840,7 +839,7 @@ public sealed class PhantomTerminalTests
 
         // Re-enter: existing alternate buffer reused (??= not = semantics)
         terminal.Write("\x1b[?1049h");
-        terminal.GetRowText(0).ShouldBe("AltContent");
+        terminal.GetRowText(0).Should().Be("AltContent");
     }
 
     // ── SGR: decoration idempotency (|= not ^=) ──────────────────────
@@ -862,7 +861,7 @@ public sealed class PhantomTerminalTests
         var terminal = new PhantomTerminal(80, 24);
         terminal.Write($"\x1b[{sgrCode};{sgrCode}mX");
 
-        terminal.Screen[0, 0].Decoration.HasFlag(expected).ShouldBeTrue();
+        terminal.Screen[0, 0].Decoration.HasFlag(expected).Should().BeTrue();
     }
 
     // ── SGR: boundary foreground/background colors ───────────────────
@@ -876,8 +875,8 @@ public sealed class PhantomTerminalTests
         terminal.Write($"\x1b[{sgrCode}mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Foreground.ShouldNotBeNull();
-        cell.Foreground!.Value.Index.ShouldBe(sgrCode);
+        cell.Foreground.Should().NotBeNull();
+        cell.Foreground!.Value.Index.Should().Be(sgrCode);
     }
 
     [Theory]
@@ -889,7 +888,7 @@ public sealed class PhantomTerminalTests
         terminal.Write($"\x1b[{sgrCode}mX");
 
         var cell = terminal.Screen[0, 0];
-        cell.Background.ShouldNotBeNull();
-        cell.Background!.Value.Index.ShouldBe(sgrCode);
+        cell.Background.Should().NotBeNull();
+        cell.Background!.Value.Index.Should().Be(sgrCode);
     }
 }

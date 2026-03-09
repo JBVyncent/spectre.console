@@ -15,8 +15,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.Rows.Add(null!));
 
             // Then
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("columns");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("columns");
         }
 
         [Fact]
@@ -30,7 +30,7 @@ public sealed class TableRowCollectionTests
             table.Rows.Add([Text.Empty]);
 
             // Then
-            table.Rows.Count.ShouldBe(1);
+            table.Rows.Count.Should().Be(1);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ public sealed class TableRowCollectionTests
             var result = table.Rows.Add([Text.Empty]);
 
             // Then
-            result.ShouldBe(1);
+            result.Should().Be(1);
         }
 
         [Fact]
@@ -80,8 +80,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.Rows.Insert(0, null!));
 
             // Then
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("columns");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("columns");
         }
 
         [Fact]
@@ -96,7 +96,7 @@ public sealed class TableRowCollectionTests
             table.Rows.Insert(0, [Text.Empty]);
 
             // Then
-            table.Rows.Count.ShouldBe(2);
+            table.Rows.Count.Should().Be(2);
         }
 
         [Fact]
@@ -112,7 +112,7 @@ public sealed class TableRowCollectionTests
             var result = table.Rows.Insert(1, [new Text("3")]);
 
             // Then
-            result.ShouldBe(1);
+            result.Should().Be(1);
         }
 
         [Fact]
@@ -148,8 +148,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.Rows.RemoveAt(-1));
 
             // Then
-            result.ShouldBeOfType<IndexOutOfRangeException>()
-                .Message.ShouldBe("Table row index cannot be negative.");
+            result.Should().BeOfType<IndexOutOfRangeException>()
+                    .Which.Message.Should().Be("Table row index cannot be negative.");
         }
 
         [Fact]
@@ -166,8 +166,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.Rows.RemoveAt(3));
 
             // Then
-            result.ShouldBeOfType<IndexOutOfRangeException>()
-                .Message.ShouldBe("Table row index cannot exceed the number of rows in the table.");
+            result.Should().BeOfType<IndexOutOfRangeException>()
+                    .Which.Message.Should().Be("Table row index cannot exceed the number of rows in the table.");
         }
 
         [Fact]
@@ -208,7 +208,7 @@ public sealed class TableRowCollectionTests
             var result = table.Rows.Count;
 
             // Then
-            result.ShouldBe(0);
+            result.Should().Be(0);
         }
     }
 
@@ -276,8 +276,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.UpdateCell(5, 2, "5"));
 
             // Then
-            result.ShouldBeOfType<IndexOutOfRangeException>()
-                .Message.ShouldBe("Table row index cannot exceed the number of rows in the table.");
+            result.Should().BeOfType<IndexOutOfRangeException>()
+                    .Which.Message.Should().Be("Table row index cannot exceed the number of rows in the table.");
         }
 
         [Fact]
@@ -298,8 +298,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.UpdateCell(2, 5, "5"));
 
             // Then
-            result.ShouldBeOfType<IndexOutOfRangeException>()
-                .Message.ShouldBe("Table column index cannot exceed the number of rows in the table.");
+            result.Should().BeOfType<IndexOutOfRangeException>()
+                    .Which.Message.Should().Be("Table column index cannot exceed the number of rows in the table.");
         }
 
         [Fact]
@@ -320,8 +320,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.UpdateCell(-1, 2, "5"));
 
             // Then
-            result.ShouldBeOfType<IndexOutOfRangeException>()
-                .Message.ShouldBe("Table row index cannot be negative.");
+            result.Should().BeOfType<IndexOutOfRangeException>()
+                    .Which.Message.Should().Be("Table row index cannot be negative.");
         }
 
         [Fact]
@@ -342,8 +342,8 @@ public sealed class TableRowCollectionTests
             var result = Record.Exception(() => table.UpdateCell(2, -1, "5"));
 
             // Then
-            result.ShouldBeOfType<IndexOutOfRangeException>()
-                .Message.ShouldBe("Table column index cannot be negative.");
+            result.Should().BeOfType<IndexOutOfRangeException>()
+                    .Which.Message.Should().Be("Table column index cannot be negative.");
         }
     }
 }

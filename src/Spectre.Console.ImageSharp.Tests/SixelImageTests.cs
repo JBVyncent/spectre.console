@@ -14,16 +14,16 @@ public sealed class SixelImageTests
         public void Should_Throw_If_Filename_Is_Null()
         {
             var result = Record.Exception(() => new SixelImage((string)null!));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .And(ex => ex.ParamName.ShouldBe("filename"));
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.And(ex => ex.ParamName.Should().Be("filename"));
         }
 
         [Fact]
         public void Should_Throw_If_Stream_Is_Null()
         {
             var result = Record.Exception(() => new SixelImage((Stream)null!));
-            result.ShouldBeOfType<ArgumentNullException>()
-                .And(ex => ex.ParamName.ShouldBe("data"));
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.And(ex => ex.ParamName.Should().Be("data"));
         }
 
         [Fact]
@@ -31,7 +31,7 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(4, 4, ImageColor.Red);
             var result = Record.Exception(() => new SixelImage(stream));
-            result.ShouldBeNull();
+            result.Should().BeNull();
         }
 
         [Fact]
@@ -39,8 +39,8 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(8, 12, ImageColor.Blue);
             var img = new SixelImage(stream);
-            img.Width.ShouldBe(8);
-            img.Height.ShouldBe(12);
+            img.Width.Should().Be(8);
+            img.Height.Should().Be(12);
         }
     }
 
@@ -60,7 +60,7 @@ public sealed class SixelImageTests
             var segments = img.GetSegments(console).ToList();
 
             // The first segment must be a control-code segment (the DCS sequence).
-            segments.Any(s => s.IsControlCode).ShouldBeTrue();
+            segments.Any(s => s.IsControlCode).Should().BeTrue();
         }
 
         [Fact]
@@ -75,8 +75,8 @@ public sealed class SixelImageTests
             var segments = img.GetSegments(console).ToList();
             var control = segments.First(s => s.IsControlCode);
 
-            control.Text.ShouldStartWith("\x1bP");
-            control.Text.ShouldEndWith("\x1b\\");
+            control.Text.Should().StartWith("\x1bP");
+            control.Text.Should().EndWith("\x1b\\");
         }
 
         [Fact]
@@ -90,7 +90,7 @@ public sealed class SixelImageTests
 
             var segments = img.GetSegments(console).ToList();
 
-            segments.Any(s => s.IsLineBreak).ShouldBeTrue();
+            segments.Any(s => s.IsLineBreak).Should().BeTrue();
         }
 
         [Fact]
@@ -106,8 +106,8 @@ public sealed class SixelImageTests
             var options = RenderOptions.Create(console, console.Profile.Capabilities);
             var measurement = ((IRenderable)img).Measure(options, 200);
 
-            measurement.Min.ShouldBe(20);
-            measurement.Max.ShouldBe(20);
+            measurement.Min.Should().Be(20);
+            measurement.Max.Should().Be(20);
         }
 
         [Fact]
@@ -123,8 +123,8 @@ public sealed class SixelImageTests
             var options = RenderOptions.Create(console, console.Profile.Capabilities);
             var measurement = ((IRenderable)img).Measure(options, 200);
 
-            measurement.Min.ShouldBe(10);
-            measurement.Max.ShouldBe(10);
+            measurement.Min.Should().Be(10);
+            measurement.Max.Should().Be(10);
         }
 
         [Fact]
@@ -140,8 +140,8 @@ public sealed class SixelImageTests
             var options = RenderOptions.Create(console, console.Profile.Capabilities);
             var measurement = ((IRenderable)img).Measure(options, 10);
 
-            measurement.Min.ShouldBeLessThanOrEqualTo(10);
-            measurement.Max.ShouldBeLessThanOrEqualTo(10);
+            measurement.Min.Should().BeLessThanOrEqualTo(10);
+            measurement.Max.Should().BeLessThanOrEqualTo(10);
         }
     }
 
@@ -162,7 +162,7 @@ public sealed class SixelImageTests
             var segments = img.GetSegments(console).ToList();
 
             // No DCS control segment.
-            segments.Any(s => s.IsControlCode && s.Text.Contains("\x1bP")).ShouldBeFalse();
+            segments.Any(s => s.IsControlCode && s.Text.Contains("\x1bP")).Should().BeFalse();
         }
 
         [Fact]
@@ -176,7 +176,7 @@ public sealed class SixelImageTests
 
             var segments = img.GetSegments(console).ToList();
 
-            segments.ShouldNotBeEmpty();
+            segments.Should().NotBeEmpty();
         }
     }
 
@@ -189,7 +189,7 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(20, 10, ImageColor.Red);
             var img = new SixelImage(stream).MaxWidth(5);
-            img.MaxWidth.ShouldBe(5);
+            img.MaxWidth.Should().Be(5);
         }
 
         [Fact]
@@ -197,14 +197,14 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(20, 10, ImageColor.Red);
             var img = new SixelImage(stream);
-            img.MaxWidth(5).ShouldBeSameAs(img);
+            img.MaxWidth(5).Should().BeSameAs(img);
         }
 
         [Fact]
         public void MaxWidth_Throws_If_Image_Is_Null()
         {
             var result = Record.Exception(() => SixelImageExtensions.MaxWidth(null!, 10));
-            result.ShouldBeOfType<ArgumentNullException>();
+            result.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -216,7 +216,7 @@ public sealed class SixelImageTests
 
             img.NoMaxWidth();
 
-            img.MaxWidth.ShouldBeNull();
+            img.MaxWidth.Should().BeNull();
         }
 
         [Fact]
@@ -224,14 +224,14 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(20, 10, ImageColor.Red);
             var img = new SixelImage(stream);
-            img.NoMaxWidth().ShouldBeSameAs(img);
+            img.NoMaxWidth().Should().BeSameAs(img);
         }
 
         [Fact]
         public void NoMaxWidth_Throws_If_Image_Is_Null()
         {
             var result = Record.Exception(() => SixelImageExtensions.NoMaxWidth(null!));
-            result.ShouldBeOfType<ArgumentNullException>();
+            result.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -239,7 +239,7 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(4, 4, ImageColor.Red);
             var img = new SixelImage(stream).MaxColors(16);
-            img.MaxColors.ShouldBe(16);
+            img.MaxColors.Should().Be(16);
         }
 
         [Fact]
@@ -247,7 +247,7 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(4, 4, ImageColor.Red);
             var img = new SixelImage(stream);
-            img.MaxColors(16).ShouldBeSameAs(img);
+            img.MaxColors(16).Should().BeSameAs(img);
         }
 
         [Fact]
@@ -257,15 +257,15 @@ public sealed class SixelImageTests
             var img = new SixelImage(stream);
 
             var result = Record.Exception(() => img.MaxColors(1));
-            result.ShouldBeOfType<ArgumentOutOfRangeException>()
-                .And(ex => ex.ParamName.ShouldBe("maxColors"));
+            result.Should().BeOfType<ArgumentOutOfRangeException>()
+                    .Which.And(ex => ex.ParamName.Should().Be("maxColors"));
         }
 
         [Fact]
         public void MaxColors_Throws_If_Image_Is_Null()
         {
             var result = Record.Exception(() => SixelImageExtensions.MaxColors(null!, 16));
-            result.ShouldBeOfType<ArgumentNullException>();
+            result.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -276,7 +276,7 @@ public sealed class SixelImageTests
 
             img.UseResampler(SixLabors.ImageSharp.Processing.KnownResamplers.Lanczos3);
 
-            img.Resampler.ShouldNotBeNull();
+            img.Resampler.Should().NotBeNull();
         }
 
         [Fact]
@@ -284,7 +284,7 @@ public sealed class SixelImageTests
         {
             using var stream = CreatePngStream(4, 4, ImageColor.Red);
             var img = new SixelImage(stream);
-            img.UseResampler(SixLabors.ImageSharp.Processing.KnownResamplers.Lanczos3).ShouldBeSameAs(img);
+            img.UseResampler(SixLabors.ImageSharp.Processing.KnownResamplers.Lanczos3).Should().BeSameAs(img);
         }
 
         [Fact]
@@ -292,7 +292,7 @@ public sealed class SixelImageTests
         {
             var result = Record.Exception(() =>
                 SixelImageExtensions.UseResampler(null!, SixLabors.ImageSharp.Processing.KnownResamplers.Bicubic));
-            result.ShouldBeOfType<ArgumentNullException>();
+            result.Should().BeOfType<ArgumentNullException>();
         }
     }
 

@@ -12,7 +12,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L132, ThrowIfNull removal
             var ex = Record.Exception(() => new ProgressTask(1, null!, 100));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
     }
 
@@ -23,7 +23,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L137 _value = 0 removal or mutation
             var task = new ProgressTask(1, "Test", 100);
-            task.Value.ShouldBe(0);
+            task.Value.Should().Be(0);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L138 .Trim() removal
             var task = new ProgressTask(1, "  Test  ", 100);
-            task.Description.ShouldBe("Test");
+            task.Description.Should().Be("Test");
         }
 
         [Fact]
@@ -39,8 +39,8 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L140 string.IsNullOrWhiteSpace check AND L143 string mutation
             var ex = Record.Exception(() => new ProgressTask(1, "   ", 100));
-            ex.ShouldBeOfType<ArgumentException>();
-            ex.Message.ShouldContain("Task name cannot be empty");
+            ex.Should().BeOfType<ArgumentException>();
+            ex.Message.Should().Contain("Task name cannot be empty");
         }
 
         [Fact]
@@ -48,7 +48,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L145 Id = id removal
             var task = new ProgressTask(42, "Test", 100);
-            task.Id.ShouldBe(42);
+            task.Id.Should().Be(42);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L147 autoStart ternary mutation
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: true, tp);
-            task.StartTime.ShouldNotBeNull();
+            task.StartTime.Should().NotBeNull();
         }
 
         [Fact]
@@ -65,7 +65,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L147 autoStart ternary mutation (other direction)
             var task = new ProgressTask(1, "Test", 100, autoStart: false);
-            task.StartTime.ShouldBeNull();
+            task.StartTime.Should().BeNull();
         }
 
         [Fact]
@@ -74,7 +74,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L135 timeProvider ?? TimeProvider.System
             // If null coalescing is removed, _timeProvider would be null and StartTime would throw
             var task = new ProgressTask(1, "Test", 100, autoStart: true);
-            task.StartTime.ShouldNotBeNull();
+            task.StartTime.Should().NotBeNull();
         }
     }
 
@@ -86,7 +86,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L219 _description = description
             var task = new ProgressTask(1, "Old", 100);
             task.Description = "New";
-            task.Description.ShouldBe("New");
+            task.Description.Should().Be("New");
         }
 
         [Fact]
@@ -95,8 +95,8 @@ public sealed class ProgressTaskMutationTests
             // Kills: L214 IsNullOrWhiteSpace check AND L218 string mutation
             var task = new ProgressTask(1, "Test", 100);
             var ex = Record.Exception(() => task.Description = "   ");
-            ex.ShouldBeOfType<InvalidOperationException>();
-            ex.Message.ShouldContain("Task name cannot be empty");
+            ex.Should().BeOfType<InvalidOperationException>();
+            ex.Message.Should().Contain("Task name cannot be empty");
         }
 
         [Fact]
@@ -105,7 +105,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L224 _maxValue = maxValue.Value
             var task = new ProgressTask(1, "Test", 100);
             task.MaxValue = 200;
-            task.MaxValue.ShouldBe(200);
+            task.MaxValue.Should().Be(200);
         }
 
         [Fact]
@@ -114,7 +114,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L229 _value += increment.Value
             var task = new ProgressTask(1, "Test", 100);
             task.Increment(25);
-            task.Value.ShouldBe(25);
+            task.Value.Should().Be(25);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L234 _value = value.Value
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 50;
-            task.Value.ShouldBe(50);
+            task.Value.Should().Be(50);
         }
 
         [Fact]
@@ -132,7 +132,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L238 _value > _maxValue capping
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 150;
-            task.Value.ShouldBe(100);
+            task.Value.Should().Be(100);
         }
 
         [Fact]
@@ -145,7 +145,7 @@ public sealed class ProgressTaskMutationTests
             task.Increment(10);
             // Speed should be null because no samples are kept
             tp.Advance(TimeSpan.FromSeconds(5));
-            task.Speed.ShouldBeNull();
+            task.Speed.Should().BeNull();
         }
     }
 
@@ -156,14 +156,14 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L82 StartTime != null
             var task = new ProgressTask(1, "Test", 100, autoStart: true);
-            task.IsStarted.ShouldBeTrue();
+            task.IsStarted.Should().BeTrue();
         }
 
         [Fact]
         public void IsStarted_Should_Be_False_When_Not_Started()
         {
             var task = new ProgressTask(1, "Test", 100, autoStart: false);
-            task.IsStarted.ShouldBeFalse();
+            task.IsStarted.Should().BeFalse();
         }
 
         [Fact]
@@ -172,7 +172,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L87 Value >= MaxValue
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 100;
-            task.IsFinished.ShouldBeTrue();
+            task.IsFinished.Should().BeTrue();
         }
 
         [Fact]
@@ -180,7 +180,7 @@ public sealed class ProgressTaskMutationTests
         {
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 99;
-            task.IsFinished.ShouldBeFalse();
+            task.IsFinished.Should().BeFalse();
         }
 
         [Fact]
@@ -189,7 +189,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L87 StopTime != null
             var task = new ProgressTask(1, "Test", 100);
             task.StopTask();
-            task.IsFinished.ShouldBeTrue();
+            task.IsFinished.Should().BeTrue();
         }
     }
 
@@ -201,7 +201,7 @@ public sealed class ProgressTaskMutationTests
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: false, tp);
             task.StartTask();
-            task.StartTime.ShouldBe(tp.GetLocalNow().LocalDateTime);
+            task.StartTime.Should().Be(tp.GetLocalNow().LocalDateTime);
         }
 
         [Fact]
@@ -215,7 +215,7 @@ public sealed class ProgressTaskMutationTests
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: false, tp);
             task.StartTask();
-            task.StartTime.ShouldNotBeNull();
+            task.StartTime.Should().NotBeNull();
         }
 
         [Fact]
@@ -225,8 +225,8 @@ public sealed class ProgressTaskMutationTests
             var task = new ProgressTask(1, "Test", 100);
             task.StopTask();
             var ex = Record.Exception(() => task.StartTask());
-            ex.ShouldBeOfType<InvalidOperationException>();
-            ex.Message.ShouldContain("Stopped tasks cannot be restarted");
+            ex.Should().BeOfType<InvalidOperationException>();
+            ex.Message.Should().Contain("Stopped tasks cannot be restarted");
         }
 
         [Fact]
@@ -236,7 +236,7 @@ public sealed class ProgressTaskMutationTests
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: false, tp);
             task.StopTask();
-            task.StartTime.ShouldNotBeNull();
+            task.StartTime.Should().NotBeNull();
         }
 
         [Fact]
@@ -246,7 +246,7 @@ public sealed class ProgressTaskMutationTests
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: true, tp);
             task.StopTask();
-            task.StopTime.ShouldBe(tp.GetLocalNow().LocalDateTime);
+            task.StopTime.Should().Be(tp.GetLocalNow().LocalDateTime);
         }
     }
 
@@ -257,7 +257,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L262 MaxValue == 0 → return 100
             var task = new ProgressTask(1, "Test", 0);
-            task.Percentage.ShouldBe(100);
+            task.Percentage.Should().Be(100);
         }
 
         [Fact]
@@ -266,7 +266,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L267 arithmetic mutations (Value / MaxValue) * 100
             var task = new ProgressTask(1, "Test", 200);
             task.Value = 50;
-            task.Percentage.ShouldBe(25);
+            task.Percentage.Should().Be(25);
         }
 
         [Fact]
@@ -279,7 +279,7 @@ public sealed class ProgressTaskMutationTests
             // (Update sets _value = value.Value), we use Increment with a negative.
             var task = new ProgressTask(1, "Test", 100);
             task.Increment(-10); // This sets _value to -10, which is < 0
-            task.Percentage.ShouldBe(0); // Clamped by Math.Max(0, ...)
+            task.Percentage.Should().Be(0); // Clamped by Math.Max(0, ...)
         }
 
         [Fact]
@@ -287,7 +287,7 @@ public sealed class ProgressTaskMutationTests
         {
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 50;
-            task.Percentage.ShouldBe(50);
+            task.Percentage.Should().Be(50);
         }
     }
 
@@ -299,7 +299,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L282 StartTime == null guard
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: false, tp);
-            task.Speed.ShouldBeNull();
+            task.Speed.Should().BeNull();
         }
 
         [Fact]
@@ -312,7 +312,7 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(1));
             task.StopTask();
             tp.Advance(TimeSpan.FromSeconds(2)); // Ensure past cache
-            task.Speed.ShouldBeNull();
+            task.Speed.Should().BeNull();
         }
 
         [Fact]
@@ -324,7 +324,7 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(2));
             task.Increment(10);
             tp.Advance(TimeSpan.FromSeconds(2)); // Past cache window
-            task.Speed.ShouldNotBeNull();
+            task.Speed.Should().NotBeNull();
         }
 
         [Fact]
@@ -343,7 +343,7 @@ public sealed class ProgressTaskMutationTests
             var speed1 = task.Speed; // Calculates and caches
             // Don't advance time or add samples — should return cached value
             var speed2 = task.Speed;
-            speed2.ShouldBe(speed1);
+            speed2.Should().Be(speed1);
         }
 
         [Fact]
@@ -358,7 +358,7 @@ public sealed class ProgressTaskMutationTests
             task.Increment(10);
             tp.Advance(TimeSpan.FromSeconds(10)); // All samples now > 5s old
 
-            task.Speed.ShouldBeNull();
+            task.Speed.Should().BeNull();
         }
 
         [Fact]
@@ -374,9 +374,9 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(5)); // Beyond cache window, speed decays
 
             var speed = task.Speed;
-            speed.ShouldNotBeNull();
+            speed.Should().NotBeNull();
             // Speed should be lower because time span is extended to current time
-            speed!.Value.ShouldBeLessThan(10.0);
+            speed!.Value.Should().BeLessThan(10.0);
         }
 
         [Fact]
@@ -389,7 +389,7 @@ public sealed class ProgressTaskMutationTests
 
             // First sample added at start time, second sample also at start time
             task.Increment(10); // Same timestamp
-            task.Speed.ShouldBeNull();
+            task.Speed.Should().BeNull();
         }
     }
 
@@ -400,7 +400,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L322 StartTime == null check
             var task = new ProgressTask(1, "Test", 100, autoStart: false);
-            task.ElapsedTime.ShouldBeNull();
+            task.ElapsedTime.Should().BeNull();
         }
 
         [Fact]
@@ -412,7 +412,7 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(10));
             task.StopTask();
             tp.Advance(TimeSpan.FromSeconds(100)); // Should not affect elapsed
-            task.ElapsedTime.ShouldBe(TimeSpan.FromSeconds(10));
+            task.ElapsedTime.Should().Be(TimeSpan.FromSeconds(10));
         }
 
         [Fact]
@@ -422,7 +422,7 @@ public sealed class ProgressTaskMutationTests
             var tp = new FakeTimeProvider(new DateTime(2024, 1, 1, 12, 0, 0));
             var task = new ProgressTask(1, "Test", 100, autoStart: true, tp);
             tp.Advance(TimeSpan.FromSeconds(42));
-            task.ElapsedTime.ShouldBe(TimeSpan.FromSeconds(42));
+            task.ElapsedTime.Should().Be(TimeSpan.FromSeconds(42));
         }
     }
 
@@ -434,7 +434,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L340-342 IsFinished → TimeSpan.Zero
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 100;
-            task.RemainingTime.ShouldBe(TimeSpan.Zero);
+            task.RemainingTime.Should().Be(TimeSpan.Zero);
         }
 
         [Fact]
@@ -442,7 +442,7 @@ public sealed class ProgressTaskMutationTests
         {
             // Kills: L346 speed == null check
             var task = new ProgressTask(1, "Test", 100, autoStart: false);
-            task.RemainingTime.ShouldBeNull();
+            task.RemainingTime.Should().BeNull();
         }
 
         [Fact]
@@ -456,7 +456,7 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(2));
             task.Increment(0);
             tp.Advance(TimeSpan.FromSeconds(2));
-            task.RemainingTime.ShouldBeNull();
+            task.RemainingTime.Should().BeNull();
         }
 
         [Fact]
@@ -474,8 +474,8 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(2));
 
             var remaining = task.RemainingTime;
-            remaining.ShouldNotBeNull();
-            remaining!.Value.TotalSeconds.ShouldBeGreaterThan(0);
+            remaining.Should().NotBeNull();
+            remaining!.Value.TotalSeconds.Should().BeGreaterThan(0);
         }
     }
 
@@ -487,7 +487,7 @@ public sealed class ProgressTaskMutationTests
             // Kills: L369 Update(increment: value - Value)
             var task = new ProgressTask(1, "Test", 100);
             ((IProgress<double>)task).Report(50);
-            task.Value.ShouldBe(50);
+            task.Value.Should().Be(50);
         }
 
         [Fact]
@@ -498,7 +498,7 @@ public sealed class ProgressTaskMutationTests
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 20;
             ((IProgress<double>)task).Report(30); // absolute target = 30 → increment = 30 - 20 = 10
-            task.Value.ShouldBe(30);
+            task.Value.Should().Be(30);
         }
 
         [Fact]
@@ -508,7 +508,7 @@ public sealed class ProgressTaskMutationTests
             var task = new ProgressTask(1, "Test", 100);
             task.Value = 60;
             ((IProgress<double>)task).Report(40); // Report(40) when at 60 → increment = 40-60 = -20
-            task.Value.ShouldBe(40);
+            task.Value.Should().Be(40);
         }
     }
 
@@ -532,7 +532,7 @@ public sealed class ProgressTaskMutationTests
             // With the mutation removed, this would throw OverflowException
             var remaining = task.RemainingTime;
             // Should return TimeSpan.MaxValue (overflow protection) or null (speed=0)
-            remaining.ShouldNotBe(null);
+            remaining.Should().HaveValue();
         }
 
         [Fact]
@@ -550,9 +550,9 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(2)); // Ensure past cache
 
             var remaining = task.RemainingTime;
-            remaining.ShouldNotBeNull();
+            remaining.Should().NotBeNull();
             // 80 remaining at ~10/s = ~8 seconds
-            remaining!.Value.TotalSeconds.ShouldBeInRange(4.0, 20.0);
+            remaining!.Value.TotalSeconds.Should().BeInRange(4.0, 20.0);
         }
     }
 
@@ -579,7 +579,7 @@ public sealed class ProgressTaskMutationTests
             var speed = task.Speed;
             // Speed should be non-null since samples exist within/at the threshold
             // (the exact-boundary sample is included with >=)
-            speed.ShouldNotBeNull();
+            speed.Should().NotBeNull();
         }
 
         [Fact]
@@ -598,15 +598,15 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(2)); // now=3s, now-newest = 2s == MaxTimeForSpeedCache
 
             var speed1 = task.Speed;
-            speed1.ShouldNotBeNull();
+            speed1.Should().NotBeNull();
 
             // Advance a bit more to exceed it clearly
             tp.Advance(TimeSpan.FromSeconds(5)); // now-newest = 7s > 2s
             var speed2 = task.Speed;
-            speed2.ShouldNotBeNull();
+            speed2.Should().NotBeNull();
 
             // Speed should decay when newest sample is older than cache window
-            speed2!.Value.ShouldBeLessThan(speed1!.Value);
+            speed2!.Value.Should().BeLessThan(speed1!.Value);
         }
 
         [Fact]
@@ -625,7 +625,7 @@ public sealed class ProgressTaskMutationTests
 
             // First Speed call: should calculate (samples changed = true)
             var speed1 = task.Speed;
-            speed1.ShouldNotBeNull();
+            speed1.Should().NotBeNull();
         }
     }
 
@@ -644,7 +644,7 @@ public sealed class ProgressTaskMutationTests
             tp.Advance(TimeSpan.FromSeconds(2));
 
             // Speed should be calculable — proves samples were added
-            task.Speed.ShouldNotBeNull();
+            task.Speed.Should().NotBeNull();
         }
     }
 }
@@ -657,7 +657,7 @@ public sealed class ProgressTaskExtensionsTests
     [Fact]
     public void Description_Extension_Throws_When_Task_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((ProgressTask)null!).Description("test"));
+        FluentActions.Invoking(() => ((ProgressTask)null!).Description("test")).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -665,14 +665,14 @@ public sealed class ProgressTaskExtensionsTests
     {
         var task = new ProgressTask(1, "Old", 100);
         var returned = task.Description("New");
-        returned.ShouldBeSameAs(task);
-        task.Description.ShouldBe("New");
+        returned.Should().BeSameAs(task);
+        task.Description.Should().Be("New");
     }
 
     [Fact]
     public void MaxValue_Extension_Throws_When_Task_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((ProgressTask)null!).MaxValue(50));
+        FluentActions.Invoking(() => ((ProgressTask)null!).MaxValue(50)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -680,14 +680,14 @@ public sealed class ProgressTaskExtensionsTests
     {
         var task = new ProgressTask(1, "Test", 100);
         var returned = task.MaxValue(200);
-        returned.ShouldBeSameAs(task);
-        task.MaxValue.ShouldBe(200);
+        returned.Should().BeSameAs(task);
+        task.MaxValue.Should().Be(200);
     }
 
     [Fact]
     public void Value_Extension_Throws_When_Task_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((ProgressTask)null!).Value(50));
+        FluentActions.Invoking(() => ((ProgressTask)null!).Value(50)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -695,14 +695,14 @@ public sealed class ProgressTaskExtensionsTests
     {
         var task = new ProgressTask(1, "Test", 100);
         var returned = task.Value(42);
-        returned.ShouldBeSameAs(task);
-        task.Value.ShouldBe(42);
+        returned.Should().BeSameAs(task);
+        task.Value.Should().Be(42);
     }
 
     [Fact]
     public void IsIndeterminate_Extension_Throws_When_Task_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((ProgressTask)null!).IsIndeterminate());
+        FluentActions.Invoking(() => ((ProgressTask)null!).IsIndeterminate()).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -710,14 +710,14 @@ public sealed class ProgressTaskExtensionsTests
     {
         var task = new ProgressTask(1, "Test", 100);
         var returned = task.IsIndeterminate(true);
-        returned.ShouldBeSameAs(task);
-        task.IsIndeterminate.ShouldBeTrue();
+        returned.Should().BeSameAs(task);
+        task.IsIndeterminate.Should().BeTrue();
     }
 
     [Fact]
     public void HideWhenCompleted_Extension_Throws_When_Task_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((ProgressTask)null!).HideWhenCompleted());
+        FluentActions.Invoking(() => ((ProgressTask)null!).HideWhenCompleted()).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -725,14 +725,14 @@ public sealed class ProgressTaskExtensionsTests
     {
         var task = new ProgressTask(1, "Test", 100);
         var returned = task.HideWhenCompleted(true);
-        returned.ShouldBeSameAs(task);
-        task.HideWhenCompleted.ShouldBe(true);
+        returned.Should().BeSameAs(task);
+        task.HideWhenCompleted.Should().Be(true);
     }
 
     [Fact]
     public void Tag_Extension_Throws_When_Task_IsNull()
     {
-        Should.Throw<ArgumentNullException>(() => ((ProgressTask)null!).Tag("value"));
+        FluentActions.Invoking(() => ((ProgressTask)null!).Tag("value")).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -741,8 +741,8 @@ public sealed class ProgressTaskExtensionsTests
         var task = new ProgressTask(1, "Test", 100);
         var tag = new object();
         var returned = task.Tag(tag);
-        returned.ShouldBeSameAs(task);
-        task.Tag.ShouldBeSameAs(tag);
+        returned.Should().BeSameAs(task);
+        task.Tag.Should().BeSameAs(tag);
     }
 
     [Fact]
@@ -750,6 +750,6 @@ public sealed class ProgressTaskExtensionsTests
     {
         var task = new ProgressTask(1, "Test", 100);
         task.Tag(null);
-        task.Tag.ShouldBeNull();
+        task.Tag.Should().BeNull();
     }
 }

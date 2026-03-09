@@ -15,8 +15,8 @@ public sealed class TableTests
             var result = Record.Exception(() => table.AddColumn((string)null!));
 
             // Then
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("column");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("column");
         }
 
         [Fact]
@@ -31,8 +31,8 @@ public sealed class TableTests
             var result = Record.Exception(() => grid.AddColumn("Bar"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Cannot add new columns to table with existing rows.");
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be("Cannot add new columns to table with existing rows.");
         }
     }
 
@@ -48,8 +48,8 @@ public sealed class TableTests
             var result = Record.Exception(() => table.AddColumns((string[])null!));
 
             // Then
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("columns");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("columns");
         }
     }
 
@@ -65,8 +65,8 @@ public sealed class TableTests
             var result = Record.Exception(() => table.AddRow((string[])null!));
 
             // Then
-            result.ShouldBeOfType<ArgumentNullException>()
-                .ParamName.ShouldBe("columns");
+            result.Should().BeOfType<ArgumentNullException>()
+                    .Which.ParamName.Should().Be("columns");
         }
 
         [Fact]
@@ -81,7 +81,7 @@ public sealed class TableTests
             table.AddRow("Foo");
 
             // Then
-            table.Rows.Count.ShouldBe(1);
+            table.Rows.Count.Should().Be(1);
         }
 
         [Fact]
@@ -95,8 +95,8 @@ public sealed class TableTests
             var result = Record.Exception(() => table.AddRow("Foo", "Bar"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldBe("The number of row columns (including spans) are greater than the number of table columns. Expected 1 but got 2.");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Be("The number of row columns (including spans) are greater than the number of table columns. Expected 1 but got 2.");
         }
     }
 
@@ -247,8 +247,8 @@ public sealed class TableTests
             var result = Record.Exception(() => table.AddRow(new TableCell("Too wide").Span(4)));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldContain("greater than the number of table columns");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Contain("greater than the number of table columns");
         }
 
         [Fact]
@@ -258,8 +258,8 @@ public sealed class TableTests
             var result = Record.Exception(() => new TableCell("Test").Span(0));
 
             // Then
-            result.ShouldBeOfType<ArgumentException>();
-            result.Message.ShouldContain("Column span must be at least 1");
+            result.Should().BeOfType<ArgumentException>();
+            result.Message.Should().Contain("Column span must be at least 1");
         }
 
         [Fact]
@@ -269,8 +269,8 @@ public sealed class TableTests
             var result = Record.Exception(() => new TableColumn(new TableCell("Header").Span(2)));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldContain("Column spanning is not supported in table header rows");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Contain("Column spanning is not supported in table header rows");
         }
 
         [Fact]
@@ -285,8 +285,8 @@ public sealed class TableTests
             var result = Record.Exception(() => column.Footer = new TableCell("Footer").Span(2));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>();
-            result.Message.ShouldContain("Column spanning is not supported in table footer rows");
+            result.Should().BeOfType<InvalidOperationException>();
+            result.Message.Should().Contain("Column spanning is not supported in table footer rows");
         }
 
         [Fact]
@@ -621,7 +621,7 @@ public sealed class TableTests
         var secondSeparator = line.IndexOf('│', firstSeparator + 1);
 
         var firstColumnWidth = secondSeparator - firstSeparator - 1;
-        firstColumnWidth.ShouldBe(14);
+        firstColumnWidth.Should().Be(14);
     }
 
     [Fact]
@@ -1021,6 +1021,6 @@ public sealed class TableTests
             .ToArray();
 
         var distinct = lines.Select(l => l.Length).Distinct().ToArray();
-        distinct.Length.ShouldBe(1, $"Expected all table rows to have the same width, but got widths: {string.Join(", ", distinct)}");
+        distinct.Length.Should().Be(1, $"Expected all table rows to have the same width, but got widths: {string.Join(", ", distinct)}");
     }
 }

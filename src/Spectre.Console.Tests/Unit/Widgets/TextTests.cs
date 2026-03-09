@@ -16,7 +16,7 @@ public sealed class TextTests
             var result = markup.Length;
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -34,7 +34,7 @@ public sealed class TextTests
             var result = markup.Lines;
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -51,7 +51,7 @@ public sealed class TextTests
             caps.CreateRenderContext(console), 80);
 
         // Then
-        result.Min.ShouldBe(6);
+        result.Min.Should().Be(6);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public sealed class TextTests
             caps.CreateRenderContext(console), 80);
 
         // Then
-        result.Max.ShouldBe(11);
+        result.Max.Should().Be(11);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class TextTests
         console.Write(text);
 
         // Then
-        console.Output.ShouldBe("Hello World");
+        console.Output.Should().Be("Hello World");
     }
 
     [Theory]
@@ -97,7 +97,7 @@ public sealed class TextTests
         console.Write(text);
 
         // Then
-        console.Output.ShouldBe("Hello\n\nWorld\n\n");
+        console.Output.Should().Be("Hello\n\nWorld\n\n");
     }
 
     [Fact]
@@ -110,9 +110,9 @@ public sealed class TextTests
         console.Write(new Markup("[b]Hello World[/]\n[yellow]Hello World[/]"));
 
         // Then
-        console.Lines.Count.ShouldBe(2);
-        console.Lines[0].ShouldBe("Hello World");
-        console.Lines[1].ShouldBe("Hello World");
+        console.Lines.Count.Should().Be(2);
+        console.Lines[0].Should().Be("Hello World");
+        console.Lines[1].Should().Be("Hello World");
     }
 
     [Theory]
@@ -131,7 +131,7 @@ public sealed class TextTests
         // Then
         console.Output
             .NormalizeLineEndings()
-            .ShouldBe(expected);
+            .Should().Be(expected);
     }
 
     [Theory]
@@ -151,6 +151,6 @@ public sealed class TextTests
         // Then
         console.Output
             .NormalizeLineEndings()
-            .ShouldBe(expected);
+            .Should().Be(expected);
     }
 }

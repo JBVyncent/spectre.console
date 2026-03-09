@@ -12,7 +12,7 @@ public sealed class MarkupMutationTests
         {
             // Kills: Line 91, ThrowIfNull removal
             var ex = Record.Exception(() => Markup.Escape(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
 
         [Fact]
@@ -20,7 +20,7 @@ public sealed class MarkupMutationTests
         {
             // Kills: Line 103, ThrowIfNull removal
             var ex = Record.Exception(() => Markup.Remove(null!));
-            ex.ShouldBeOfType<ArgumentNullException>();
+            ex.Should().BeOfType<ArgumentNullException>();
         }
     }
 
@@ -35,7 +35,7 @@ public sealed class MarkupMutationTests
             var console = new TestConsole().Width(80);
             var value = 42;
             console.MarkupInterpolated($"Value: {value}");
-            console.Output.ShouldContain("42");
+            console.Output.Should().Contain("42");
         }
 
         [Fact]
@@ -49,7 +49,7 @@ public sealed class MarkupMutationTests
             // Use a formatted value that requires the inner provider for number formatting
             var num = 1234.5;
             console.MarkupInterpolated($"Number: {num:N2}");
-            console.Output.ShouldContain("1");
+            console.Output.Should().Contain("1");
         }
 
         [Fact]
@@ -61,7 +61,7 @@ public sealed class MarkupMutationTests
             var console = new TestConsole().Width(80);
             var brackets = "[test]";
             console.MarkupInterpolated($"Hello {brackets} world");
-            console.Output.ShouldContain("[test]");
+            console.Output.Should().Contain("[test]");
         }
 
         [Fact]
@@ -73,7 +73,7 @@ public sealed class MarkupMutationTests
             // Date formatting needs NumberFormatInfo from the inner provider
             var date = new DateTime(2024, 1, 15);
             console.MarkupInterpolated($"Date: {date:yyyy-MM-dd}");
-            console.Output.ShouldContain("2024-01-15");
+            console.Output.Should().Contain("2024-01-15");
         }
 
         [Fact]
@@ -83,7 +83,7 @@ public sealed class MarkupMutationTests
             var console = new TestConsole().Width(80);
             object? arg = new NonFormattableObject("test[value]");
             console.MarkupInterpolated($"Result: {arg}");
-            console.Output.ShouldContain("test[value]");
+            console.Output.Should().Contain("test[value]");
         }
 
         [Fact]
@@ -93,7 +93,7 @@ public sealed class MarkupMutationTests
             var console = new TestConsole().Width(80);
             object? arg = null;
             console.MarkupInterpolated($"Result: {arg} end");
-            console.Output.ShouldContain("end");
+            console.Output.Should().Contain("end");
         }
     }
 

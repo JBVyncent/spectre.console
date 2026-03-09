@@ -22,7 +22,7 @@ public sealed class DownloadedColumnTests
         var result = fixture.Render();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -40,7 +40,7 @@ public sealed class DownloadedColumnTests
         var result = fixture.Render();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -58,7 +58,7 @@ public sealed class DownloadedColumnTests
         var result = fixture.Render();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -76,6 +76,6 @@ public sealed class DownloadedColumnTests
         var result = fixture.Render();
 
         // Then
-        result.ShouldBe(expected);
+        result.Should().Be(expected);
     }
 }

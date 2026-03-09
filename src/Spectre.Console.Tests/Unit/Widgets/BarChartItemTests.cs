@@ -8,36 +8,36 @@ public sealed class BarChartItemTests
         public void Should_Throw_For_Null_Label()
         {
             var ex = Record.Exception(() => new BarChartItem(null!, 10.0));
-            ex.ShouldBeOfType<ArgumentNullException>()
-              .ParamName.ShouldBe("label");
+            ex.Should().BeOfType<ArgumentNullException>()
+                  .Which.ParamName.Should().Be("label");
         }
 
         [Fact]
         public void Should_Set_Label()
         {
             var item = new BarChartItem("Apple", 12.0);
-            item.Label.ShouldBe("Apple");
+            item.Label.Should().Be("Apple");
         }
 
         [Fact]
         public void Should_Set_Value()
         {
             var item = new BarChartItem("Apple", 42.5);
-            item.Value.ShouldBe(42.5);
+            item.Value.Should().Be(42.5);
         }
 
         [Fact]
         public void Should_Set_Color()
         {
             var item = new BarChartItem("Apple", 12.0, Color.Red);
-            item.Color.ShouldBe(Color.Red);
+            item.Color.Should().Be(Color.Red);
         }
 
         [Fact]
         public void Should_Default_Color_To_Null()
         {
             var item = new BarChartItem("Apple", 12.0);
-            item.Color.ShouldBeNull();
+            item.Color.Should().BeNull();
         }
     }
 
@@ -48,7 +48,7 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0);
             item.Label = "Pear";
-            item.Label.ShouldBe("Pear");
+            item.Label.Should().Be("Pear");
         }
 
         [Fact]
@@ -56,8 +56,8 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0);
             var ex = Record.Exception(() => item.Label = null!);
-            ex.ShouldBeOfType<ArgumentNullException>()
-              .ParamName.ShouldBe("value");
+            ex.Should().BeOfType<ArgumentNullException>()
+                  .Which.ParamName.Should().Be("value");
         }
 
         [Fact]
@@ -65,7 +65,7 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0);
             item.Label = string.Empty;
-            item.Label.ShouldBe(string.Empty);
+            item.Label.Should().Be(string.Empty);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ public sealed class BarChartItemTests
         {
             IBarChartItem item = new BarChartItem("Apple", 12.0);
             ((BarChartItem)item).Label = "Mango";
-            item.Label.ShouldBe("Mango");
+            item.Label.Should().Be("Mango");
         }
     }
 
@@ -84,7 +84,7 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0);
             item.Value = 99.9;
-            item.Value.ShouldBe(99.9);
+            item.Value.Should().Be(99.9);
         }
 
         [Fact]
@@ -92,7 +92,7 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0);
             item.Value = 0.0;
-            item.Value.ShouldBe(0.0);
+            item.Value.Should().Be(0.0);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ public sealed class BarChartItemTests
             // Negative values are permitted; the renderer clamps via MaxValue
             var item = new BarChartItem("Apple", 12.0);
             item.Value = -5.0;
-            item.Value.ShouldBe(-5.0);
+            item.Value.Should().Be(-5.0);
         }
 
         [Fact]
@@ -109,7 +109,7 @@ public sealed class BarChartItemTests
         {
             IBarChartItem item = new BarChartItem("Apple", 12.0);
             ((BarChartItem)item).Value = 77.0;
-            item.Value.ShouldBe(77.0);
+            item.Value.Should().Be(77.0);
         }
     }
 
@@ -120,7 +120,7 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0, Color.Blue);
             item.Color = Color.Green;
-            item.Color.ShouldBe(Color.Green);
+            item.Color.Should().Be(Color.Green);
         }
 
         [Fact]
@@ -128,7 +128,7 @@ public sealed class BarChartItemTests
         {
             var item = new BarChartItem("Apple", 12.0, Color.Red);
             item.Color = null;
-            item.Color.ShouldBeNull();
+            item.Color.Should().BeNull();
         }
 
         [Fact]
@@ -136,7 +136,7 @@ public sealed class BarChartItemTests
         {
             IBarChartItem item = new BarChartItem("Apple", 12.0, Color.Blue);
             ((BarChartItem)item).Color = Color.Yellow;
-            item.Color.ShouldBe(Color.Yellow);
+            item.Color.Should().Be(Color.Yellow);
         }
     }
 
@@ -155,10 +155,10 @@ public sealed class BarChartItemTests
             item.Color = Color.Red;
 
             var stored = chart.Data[0] as BarChartItem;
-            stored.ShouldNotBeNull();
-            stored.Value.ShouldBe(99.0);
-            stored.Label.ShouldBe("Pear");
-            stored.Color.ShouldBe(Color.Red);
+            stored.Should().NotBeNull();
+            stored.Value.Should().Be(99.0);
+            stored.Label.Should().Be("Pear");
+            stored.Color.Should().Be(Color.Red);
         }
     }
 }

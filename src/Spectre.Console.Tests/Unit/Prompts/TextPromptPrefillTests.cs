@@ -18,7 +18,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue("Alice")
                 .PrefillDefaultValue());
 
-        result.ShouldBe("Alice");
+        result.Should().Be("Alice");
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue(30)
                 .PrefillDefaultValue());
 
-        result.ShouldBe(30);
+        result.Should().Be(30);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue("Hello")
                 .PrefillDefaultValue());
 
-        result.ShouldBe("Hell");
+        result.Should().Be("Hell");
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue("Hello")
                 .PrefillDefaultValue());
 
-        result.ShouldBe("Hello!");
+        result.Should().Be("Hello!");
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue("Hello")
                 .PrefillDefaultValue());
 
-        result.ShouldBe("World");
+        result.Should().Be("World");
     }
 
     // -------------------------------------------------------------------------
@@ -104,7 +104,7 @@ public sealed class TextPromptPrefillTests
             new TextPrompt<string>("Name:")
                 .PrefillDefaultValue());   // no default — no-op
 
-        result.ShouldBe("Hello");
+        result.Should().Be("Hello");
     }
 
     // -------------------------------------------------------------------------
@@ -123,7 +123,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue("Alice")
                 .PrefillDefaultValue());
 
-        console.Output.ShouldContain("Alice");
+        console.Output.Should().Contain("Alice");
     }
 
     // -------------------------------------------------------------------------
@@ -143,7 +143,7 @@ public sealed class TextPromptPrefillTests
                 .DefaultValue("Orange")
                 .PrefillDefaultValue());
 
-        result.ShouldBe("Orange");
+        result.Should().Be("Orange");
     }
 
     // -------------------------------------------------------------------------
@@ -154,6 +154,6 @@ public sealed class TextPromptPrefillTests
     public void PrefillDefaultValue_Should_Throw_For_Null_Prompt()
     {
         var ex = Record.Exception(() => ((TextPrompt<string>)null!).PrefillDefaultValue());
-        ex.ShouldBeOfType<ArgumentNullException>().ParamName.ShouldBe("obj");
+        ex.Should().BeOfType<ArgumentNullException>().Which.ParamName.Should().Be("obj");
     }
 }

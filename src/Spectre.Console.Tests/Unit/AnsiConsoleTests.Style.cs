@@ -22,7 +22,7 @@ public partial class AnsiConsoleTests
         console.Write("Hello World", new Style().Decoration(decoration));
 
         // Then
-        console.Output.ShouldBe(expected);
+        console.Output.Should().Be(expected);
     }
 
     [Theory]
@@ -38,6 +38,6 @@ public partial class AnsiConsoleTests
         console.Write("Hello World", new Style().Decoration(decoration));
 
         // Then
-        console.Output.ShouldBe(expected);
+        console.Output.Should().Be(expected);
     }
 }

@@ -1,4 +1,3 @@
-using Shouldly;
 using Spectre.Console.Phantom;
 
 namespace Spectre.Console.Phantom.Tests;
@@ -16,8 +15,8 @@ public sealed class ScreenBufferTests
     public void Constructor_Should_Create_Buffer_With_Correct_Dimensions()
     {
         var buffer = new ScreenBuffer(40, 10);
-        buffer.Width.ShouldBe(40);
-        buffer.Height.ShouldBe(10);
+        buffer.Width.Should().Be(40);
+        buffer.Height.Should().Be(10);
     }
 
     [Fact]
@@ -28,7 +27,7 @@ public sealed class ScreenBufferTests
         {
             for (var c = 0; c < 5; c++)
             {
-                buffer[r, c].Character.ShouldBe(' ');
+                buffer[r, c].Character.Should().Be(' ');
             }
         }
     }
@@ -39,7 +38,7 @@ public sealed class ScreenBufferTests
     [InlineData(-100, 5)]
     public void Constructor_Should_Throw_For_Invalid_Width(int width, int height)
     {
-        Should.Throw<ArgumentOutOfRangeException>(() => new ScreenBuffer(width, height));
+        FluentActions.Invoking(() => new ScreenBuffer(width, height)).Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Theory]
@@ -48,7 +47,7 @@ public sealed class ScreenBufferTests
     [InlineData(5, -100)]
     public void Constructor_Should_Throw_For_Invalid_Height(int width, int height)
     {
-        Should.Throw<ArgumentOutOfRangeException>(() => new ScreenBuffer(width, height));
+        FluentActions.Invoking(() => new ScreenBuffer(width, height)).Should().Throw<ArgumentOutOfRangeException>();
     }
 
     // ── Indexer ──────────────────────────────────────────────────────
@@ -60,7 +59,7 @@ public sealed class ScreenBufferTests
         var style = new ScreenCell { Foreground = CellColor.FromLegacy(31) };
         buffer.WriteChar(2, 3, 'X', style);
 
-        buffer[2, 3].Character.ShouldBe('X');
+        buffer[2, 3].Character.Should().Be('X');
     }
 
     [Theory]
@@ -71,7 +70,7 @@ public sealed class ScreenBufferTests
     public void Indexer_Should_Throw_For_Out_Of_Bounds(int row, int col)
     {
         var buffer = new ScreenBuffer(10, 5);
-        Should.Throw<ArgumentOutOfRangeException>(() => _ = buffer[row, col]);
+        FluentActions.Invoking(() => _ = buffer[row, col]).Should().Throw<ArgumentOutOfRangeException>();
     }
 
     // ── WriteChar ────────────────────────────────────────────────────
@@ -90,12 +89,12 @@ public sealed class ScreenBufferTests
         buffer.WriteChar(1, 2, 'Z', style);
 
         var cell = buffer[1, 2];
-        cell.Character.ShouldBe('Z');
-        cell.Foreground!.Value.Index.ShouldBe(31);
-        cell.Background!.Value.Index.ShouldBe(42);
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
-        cell.Decoration.HasFlag(CellDecoration.Italic).ShouldBeTrue();
-        cell.HyperlinkUrl.ShouldBe("https://example.com");
+        cell.Character.Should().Be('Z');
+        cell.Foreground!.Value.Index.Should().Be(31);
+        cell.Background!.Value.Index.Should().Be(42);
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
+        cell.Decoration.HasFlag(CellDecoration.Italic).Should().BeTrue();
+        cell.HyperlinkUrl.Should().Be("https://example.com");
     }
 
     [Fact]
@@ -105,17 +104,17 @@ public sealed class ScreenBufferTests
         var style = new ScreenCell();
 
         // None of these should throw
-        Should.NotThrow(() => buffer.WriteChar(-1, 0, 'X', style));
-        Should.NotThrow(() => buffer.WriteChar(5, 0, 'X', style));
-        Should.NotThrow(() => buffer.WriteChar(0, -1, 'X', style));
-        Should.NotThrow(() => buffer.WriteChar(0, 10, 'X', style));
+        FluentActions.Invoking(() => buffer.WriteChar(-1, 0, 'X', style)).Should().NotThrow();
+        FluentActions.Invoking(() => buffer.WriteChar(5, 0, 'X', style)).Should().NotThrow();
+        FluentActions.Invoking(() => buffer.WriteChar(0, -1, 'X', style)).Should().NotThrow();
+        FluentActions.Invoking(() => buffer.WriteChar(0, 10, 'X', style)).Should().NotThrow();
     }
 
     [Fact]
     public void WriteChar_Should_Throw_For_Null_Style()
     {
         var buffer = new ScreenBuffer(10, 5);
-        Should.Throw<ArgumentNullException>(() => buffer.WriteChar(0, 0, 'X', null!));
+        FluentActions.Invoking(() => buffer.WriteChar(0, 0, 'X', null!)).Should().Throw<ArgumentNullException>();
     }
 
     // ── EraseToEnd ───────────────────────────────────────────────────
@@ -138,17 +137,17 @@ public sealed class ScreenBufferTests
         buffer.EraseToEnd(1, 5);
 
         // Row 0 should be intact
-        buffer[0, 0].Character.ShouldBe('A');
-        buffer[0, 9].Character.ShouldBe('A');
+        buffer[0, 0].Character.Should().Be('A');
+        buffer[0, 9].Character.Should().Be('A');
 
         // Row 1: cols 0-4 intact, cols 5-9 erased
-        buffer[1, 4].Character.ShouldBe('A');
-        buffer[1, 5].Character.ShouldBe(' ');
-        buffer[1, 9].Character.ShouldBe(' ');
+        buffer[1, 4].Character.Should().Be('A');
+        buffer[1, 5].Character.Should().Be(' ');
+        buffer[1, 9].Character.Should().Be(' ');
 
         // Row 2: all erased
-        buffer[2, 0].Character.ShouldBe(' ');
-        buffer[2, 9].Character.ShouldBe(' ');
+        buffer[2, 0].Character.Should().Be(' ');
+        buffer[2, 9].Character.Should().Be(' ');
     }
 
     [Fact]
@@ -156,8 +155,8 @@ public sealed class ScreenBufferTests
     {
         var buffer = new ScreenBuffer(5, 3);
         // Should not throw even with out-of-bounds row
-        Should.NotThrow(() => buffer.EraseToEnd(-1, 0));
-        Should.NotThrow(() => buffer.EraseToEnd(5, 0));
+        FluentActions.Invoking(() => buffer.EraseToEnd(-1, 0)).Should().NotThrow();
+        FluentActions.Invoking(() => buffer.EraseToEnd(5, 0)).Should().NotThrow();
     }
 
     // ── EraseToStart ─────────────────────────────────────────────────
@@ -178,15 +177,15 @@ public sealed class ScreenBufferTests
         buffer.EraseToStart(1, 3);
 
         // Row 0: all erased
-        buffer[0, 0].Character.ShouldBe(' ');
-        buffer[0, 9].Character.ShouldBe(' ');
+        buffer[0, 0].Character.Should().Be(' ');
+        buffer[0, 9].Character.Should().Be(' ');
 
         // Row 1: cols 0-3 erased, cols 4-9 intact
-        buffer[1, 3].Character.ShouldBe(' ');
-        buffer[1, 4].Character.ShouldBe('B');
+        buffer[1, 3].Character.Should().Be(' ');
+        buffer[1, 4].Character.Should().Be('B');
 
         // Row 2: all intact
-        buffer[2, 0].Character.ShouldBe('B');
+        buffer[2, 0].Character.Should().Be('B');
     }
 
     // ── EraseAll ─────────────────────────────────────────────────────
@@ -208,7 +207,7 @@ public sealed class ScreenBufferTests
 
         for (var r = 0; r < 3; r++)
         {
-            buffer.GetRowText(r).ShouldBeEmpty();
+            buffer.GetRowText(r).Should().BeEmpty();
         }
     }
 
@@ -226,9 +225,9 @@ public sealed class ScreenBufferTests
 
         buffer.EraseLineToEnd(0, 5);
 
-        buffer[0, 4].Character.ShouldBe('C');
-        buffer[0, 5].Character.ShouldBe(' ');
-        buffer[0, 9].Character.ShouldBe(' ');
+        buffer[0, 4].Character.Should().Be('C');
+        buffer[0, 5].Character.Should().Be(' ');
+        buffer[0, 9].Character.Should().Be(' ');
     }
 
     [Theory]
@@ -237,7 +236,7 @@ public sealed class ScreenBufferTests
     public void EraseLineToEnd_Should_Return_For_Out_Of_Bounds_Row(int row)
     {
         var buffer = new ScreenBuffer(10, 5);
-        Should.NotThrow(() => buffer.EraseLineToEnd(row, 0));
+        FluentActions.Invoking(() => buffer.EraseLineToEnd(row, 0)).Should().NotThrow();
     }
 
     // ── EraseLineToStart ─────────────────────────────────────────────
@@ -254,8 +253,8 @@ public sealed class ScreenBufferTests
 
         buffer.EraseLineToStart(0, 4);
 
-        buffer[0, 4].Character.ShouldBe(' ');
-        buffer[0, 5].Character.ShouldBe('D');
+        buffer[0, 4].Character.Should().Be(' ');
+        buffer[0, 5].Character.Should().Be('D');
     }
 
     [Theory]
@@ -264,7 +263,7 @@ public sealed class ScreenBufferTests
     public void EraseLineToStart_Should_Return_For_Out_Of_Bounds_Row(int row)
     {
         var buffer = new ScreenBuffer(10, 5);
-        Should.NotThrow(() => buffer.EraseLineToStart(row, 0));
+        FluentActions.Invoking(() => buffer.EraseLineToStart(row, 0)).Should().NotThrow();
     }
 
     // ── EraseLine ────────────────────────────────────────────────────
@@ -281,7 +280,7 @@ public sealed class ScreenBufferTests
 
         buffer.EraseLine(1);
 
-        buffer.GetRowText(1).ShouldBeEmpty();
+        buffer.GetRowText(1).Should().BeEmpty();
     }
 
     [Theory]
@@ -290,7 +289,7 @@ public sealed class ScreenBufferTests
     public void EraseLine_Should_Return_For_Out_Of_Bounds_Row(int row)
     {
         var buffer = new ScreenBuffer(10, 5);
-        Should.NotThrow(() => buffer.EraseLine(row));
+        FluentActions.Invoking(() => buffer.EraseLine(row)).Should().NotThrow();
     }
 
     // ── ScrollUp ─────────────────────────────────────────────────────
@@ -313,9 +312,9 @@ public sealed class ScreenBufferTests
 
         buffer.ScrollUp();
 
-        buffer.GetRowText(0).ShouldBe("B");
-        buffer.GetRowText(1).ShouldBe("C");
-        buffer.GetRowText(2).ShouldBeEmpty();
+        buffer.GetRowText(0).Should().Be("B");
+        buffer.GetRowText(1).Should().Be("C");
+        buffer.GetRowText(2).Should().BeEmpty();
     }
 
     [Fact]
@@ -333,9 +332,9 @@ public sealed class ScreenBufferTests
 
         // Row 1 should have scrolled to row 0
         var cell = buffer[0, 0];
-        cell.Character.ShouldBe('X');
-        cell.Foreground!.Value.Index.ShouldBe(31);
-        cell.Decoration.HasFlag(CellDecoration.Bold).ShouldBeTrue();
+        cell.Character.Should().Be('X');
+        cell.Foreground!.Value.Index.Should().Be(31);
+        cell.Decoration.HasFlag(CellDecoration.Bold).Should().BeTrue();
     }
 
     // ── GetRowText ───────────────────────────────────────────────────
@@ -351,15 +350,15 @@ public sealed class ScreenBufferTests
             buffer.WriteChar(0, i, text[i], style);
         }
 
-        buffer.GetRowText(0).ShouldBe("Hello");
+        buffer.GetRowText(0).Should().Be("Hello");
     }
 
     [Fact]
     public void GetRowText_Should_Throw_For_Invalid_Row()
     {
         var buffer = new ScreenBuffer(10, 5);
-        Should.Throw<ArgumentOutOfRangeException>(() => buffer.GetRowText(-1));
-        Should.Throw<ArgumentOutOfRangeException>(() => buffer.GetRowText(5));
+        FluentActions.Invoking(() => buffer.GetRowText(-1)).Should().Throw<ArgumentOutOfRangeException>();
+        FluentActions.Invoking(() => buffer.GetRowText(5)).Should().Throw<ArgumentOutOfRangeException>();
     }
 
     // ── GetText ──────────────────────────────────────────────────────
@@ -378,7 +377,7 @@ public sealed class ScreenBufferTests
             buffer.WriteChar(1, i, "World"[i], style);
         }
 
-        buffer.GetText().ShouldBe("Hi!\nWorld");
+        buffer.GetText().Should().Be("Hi!\nWorld");
     }
 
     [Fact]
@@ -389,14 +388,14 @@ public sealed class ScreenBufferTests
         buffer.WriteChar(0, 0, 'A', style);
         // Rows 1-4 are empty
 
-        buffer.GetText().ShouldBe("A");
+        buffer.GetText().Should().Be("A");
     }
 
     [Fact]
     public void GetText_On_Empty_Buffer_Should_Return_Empty_String()
     {
         var buffer = new ScreenBuffer(10, 5);
-        buffer.GetText().ShouldBeEmpty();
+        buffer.GetText().Should().BeEmpty();
     }
 
     // ── GetRegionText ────────────────────────────────────────────────
@@ -419,9 +418,9 @@ public sealed class ScreenBufferTests
         // Row 0: cols 2-5 = "2345"
         // Row 1: cols 0-5 = "ABCDEF"
         // Row 2: cols 0-5 = "abcdef"
-        region.ShouldContain("2345");
-        region.ShouldContain("ABCDEF");
-        region.ShouldContain("abcdef");
+        region.Should().Contain("2345");
+        region.Should().Contain("ABCDEF");
+        region.Should().Contain("abcdef");
     }
 
     [Fact]
@@ -435,7 +434,7 @@ public sealed class ScreenBufferTests
         }
 
         var region = buffer.GetRegionText(0, 2, 0, 5);
-        region.ShouldBe("CDEF");
+        region.Should().Be("CDEF");
     }
 
     // ── HasCharAt ────────────────────────────────────────────────────
@@ -446,8 +445,8 @@ public sealed class ScreenBufferTests
         var buffer = new ScreenBuffer(10, 5);
         buffer.WriteChar(0, 0, 'X', new ScreenCell());
 
-        buffer.HasCharAt(0, 0, 'X').ShouldBeTrue();
-        buffer.HasCharAt(0, 0, 'Y').ShouldBeFalse();
+        buffer.HasCharAt(0, 0, 'X').Should().BeTrue();
+        buffer.HasCharAt(0, 0, 'Y').Should().BeFalse();
     }
 
     [Fact]
@@ -455,10 +454,10 @@ public sealed class ScreenBufferTests
     {
         var buffer = new ScreenBuffer(10, 5);
 
-        buffer.HasCharAt(-1, 0, ' ').ShouldBeFalse();
-        buffer.HasCharAt(5, 0, ' ').ShouldBeFalse();
-        buffer.HasCharAt(0, -1, ' ').ShouldBeFalse();
-        buffer.HasCharAt(0, 10, ' ').ShouldBeFalse();
+        buffer.HasCharAt(-1, 0, ' ').Should().BeFalse();
+        buffer.HasCharAt(5, 0, ' ').Should().BeFalse();
+        buffer.HasCharAt(0, -1, ' ').Should().BeFalse();
+        buffer.HasCharAt(0, 10, ' ').Should().BeFalse();
     }
 
     // ── FindText / ContainsText ──────────────────────────────────────
@@ -474,23 +473,23 @@ public sealed class ScreenBufferTests
         }
 
         var pos = buffer.FindText("Hello");
-        pos.ShouldNotBeNull();
-        pos!.Value.Row.ShouldBe(1);
-        pos!.Value.Col.ShouldBe(3);
+        pos.Should().NotBeNull();
+        pos!.Value.Row.Should().Be(1);
+        pos!.Value.Col.Should().Be(3);
     }
 
     [Fact]
     public void FindText_Should_Return_Null_When_Not_Found()
     {
         var buffer = new ScreenBuffer(10, 3);
-        buffer.FindText("Missing").ShouldBeNull();
+        buffer.FindText("Missing").Should().BeNull();
     }
 
     [Fact]
     public void FindText_Should_Throw_For_Null_Input()
     {
         var buffer = new ScreenBuffer(10, 3);
-        Should.Throw<ArgumentNullException>(() => buffer.FindText(null!));
+        FluentActions.Invoking(() => buffer.FindText(null!)).Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -498,14 +497,14 @@ public sealed class ScreenBufferTests
     {
         var buffer = new ScreenBuffer(10, 3);
         buffer.WriteChar(0, 0, 'A', new ScreenCell());
-        buffer.ContainsText("A").ShouldBeTrue();
+        buffer.ContainsText("A").Should().BeTrue();
     }
 
     [Fact]
     public void ContainsText_Should_Return_False_When_Not_Found()
     {
         var buffer = new ScreenBuffer(10, 3);
-        buffer.ContainsText("Z").ShouldBeFalse();
+        buffer.ContainsText("Z").Should().BeFalse();
     }
 
     // ── Assertion Helpers Integration ────────────────────────────────
@@ -691,9 +690,9 @@ public sealed class ScreenBufferTests
 
         buffer.EraseToEnd(2, 2);
 
-        buffer[2, 1].Character.ShouldBe('Z');
-        buffer[2, 2].Character.ShouldBe(' ');
-        buffer[2, 4].Character.ShouldBe(' ');
+        buffer[2, 1].Character.Should().Be('Z');
+        buffer[2, 2].Character.Should().Be(' ');
+        buffer[2, 4].Character.Should().Be(' ');
     }
 
     [Fact]
@@ -702,7 +701,7 @@ public sealed class ScreenBufferTests
         // Kills: L82 `row < Height` → `row <= Height`
         // With `<=`, row == Height passes the guard → IndexOutOfRangeException on _cells[3, c].
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseToEnd(3, 0)); // row == Height
+        FluentActions.Invoking(() => buffer.EraseToEnd(3, 0)).Should().NotThrow(); // row == Height
     }
 
     // ── EraseToStart: boundary at col == Width-1 ────────────────────
@@ -722,7 +721,7 @@ public sealed class ScreenBufferTests
 
         for (var c = 0; c < 5; c++)
         {
-            buffer[2, c].Character.ShouldBe(' ');
+            buffer[2, c].Character.Should().Be(' ');
         }
     }
 
@@ -732,7 +731,7 @@ public sealed class ScreenBufferTests
         // Kills: L113 `c < Width` → `c <= Width`
         // With `<=`, c == Width passes → _cells[row, Width] → IndexOutOfRangeException.
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseToStart(1, 5)); // col == Width
+        FluentActions.Invoking(() => buffer.EraseToStart(1, 5)).Should().NotThrow(); // col == Width
     }
 
     [Fact]
@@ -741,7 +740,7 @@ public sealed class ScreenBufferTests
         // Kills: L115 `row >= 0 && row < Height` → `row >= 0 || row < Height`
         // With `||`, row=-1 would pass because `row < Height` is true, causing IndexOutOfRangeException.
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseToStart(-1, 2));
+        FluentActions.Invoking(() => buffer.EraseToStart(-1, 2)).Should().NotThrow();
     }
 
     [Fact]
@@ -750,7 +749,7 @@ public sealed class ScreenBufferTests
         // Kills: L115 `row < Height` → `row <= Height`
         // With `<=`, row == Height passes the guard → IndexOutOfRangeException on _cells[3, c].
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseToStart(3, 2)); // row == Height
+        FluentActions.Invoking(() => buffer.EraseToStart(3, 2)).Should().NotThrow(); // row == Height
     }
 
     // ── EraseLineToStart: boundary at col == Width-1 ─────────────────
@@ -769,7 +768,7 @@ public sealed class ScreenBufferTests
 
         for (var c = 0; c < 5; c++)
         {
-            buffer[0, c].Character.ShouldBe(' ');
+            buffer[0, c].Character.Should().Be(' ');
         }
     }
 
@@ -779,7 +778,7 @@ public sealed class ScreenBufferTests
         // Kills: L162 `c < Width` → `c <= Width`
         // With `<=`, c == Width passes → _cells[row, Width] → IndexOutOfRangeException.
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseLineToStart(0, 5)); // col == Width
+        FluentActions.Invoking(() => buffer.EraseLineToStart(0, 5)).Should().NotThrow(); // col == Width
     }
 
     // ── GetRegionText: endCol boundary at Width-1 ────────────────────
@@ -803,7 +802,7 @@ public sealed class ScreenBufferTests
         // startRow=0, startCol=0, endRow=2, endCol=4
         // Row 1 (middle) should use cEnd = Width - 1 = 4, getting all 5 chars
         var region = buffer.GetRegionText(0, 0, 2, 4);
-        region.ShouldBe("AAAAA\nBBBBB\nCCCCC");
+        region.Should().Be("AAAAA\nBBBBB\nCCCCC");
     }
 
     [Fact]
@@ -825,7 +824,7 @@ public sealed class ScreenBufferTests
         // endCol == Width (3) which exceeds valid range — should still work
         // because `c < Width` prevents OOB access
         var region = buffer.GetRegionText(0, 0, 2, 3);
-        region.ShouldBe("AAA\nBBB\nCCC");
+        region.Should().Be("AAA\nBBB\nCCC");
     }
 
     // ── Constructor: exact error messages (kills String mutations) ────
@@ -833,17 +832,17 @@ public sealed class ScreenBufferTests
     [Fact]
     public void Constructor_Should_Include_Width_In_Error_Message()
     {
-        var ex = Should.Throw<ArgumentOutOfRangeException>(() => new ScreenBuffer(0, 5));
-        ex.ParamName.ShouldBe("width");
-        ex.Message.ShouldContain("Width must be positive.");
+        var ex = FluentActions.Invoking(() => new ScreenBuffer(0, 5)).Should().Throw<ArgumentOutOfRangeException>().Which;
+        ex.ParamName.Should().Be("width");
+        ex.Message.Should().Contain("Width must be positive.");
     }
 
     [Fact]
     public void Constructor_Should_Include_Height_In_Error_Message()
     {
-        var ex = Should.Throw<ArgumentOutOfRangeException>(() => new ScreenBuffer(5, 0));
-        ex.ParamName.ShouldBe("height");
-        ex.Message.ShouldContain("Height must be positive.");
+        var ex = FluentActions.Invoking(() => new ScreenBuffer(5, 0)).Should().Throw<ArgumentOutOfRangeException>().Which;
+        ex.ParamName.Should().Be("height");
+        ex.Message.Should().Contain("Height must be positive.");
     }
 
     // ── EraseToEnd: row=0 boundary (kills >= 0 → > 0 mutation) ──────
@@ -861,8 +860,8 @@ public sealed class ScreenBufferTests
         buffer.EraseToEnd(0, 5);
 
         // Cols 0-4 intact, cols 5-9 erased
-        buffer[0, 4].Character.ShouldBe('A');
-        buffer[0, 5].Character.ShouldBe(' ');
+        buffer[0, 4].Character.Should().Be('A');
+        buffer[0, 5].Character.Should().Be(' ');
     }
 
     // ── EraseToStart: col boundary (kills <= col → < col mutation) ───
@@ -880,8 +879,8 @@ public sealed class ScreenBufferTests
         // col=5: positions 0..5 inclusive should be erased
         buffer.EraseToStart(1, 5);
 
-        buffer[1, 5].Character.ShouldBe(' ');
-        buffer[1, 6].Character.ShouldBe('B');
+        buffer[1, 5].Character.Should().Be(' ');
+        buffer[1, 6].Character.Should().Be('B');
     }
 
     [Fact]
@@ -896,9 +895,9 @@ public sealed class ScreenBufferTests
 
         buffer.EraseToStart(0, 4);
 
-        buffer[0, 0].Character.ShouldBe(' ');
-        buffer[0, 4].Character.ShouldBe(' ');
-        buffer[0, 5].Character.ShouldBe('C');
+        buffer[0, 0].Character.Should().Be(' ');
+        buffer[0, 4].Character.Should().Be(' ');
+        buffer[0, 5].Character.Should().Be('C');
     }
 
     // ── EraseLineToStart: col at Width-1 boundary ────────────────────
@@ -918,7 +917,7 @@ public sealed class ScreenBufferTests
 
         for (var c = 0; c < 5; c++)
         {
-            buffer[1, c].Character.ShouldBe(' ');
+            buffer[1, c].Character.Should().Be(' ');
         }
     }
 
@@ -935,8 +934,8 @@ public sealed class ScreenBufferTests
         }
 
         var region = buffer.GetRegionText(0, 0, 0, 4);
-        region.ShouldBe("Hello");
-        region.ShouldNotContain("\n");
+        region.Should().Be("Hello");
+        region.Should().NotContain("\n");
     }
 
     [Fact]
@@ -956,7 +955,7 @@ public sealed class ScreenBufferTests
 
         var region = buffer.GetRegionText(0, 0, 1, 2);
         // Newline between rows, not before first row
-        region.ShouldBe("ABC\nDEF");
+        region.Should().Be("ABC\nDEF");
     }
 
     [Fact]
@@ -982,9 +981,9 @@ public sealed class ScreenBufferTests
         // Row 1 (middle): full width 0..4 = "BBBBB"
         // Row 2: cols 0..2 = "CCC"
         var region = buffer.GetRegionText(0, 2, 2, 2);
-        region.ShouldContain("AAA");
-        region.ShouldContain("BBBBB");
-        region.ShouldContain("CCC");
+        region.Should().Contain("AAA");
+        region.Should().Contain("BBBBB");
+        region.Should().Contain("CCC");
     }
 
     [Fact]
@@ -997,8 +996,8 @@ public sealed class ScreenBufferTests
 
         // endRow beyond buffer height should clamp gracefully
         var region = buffer.GetRegionText(0, 0, 99, 0);
-        region.ShouldContain("X");
-        region.ShouldContain("Y");
+        region.Should().Contain("X");
+        region.Should().Contain("Y");
     }
 
     [Fact]
@@ -1013,7 +1012,7 @@ public sealed class ScreenBufferTests
 
         // endCol=4: should include col 4 (inclusive)
         var region = buffer.GetRegionText(0, 0, 0, 4);
-        region.ShouldBe("ABCDE");
+        region.Should().Be("ABCDE");
     }
 
     // ── ValidatePosition/ValidateRow: exact error messages ───────────
@@ -1022,27 +1021,27 @@ public sealed class ScreenBufferTests
     public void Indexer_Row_Error_Should_Include_Row_And_Height()
     {
         var buffer = new ScreenBuffer(10, 5);
-        var ex = Should.Throw<ArgumentOutOfRangeException>(() => _ = buffer[-1, 0]);
-        ex.ParamName.ShouldBe("row");
-        ex.Message.ShouldContain("Row -1 is out of range [0, 5).");
+        var ex = FluentActions.Invoking(() => _ = buffer[-1, 0]).Should().Throw<ArgumentOutOfRangeException>().Which;
+        ex.ParamName.Should().Be("row");
+        ex.Message.Should().Contain("Row -1 is out of range [0, 5).");
     }
 
     [Fact]
     public void Indexer_Col_Error_Should_Include_Col_And_Width()
     {
         var buffer = new ScreenBuffer(10, 5);
-        var ex = Should.Throw<ArgumentOutOfRangeException>(() => _ = buffer[0, 10]);
-        ex.ParamName.ShouldBe("col");
-        ex.Message.ShouldContain("Column 10 is out of range [0, 10).");
+        var ex = FluentActions.Invoking(() => _ = buffer[0, 10]).Should().Throw<ArgumentOutOfRangeException>().Which;
+        ex.ParamName.Should().Be("col");
+        ex.Message.Should().Contain("Column 10 is out of range [0, 10).");
     }
 
     [Fact]
     public void GetRowText_Row_Error_Should_Include_Row_And_Height()
     {
         var buffer = new ScreenBuffer(10, 5);
-        var ex = Should.Throw<ArgumentOutOfRangeException>(() => buffer.GetRowText(5));
-        ex.ParamName.ShouldBe("row");
-        ex.Message.ShouldContain("Row 5 is out of range [0, 5).");
+        var ex = FluentActions.Invoking(() => buffer.GetRowText(5)).Should().Throw<ArgumentOutOfRangeException>().Which;
+        ex.ParamName.Should().Be("row");
+        ex.Message.Should().Contain("Row 5 is out of range [0, 5).");
     }
 
     // ── Erase bounds: row == Height exactly (kills < Height → <= Height mutation) ──
@@ -1052,14 +1051,14 @@ public sealed class ScreenBufferTests
     {
         // row = Height is one past the last valid row; should be silently ignored
         var buffer = new ScreenBuffer(10, 3);
-        Should.NotThrow(() => buffer.EraseToEnd(3, 0)); // row=Height=3
+        FluentActions.Invoking(() => buffer.EraseToEnd(3, 0)).Should().NotThrow(); // row=Height=3
     }
 
     [Fact]
     public void EraseToStart_Should_Not_Throw_For_Row_Exactly_At_Height()
     {
         var buffer = new ScreenBuffer(10, 3);
-        Should.NotThrow(() => buffer.EraseToStart(3, 0)); // row=Height=3
+        FluentActions.Invoking(() => buffer.EraseToStart(3, 0)).Should().NotThrow(); // row=Height=3
     }
 
     [Fact]
@@ -1068,7 +1067,7 @@ public sealed class ScreenBufferTests
         // row=-1 triggers the `||` logical mutation: `row >= 0 || row < Height`
         // would make condition true and attempt _cells[-1, c].Reset()
         var buffer = new ScreenBuffer(10, 3);
-        Should.NotThrow(() => buffer.EraseToStart(-1, 0));
+        FluentActions.Invoking(() => buffer.EraseToStart(-1, 0)).Should().NotThrow();
     }
 
     // ── Erase bounds: col == Width exactly (kills c < Width → c <= Width mutation) ──
@@ -1078,7 +1077,7 @@ public sealed class ScreenBufferTests
     {
         // col=Width: with `c <= Width` mutation, loop would access _cells[row, Width]
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseToStart(1, 5)); // col=Width=5
+        FluentActions.Invoking(() => buffer.EraseToStart(1, 5)).Should().NotThrow(); // col=Width=5
     }
 
     [Fact]
@@ -1086,7 +1085,7 @@ public sealed class ScreenBufferTests
     {
         // col=Width: with `c <= Width` mutation, loop would access _cells[row, Width]
         var buffer = new ScreenBuffer(5, 3);
-        Should.NotThrow(() => buffer.EraseLineToStart(1, 5)); // col=Width=5
+        FluentActions.Invoking(() => buffer.EraseLineToStart(1, 5)).Should().NotThrow(); // col=Width=5
     }
 
     // ── GetRegionText: endCol stops at endCol, not Width (kills c <= cEnd → c <= Width) ──
@@ -1105,6 +1104,6 @@ public sealed class ScreenBufferTests
         }
 
         var region = buffer.GetRegionText(0, 0, 0, 3);
-        region.ShouldBe("ABCD");
+        region.Should().Be("ABCD");
     }
 }

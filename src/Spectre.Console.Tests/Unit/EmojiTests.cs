@@ -12,7 +12,7 @@ public sealed class EmojiTests
         console.Markup("Hello :globe_showing_europe_africa:!");
 
         // Then
-        console.Output.ShouldBe("Hello 🌍!");
+        console.Output.Should().Be("Hello 🌍!");
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public sealed class EmojiTests
         const string result = "Hello " + Emoji.Known.GlobeShowingEuropeAfrica + "!";
 
         // Then
-        result.ShouldBe("Hello 🌍!");
+        result.Should().Be("Hello 🌍!");
     }
 
     public sealed class TheReplaceMethod
@@ -34,7 +34,7 @@ public sealed class EmojiTests
             var result = Emoji.Replace("Hello :globe_showing_europe_africa:!");
 
             // Then
-            result.ShouldBe("Hello 🌍!");
+            result.Should().Be("Hello 🌍!");
         }
     }
 
@@ -59,7 +59,7 @@ public sealed class EmojiTests
             console.Markup(markup);
 
             // Then
-            console.Output.ShouldBe(expected);
+            console.Output.Should().Be(expected);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ public sealed class EmojiTests
             console.Markup("Hello :globe_showing_europe_africa:! Output: good");
 
             // Then
-            console.Output.ShouldBe("Hello 🌍! Output: good");
+            console.Output.Should().Be("Hello 🌍! Output: good");
         }
 
         [Fact]
@@ -85,7 +85,7 @@ public sealed class EmojiTests
             console.Markup("Hello :globe_showing_flat_earth:!");
 
             // Then
-            console.Output.ShouldBe("Hello :globe_showing_flat_earth:!");
+            console.Output.Should().Be("Hello :globe_showing_flat_earth:!");
         }
     }
 }

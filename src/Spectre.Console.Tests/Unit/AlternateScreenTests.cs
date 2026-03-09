@@ -21,8 +21,8 @@ public sealed class AlternateScreenTests
         });
 
         // Then
-        result.ShouldNotBeNull();
-        result.Message.ShouldBe("Alternate buffers are not supported by your terminal.");
+        result.Should().NotBeNull();
+        result.Message.Should().Be("Alternate buffers are not supported by your terminal.");
     }
 
     [Fact]
@@ -44,8 +44,8 @@ public sealed class AlternateScreenTests
         });
 
         // Then
-        result.ShouldNotBeNull();
-        result.Message.ShouldBe("Alternate buffers are not supported since your terminal does not support ANSI.");
+        result.Should().NotBeNull();
+        result.Message.Should().Be("Alternate buffers are not supported since your terminal does not support ANSI.");
     }
 
     [Fact]

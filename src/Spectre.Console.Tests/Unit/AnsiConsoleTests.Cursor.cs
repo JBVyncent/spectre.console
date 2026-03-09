@@ -22,7 +22,7 @@ public partial class AnsiConsoleTests
                 console.Write("World");
 
                 // Then
-                console.Output.ShouldBe(expected);
+                console.Output.Should().Be(expected);
             }
         }
 
@@ -40,7 +40,7 @@ public partial class AnsiConsoleTests
                 console.Write("World");
 
                 // Then
-                console.Output.ShouldBe("Hello[3;5HWorld");
+                console.Output.Should().Be("Hello[3;5HWorld");
             }
         }
     }

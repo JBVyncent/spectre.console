@@ -16,8 +16,8 @@ public sealed class AnsiMarkupTests
             var result = Record.Exception(() => AnsiMarkup.Parse(markup));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe(expected);
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be(expected);
         }
 
         [Fact]
@@ -27,8 +27,8 @@ public sealed class AnsiMarkupTests
             var result = Record.Exception(() => AnsiMarkup.Parse("[yellow][blue]Hello[/]"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Unbalanced markup stack. Did you forget to close a tag?");
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be("Unbalanced markup stack. Did you forget to close a tag?");
         }
 
         [Fact]
@@ -38,8 +38,8 @@ public sealed class AnsiMarkupTests
             var result = Record.Exception(() => AnsiMarkup.Parse("Hello[/]World"));
 
             // Then
-            result.ShouldBeOfType<InvalidOperationException>()
-                .Message.ShouldBe("Encountered closing tag when none was expected near position 5.");
+            result.Should().BeOfType<InvalidOperationException>()
+                    .Which.Message.Should().Be("Encountered closing tag when none was expected near position 5.");
         }
     }
 
@@ -57,7 +57,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Escape(input);
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -74,7 +74,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Remove(input);
 
             // Then
-            result.ShouldBe(expected);
+            result.Should().Be(expected);
         }
     }
 
@@ -95,7 +95,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Highlight(value, searchText, highlightStyle);
 
             // Then
-            result.ShouldBe(value);
+            result.Should().Be(value);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Highlight(value, searchText, highlightStyle);
 
             // Then
-            result.ShouldBe("Sample text with [bold on yellow]test[/] word");
+            result.Should().Be("Sample text with [bold on yellow]test[/] word");
         }
 
         [Fact]
@@ -125,7 +125,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Highlight(value, searchText, highlightStyle);
 
             // Then
-            result.ShouldBe("[red]Sample [/][bold on yellow]text with[/] test word");
+            result.Should().Be("[red]Sample [/][bold on yellow]text with[/] test word");
         }
 
         [Fact]
@@ -140,7 +140,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Highlight(value, searchText, highlightStyle);
 
             // Then
-            result.ShouldBe("Sample [bold on yellow]te[/]xt with test word");
+            result.Should().Be("Sample [bold on yellow]te[/]xt with test word");
         }
 
         [Fact]
@@ -155,7 +155,7 @@ public sealed class AnsiMarkupTests
             var result = AnsiMarkup.Highlight(value, searchText, highlightStyle);
 
             // Then
-            result.ShouldBe(value);
+            result.Should().Be(value);
         }
     }
 
@@ -172,7 +172,7 @@ public sealed class AnsiMarkupTests
 
             // Then
             fixture.Output
-                .ShouldBe("Hello [ World ] !");
+                .Should().Be("Hello [ World ] !");
         }
 
         [Theory]
@@ -189,7 +189,7 @@ public sealed class AnsiMarkupTests
 
             // Then
             fixture.Output
-                .ShouldBe(expected);
+                .Should().Be(expected);
         }
 
         [Fact]
@@ -202,7 +202,7 @@ public sealed class AnsiMarkupTests
             fixture.Markup.Write("[link=https://patriksvensson.se]Click to visit my blog[/]");
 
             // Then
-            fixture.Output.ShouldMatch(
+            fixture.Output.Should().MatchRegex(
                 "]8;id=[0-9]*;https:\\/\\/patriksvensson\\.se\\\\Click to visit my blog]8;;\\\\");
         }
 
@@ -216,7 +216,7 @@ public sealed class AnsiMarkupTests
             fixture.Markup.Write("[link]https://patriksvensson.se[/]");
 
             // Then
-            fixture.Output.ShouldMatch(
+            fixture.Output.Should().MatchRegex(
                 "]8;id=[0-9]*;https:\\/\\/patriksvensson\\.se\\\\https:\\/\\/patriksvensson\\.se]8;;\\\\");
         }
 
@@ -231,7 +231,7 @@ public sealed class AnsiMarkupTests
             fixture.Markup.Write($"[link]{AnsiMarkup.Escape(Path)}[/]");
 
             // Then
-            fixture.Output.ShouldMatch(
+            fixture.Output.Should().MatchRegex(
                 "]8;id=[0-9]*;file:\\/\\/c:\\/temp\\/\\[x\\].txt\\\\file:\\/\\/c:\\/temp\\/\\[x\\].txt]8;;\\\\");
         }
 
@@ -247,7 +247,7 @@ public sealed class AnsiMarkupTests
             fixture.Markup.Write($"[link={escapedPath}]{escapedPath}[/]");
 
             // Then
-            fixture.Output.ShouldMatch(
+            fixture.Output.Should().MatchRegex(
                 "]8;id=[0-9]*;file:\\/\\/c:\\/temp\\/\\[x\\].txt\\\\file:\\/\\/c:\\/temp\\/\\[x\\].txt]8;;\\\\");
         }
 
@@ -264,7 +264,7 @@ public sealed class AnsiMarkupTests
 
             // Then
             fixture.Output
-                .ShouldBe(expected);
+                .Should().Be(expected);
         }
     }
 }

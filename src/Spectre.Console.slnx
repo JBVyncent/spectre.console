@@ -22,11 +22,19 @@
   </Folder>
   <Folder Name="/Extensions/Tests/">
     <Project Path="Spectre.Console.ImageSharp.Tests/Spectre.Console.ImageSharp.Tests.csproj" />
+    <Project Path="Spectre.Console.ImageSharp.Properties.Tests/Spectre.Console.ImageSharp.Properties.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Properties Tests/">
+    <Project Path="Spectre.Console.Properties.Tests/Spectre.Console.Properties.Tests.csproj" />
+    <Project Path="Spectre.Console.Ansi.Properties.Tests/Spectre.Console.Ansi.Properties.Tests.csproj" />
   </Folder>
   <Project Path="Benchmarks/Benchmarks.csproj" />
   <Project Path="Spectre.Console.Ansi.Tests/Spectre.Console.Ansi.Tests.csproj" />
   <Project Path="Spectre.Console.Ansi/Spectre.Console.Ansi.csproj" />
+  <Project Path="Spectre.Console.Phantom.Tests/Spectre.Console.Phantom.Tests.csproj" />
+  <Project Path="Spectre.Console.Phantom/Spectre.Console.Phantom.csproj" />
   <Project Path="Spectre.Console.SourceGenerator/Spectre.Console.SourceGenerator.csproj" />
+  <Project Path="Spectre.Console.Testing.Tests/Spectre.Console.Testing.Tests.csproj" />
   <Project Path="Spectre.Console.Testing/Spectre.Console.Testing.csproj" />
   <Project Path="Spectre.Console.Tests/Spectre.Console.Tests.csproj" />
   <Project Path="Spectre.Console/Spectre.Console.csproj" />

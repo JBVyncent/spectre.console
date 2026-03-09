@@ -15,7 +15,7 @@ public sealed class TextPathTests
         console.Write(new TextPath(input));
 
         // Then
-        console.Output.ShouldBe(expected);
+        console.Output.Should().Be(expected);
     }
 
     [Theory]
@@ -31,7 +31,7 @@ public sealed class TextPathTests
         console.Write(new TextPath(input));
 
         // Then
-        console.Output.ShouldBe(expected);
+        console.Output.Should().Be(expected);
     }
 
     [Theory]
@@ -47,7 +47,7 @@ public sealed class TextPathTests
         console.Write(new TextPath(input));
 
         // Then
-        console.Output.ShouldBe(expected);
+        console.Output.Should().Be(expected);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class TextPathTests
         console.Write(new TextPath("C:/My documents/Bar/Baz.txt").RightJustified());
 
         // Then
-        console.Output.ShouldBe("             C:/My documents/Bar/Baz.txt");
+        console.Output.Should().Be("             C:/My documents/Bar/Baz.txt");
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public sealed class TextPathTests
         console.Write(new TextPath("C:/My documents/Bar/Baz.txt").Centered());
 
         // Then
-        console.Output.ShouldBe("      C:/My documents/Bar/Baz.txt       ");
+        console.Output.Should().Be("      C:/My documents/Bar/Baz.txt       ");
     }
 
     [Fact]
