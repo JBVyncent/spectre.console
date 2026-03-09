@@ -95,3 +95,5 @@ Thumbs.db
 *.received.*
 
 node_modules
+.claude/
+.gemini/
