@@ -10,6 +10,7 @@ public sealed class Grid : JustInTimeRenderable, IExpandable
 
     private bool _expand;
     private bool _padRightCell;
+    private int? _width;
 
     /// <summary>
     /// Gets the grid columns.
@@ -31,7 +32,11 @@ public sealed class Grid : JustInTimeRenderable, IExpandable
     /// <summary>
     /// Gets or sets the width of the grid.
     /// </summary>
-    public int? Width { get; set; }
+    public int? Width
+    {
+        get => _width;
+        set => MarkAsDirty(() => _width = value);
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Grid"/> class.

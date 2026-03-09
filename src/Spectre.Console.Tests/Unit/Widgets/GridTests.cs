@@ -292,4 +292,44 @@ public sealed class GridTests
         // Then
         return Verifier.Verify(console.Output);
     }
+
+    public sealed class TheWidthProperty
+    {
+        [Fact]
+        public void Changing_Width_After_Render_Should_Invalidate_Cache()
+        {
+            // Given — render once with Width=40
+            var console = new TestConsole().Width(80);
+            var grid = new Grid();
+            grid.AddColumn();
+            grid.AddRow("Hello");
+            grid.Width = 40;
+            console.Write(grid);
+            var firstOutput = console.Output;
+
+            // When — change Width to 20 and re-render
+            grid.Width = 20;
+            var console2 = new TestConsole().Width(80);
+            console2.Write(grid);
+            var secondOutput = console2.Output;
+
+            // Then — outputs should differ because width changed and cache was invalidated
+            secondOutput.Should().NotBe(firstOutput);
+        }
+
+        [Fact]
+        public void Width_Should_Be_Readable_After_Set()
+        {
+            var grid = new Grid();
+            grid.Width = 42;
+            grid.Width.Should().Be(42);
+        }
+
+        [Fact]
+        public void Width_Should_Default_To_Null()
+        {
+            var grid = new Grid();
+            grid.Width.Should().BeNull();
+        }
+    }
 }
