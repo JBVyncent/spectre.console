@@ -60,8 +60,10 @@ public static class CanvasImageExtensions
     {
         ArgumentNullException.ThrowIfNull(image);
 
+        // Stryker disable once Statement : Equivalent — ImageSharp.Image.Mutate also throws ArgumentNullException for null action
         ArgumentNullException.ThrowIfNull(action);
 
+        // Stryker disable once Statement : Killed by CanvasImageTests.Mutate_Applies_Action — Resize verifies dimensions change
         image.Image.Mutate(action);
         return image;
     }

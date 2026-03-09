@@ -296,6 +296,164 @@ public sealed class SixelImageTests
         }
     }
 
+    // ── Mutation killers — SixelImage scaling/rendering ──────────────────────
+
+    public sealed class MutationKillers
+    {
+        [Fact]
+        public void Sixel_Render_Scales_Height_Proportionally_With_MaxWidth()
+        {
+            var console = new TestConsole();
+            console.Profile.Capabilities.SupportsSixel = true;
+            console.Profile.Width = 200;
+
+            using var stream = CreatePngStream(20, 40, ImageColor.Red);
+            var img = new SixelImage(stream) { MaxWidth = 10 };
+
+            // Rendering should succeed with proportional scaling
+            var segments = img.GetSegments(console).ToList();
+            var sixel = segments.First(s => s.IsControlCode).Text;
+
+            // Raster attributes should show scaled dimensions: 10 wide, ~20 tall
+            sixel.Should().Contain("\"1;1;10;20");
+        }
+
+        [Fact]
+        public void Sixel_Render_Clamps_To_Terminal_Width()
+        {
+            var console = new TestConsole();
+            console.Profile.Capabilities.SupportsSixel = true;
+            console.Profile.Width = 5;
+
+            using var stream = CreatePngStream(20, 20, ImageColor.Blue);
+            var img = new SixelImage(stream);
+
+            var segments = img.GetSegments(console).ToList();
+            var sixel = segments.First(s => s.IsControlCode).Text;
+
+            // Width in raster attributes should be <= 5
+            sixel.Should().Contain("\"1;1;5;");
+        }
+
+        [Fact]
+        public void Sixel_Render_Uses_Custom_Resampler()
+        {
+            var console = new TestConsole();
+            console.Profile.Capabilities.SupportsSixel = true;
+            console.Profile.Width = 200;
+
+            using var stream = CreatePngStream(20, 20, ImageColor.Green);
+            var img = new SixelImage(stream)
+            {
+                MaxWidth = 5,
+                Resampler = SixLabors.ImageSharp.Processing.KnownResamplers.NearestNeighbor,
+            };
+
+            // Should not throw
+            var segments = img.GetSegments(console).ToList();
+            segments.Any(s => s.IsControlCode).Should().BeTrue();
+        }
+
+        [Fact]
+        public void Sixel_Render_Uses_Custom_MaxColors()
+        {
+            var console = new TestConsole();
+            console.Profile.Capabilities.SupportsSixel = true;
+            console.Profile.Width = 200;
+
+            using var stream = CreatePngStream(4, 4, ImageColor.Red);
+            var img = new SixelImage(stream) { MaxColors = 4 };
+
+            var segments = img.GetSegments(console).ToList();
+            segments.Any(s => s.IsControlCode).Should().BeTrue();
+        }
+
+        [Fact]
+        public void Fallback_Measure_Uses_CanvasImage()
+        {
+            var console = new TestConsole();
+            console.Profile.Capabilities.SupportsSixel = false;
+            console.Profile.Width = 200;
+
+            using var stream = CreatePngStream(10, 5, ImageColor.Red);
+            var img = new SixelImage(stream);
+
+            var options = RenderOptions.Create(console, console.Profile.Capabilities);
+            var measurement = ((IRenderable)img).Measure(options, 200);
+
+            // CanvasImage in unicode mode: pixelWidth=1, so measurement = 10
+            measurement.Min.Should().Be(10);
+        }
+
+        [Fact]
+        public void Fallback_Render_Preserves_MaxWidth()
+        {
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Profile.Capabilities.SupportsSixel = false;
+
+            using var stream = CreatePngStream(20, 20, ImageColor.Red);
+            var img = new SixelImage(stream) { MaxWidth = 5 };
+
+            // Should render without throwing
+            var segments = img.GetSegments(console).ToList();
+            segments.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void Fallback_Render_Preserves_Resampler()
+        {
+            var console = new TestConsole().EmitAnsiSequences();
+            console.Profile.Capabilities.SupportsSixel = false;
+
+            using var stream = CreatePngStream(20, 20, ImageColor.Red);
+            var img = new SixelImage(stream)
+            {
+                MaxWidth = 5,
+                Resampler = SixLabors.ImageSharp.Processing.KnownResamplers.NearestNeighbor,
+            };
+
+            var segments = img.GetSegments(console).ToList();
+            segments.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void MaxColors_Default_Is_256()
+        {
+            using var stream = CreatePngStream(4, 4, ImageColor.Red);
+            var img = new SixelImage(stream);
+            img.MaxColors.Should().Be(256);
+        }
+
+        [Fact]
+        public void Sixel_Measure_With_Negate_SupportsSixel()
+        {
+            // When SupportsSixel is true: direct measurement
+            // When false: fallback via CanvasImage
+            var consoleTrue = new TestConsole();
+            consoleTrue.Profile.Capabilities.SupportsSixel = true;
+            consoleTrue.Profile.Width = 200;
+
+            var consoleFalse = new TestConsole();
+            consoleFalse.Profile.Capabilities.SupportsSixel = false;
+            consoleFalse.Profile.Width = 200;
+
+            using var stream1 = CreatePngStream(10, 5, ImageColor.Red);
+            var img1 = new SixelImage(stream1);
+            using var stream2 = CreatePngStream(10, 5, ImageColor.Red);
+            var img2 = new SixelImage(stream2);
+
+            var optTrue = RenderOptions.Create(consoleTrue, consoleTrue.Profile.Capabilities);
+            var optFalse = RenderOptions.Create(consoleFalse, consoleFalse.Profile.Capabilities);
+
+            var mTrue = ((IRenderable)img1).Measure(optTrue, 200);
+            var mFalse = ((IRenderable)img2).Measure(optFalse, 200);
+
+            // Both should give width 10 for a 10-wide image
+            mTrue.Min.Should().Be(10);
+            mFalse.Min.Should().Be(10);
+        }
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>Creates an in-memory PNG stream with a solid colour fill.</summary>
