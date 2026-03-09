@@ -48,7 +48,9 @@ internal sealed class ProgressBar : Renderable, IHasCulture
 
         var bar = !options.Unicode ? AsciiBar : UnicodeBar;
         var style = isCompleted ? FinishedStyle : CompletedStyle;
-        var barCount = Math.Max(0, (int)(width * (completedBarCount / MaxValue)));
+        var barCount = MaxValue > 0
+            ? Math.Max(0, (int)(width * (completedBarCount / MaxValue)))
+            : 0;
 
         // Show value?
         var value = ValueFormatter != null ? ValueFormatter(completedBarCount, Culture ?? CultureInfo.InvariantCulture) : completedBarCount.ToString(Culture ?? CultureInfo.InvariantCulture);
