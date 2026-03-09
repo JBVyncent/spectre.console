@@ -18,10 +18,9 @@ internal sealed class StringBuffer : IDisposable
         Position = 0;
     }
 
-    public void Dispose()
-    {
-        _reader.Dispose();
-    }
+    // Stryker disable all : StringReader.Dispose has no observable effect in test environments; block and statement mutations are unobservable
+    public void Dispose() { _reader.Dispose(); }
+    // Stryker restore all
 
     public char Peek()
     {

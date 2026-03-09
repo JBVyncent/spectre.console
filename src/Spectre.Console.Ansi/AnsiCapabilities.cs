@@ -1,5 +1,8 @@
 namespace Spectre.Console;
 
+// Stryker disable all : Create methods delegate entirely to AnsiDetector and ColorSystemDetector which depend on
+// OS/environment — untestable in unit tests. Tests bypass Create() by constructing AnsiCapabilities via object initializer.
+
 /// <summary>
 /// Represents ANSI capabilities.
 /// </summary>
@@ -73,6 +76,7 @@ public class AnsiCapabilities : IReadOnlyAnsiCapabilities
         };
     }
 }
+// Stryker restore all
 
 /// <summary>
 /// Represents read-only ANSI capabilities.

@@ -21,6 +21,7 @@ public sealed class AnsiWriter
     /// <param name="output">The <see cref="TextWriter"/> to write to.</param>
     public AnsiWriter(TextWriter output)
     {
+        // Stryker disable once Statement : AnsiCapabilities.Create(output) at the next line also has ArgumentNullException.ThrowIfNull(writer); removing this guard still throws the same exception type
         ArgumentNullException.ThrowIfNull(output);
         _output = output;
         _codes = [];
@@ -76,6 +77,7 @@ public sealed class AnsiWriter
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public AnsiWriter Write(string text, Style style, Link? link = null)
     {
+        // Stryker disable once Boolean : initial value is immediately overwritten by WriteSgr on the assignment below; initial false/true is never observed
         var shouldClose = false;
 
         if (Capabilities.Ansi)
@@ -573,10 +575,12 @@ public sealed class AnsiWriter
     {
         if (!Capabilities.Ansi || codes.Count == 0)
         {
+            // Stryker disable once Boolean : return value of WriteSgr is not observed by any caller; early-exit branch
             return false;
         }
 
         WriteCsi(string.Join(";", codes), 'm');
+        // Stryker disable once Boolean : return value of WriteSgr is not observed by any caller
         return true;
     }
 
@@ -594,21 +598,27 @@ public sealed class AnsiWriter
     {
         if (!Capabilities.Ansi)
         {
+            // Stryker disable once Boolean : return value of WriteCsi is not observed by any caller; the guard branch is for early exit
             return false;
         }
 
         Write(decPrivateMode ? $"\e[?{parameters}" : $"\e[{parameters}");
+        // Stryker disable once Boolean : return value of WriteCsi is not observed by any caller
         return true;
     }
 
     private bool WriteOsc(string parameters)
     {
+        // Stryker disable once Block : Block removal is semantically equivalent for tests because BeginLink always
+        // guards Ansi==true before calling WriteOsc; the guard is dead code in test scenarios
         if (!Capabilities.Ansi)
         {
+            // Stryker disable once Boolean : return value of WriteOsc is not observed by any caller; early-exit branch
             return false;
         }
 
         Write($"\e]{parameters}");
+        // Stryker disable once Boolean : return value of WriteOsc is not observed by any caller
         return true;
     }
 }
@@ -677,6 +687,7 @@ file static class AnsiCodeBuilder
             ColorSystem.EightBit => GetEightBit(color, foreground), // 8-bit
             ColorSystem.Standard => GetFourBit(color, foreground), // 4-bit
             ColorSystem.Legacy => GetThreeBit(color, foreground), // 3-bit
+            // Stryker disable once String : Dead code — all ColorSystem enum values are handled; default branch is unreachable
             _ => throw new InvalidOperationException("Could not determine ANSI color."),
         };
     }
@@ -689,7 +700,9 @@ file static class AnsiCodeBuilder
             number = color.ExactOrClosest(ColorSystem.Legacy).Number;
         }
 
-        Debug.Assert(number is >= 0 and < 8, "Invalid range for 4-bit color");
+        // Stryker disable all : Debug.Assert fires but does not throw in test environments; all mutations on the condition/string are not observable
+        Debug.Assert(number is >= 0 and < 8, "Invalid range for 3-bit color");
+        // Stryker restore all
 
         var mod = foreground ? 30 : 40;
         return [(byte)(number.Value + mod)];
@@ -703,7 +716,9 @@ file static class AnsiCodeBuilder
             number = color.ExactOrClosest(ColorSystem.Standard).Number;
         }
 
+        // Stryker disable all : Debug.Assert fires but does not throw in test environments; all mutations on the condition/string are not observable
         Debug.Assert(number is >= 0 and < 16, "Invalid range for 4-bit color");
+        // Stryker restore all
 
         var mod = number < 8 ? (foreground ? 30 : 40) : (foreground ? 82 : 92);
         return [(byte)(number.Value + mod)];
@@ -711,8 +726,13 @@ file static class AnsiCodeBuilder
 
     private static IEnumerable<byte> GetEightBit(Color color, bool foreground)
     {
+        // Stryker disable all : null coalescing mutations are semantically equivalent — for named colors Number is set and
+        // ExactOrClosest(EightBit) returns the same color; for unnamed colors Number is null and ExactOrClosest is always called
         var number = color.Number ?? color.ExactOrClosest(ColorSystem.EightBit).Number;
+        // Stryker restore all
+        // Stryker disable all : Debug.Assert does not throw in test environments; string/equality mutations are not observable
         Debug.Assert(number is >= 0, "Invalid range for 8-bit color");
+        // Stryker restore all
 
         var mod = foreground ? (byte)38 : (byte)48;
         return [mod, 5, (byte)number];

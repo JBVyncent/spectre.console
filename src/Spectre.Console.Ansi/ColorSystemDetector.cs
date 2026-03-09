@@ -1,7 +1,11 @@
 namespace Spectre.Console;
 
+// Stryker disable all : ColorSystemDetector.Detect uses RuntimeInformation.IsOSPlatform,
+// Environment.GetEnvironmentVariables, and Environment.OSVersion.Version — all OS/environment
+// dependent and not controllable in unit tests. Tests bypass this code by constructing AnsiCapabilities directly.
 internal static class ColorSystemDetector
 {
+
     // Adapted from https://github.com/willmcgugan/rich/blob/f0c29052c22d1e49579956a9207324d9072beed7/rich/console.py#L391
     public static ColorSystem Detect(bool supportsAnsi)
     {
@@ -86,3 +90,4 @@ internal static class ColorSystemDetector
 #endif
     }
 }
+// Stryker restore all

@@ -5,7 +5,11 @@
     "target-framework": "net10.0",
     "reporters": ["json", "html", "cleartext"],
     "mutate": [
-      "**/*"
+      "**/*",
+      "!**/.nuget/**/*",
+      "!**/External/**/*",
+      "!**/Generated/**/*",
+      "!**/obj/**/*"
     ]
   }
 }

@@ -15,6 +15,11 @@
   <ItemGroup>
     <!-- Exclude the output of source generators from the compilation -->
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <!-- Re-include Color, ColorPalette, and ColorTable generated files from disk.
+         During normal builds, the source generator produces identical in-memory output.
+         During Stryker.NET mutation testing, source generators don't run in Roslyn
+         recompilation, so these on-disk files provide the required partial class members. -->
+    <Compile Include="$(CompilerGeneratedFilesOutputPath)/Spectre.Console.SourceGenerator/Spectre.Console.SourceGenerator.Colors.ColorGenerator/*.cs" />
   </ItemGroup>
 
   <ItemGroup Label="REMOVE THIS">
@@ -27,7 +32,10 @@
   </ItemGroup>
 
   <ItemGroup Label="Source Generator">
-    <ProjectReference Include="..\Spectre.Console.SourceGenerator\Spectre.Console.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- Source generator disabled: using checked-in generated files for Color/ColorPalette/ColorTable.
+         This fixes Stryker.NET compatibility (Stryker's Roslyn recompilation doesn't run generators).
+         To regenerate after data file changes, re-enable this reference temporarily and rebuild. -->
+    <!-- <ProjectReference Include="..\Spectre.Console.SourceGenerator\Spectre.Console.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" /> -->
   </ItemGroup>
 
   <ItemGroup>

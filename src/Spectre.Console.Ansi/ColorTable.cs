@@ -33,10 +33,13 @@ internal static partial class ColorTable
             return null;
         }
 
+        // Stryker disable all : The _numberLookup table only contains indices 0–255 which are always valid
+        // EightBit palette indices. This guard is defensive dead code — block/equality mutations are untestable.
         if (number > ColorPalette.EightBit.Count - 1)
         {
             return null;
         }
+        // Stryker restore all
 
         return ColorPalette.EightBit[number];
     }

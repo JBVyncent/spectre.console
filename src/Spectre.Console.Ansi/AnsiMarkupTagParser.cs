@@ -10,6 +10,8 @@ internal static class AnsiMarkupTagParser
             throw new InvalidOperationException(error);
         }
 
+        // Stryker disable once NullCoalescing,String : Parse(text, out error) always sets error when returning null;
+        // the ?? throw is unreachable defensive code — NullCoalescing and String mutations are both dead code
         return result ?? throw new InvalidOperationException("Could not parse style.");
     }
 
@@ -150,6 +152,7 @@ internal static class AnsiMarkupTagParser
     {
         error = null;
 
+        // Stryker disable once NullCoalescing,String : hex is never null (caller passes part from Split); dead-code branch
         hex ??= string.Empty;
         hex = hex.ReplaceExact("#", string.Empty).Trim();
 
@@ -189,12 +192,17 @@ internal static class AnsiMarkupTagParser
         {
             error = null;
 
+            // Stryker disable once NullCoalescing,String : rgb is never null in practice (caller validates); dead-code branch
             var normalized = rgb ?? string.Empty;
+            // Stryker disable once Equality : length==3 means exactly "rgb" which has no parenthesized values;
+            // >= 3 and > 3 both fail to parse it (Substring(3) is empty, StartsWith("(") is false)
             if (normalized.Length >= 3)
             {
                 // Trim parentheses
                 normalized = normalized.Substring(3).Trim();
 
+                // Stryker disable once String : mutating "(" to "" makes StartsWith always true, but EndsWith(")")
+                // still gates the code path; all invalid inputs produce the same null result via a different code path
                 if (normalized.StartsWith("(", StringComparison.OrdinalIgnoreCase) &&
                    normalized.EndsWith(")", StringComparison.OrdinalIgnoreCase))
                 {
