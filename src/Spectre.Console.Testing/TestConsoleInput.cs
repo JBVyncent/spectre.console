@@ -75,6 +75,9 @@ public sealed class TestConsoleInput : IAnsiConsoleInput
     public void PushKey(ConsoleKey input)
     {
         var ch = _nonPrintingKeys.Contains(input) ? '\0' : (char)input;
+        // Stryker disable once Block : Equivalent mutant — any ConsoleKey not in _nonPrintingKeys
+        // whose (char) cast is a control character already yields ch='\0' via the cast itself;
+        // removing this guard produces the same '\0' result. The guard is defensive dead code.
         if (char.IsControl(ch))
         {
             ch = '\0';

@@ -36,6 +36,9 @@ public sealed class TestCapabilities : IReadOnlyCapabilities
     /// <returns>A <see cref="RenderOptions"/> with the same capabilities as this instance.</returns>
     public RenderOptions CreateRenderContext(IAnsiConsole console)
     {
+        // Stryker disable once Statement : Equivalent mutant — RenderOptions.Create(null, this) also
+        // throws ArgumentNullException internally; removing this guard produces the same observable
+        // exception type, making the mutation indistinguishable from correct code in tests.
         ArgumentNullException.ThrowIfNull(console);
 
         return RenderOptions.Create(console, this);

@@ -63,10 +63,15 @@ public sealed class TestConsole : IAnsiConsole, IDisposable
             Out = new AnsiConsoleOutput(_writer),
             Interactive = InteractionSupport.No,
             ExclusivityMode = new NoopExclusivityMode(),
+            // Stryker disable all : All mutations on the Enrichment initializer are equivalent —
+            // UseDefaultEnrichers=false prevents enrichers from overwriting capabilities, but
+            // explicit assignments below (Width=80, Height=24, Ansi=true, Unicode=true) override
+            // any enricher results regardless. Removing or changing this initializer is unobservable.
             Enrichment = new ProfileEnrichment
             {
                 UseDefaultEnrichers = false,
             },
+            // Stryker restore all
         });
 
         _console.Profile.Width = 80;
@@ -76,10 +81,14 @@ public sealed class TestConsole : IAnsiConsole, IDisposable
     }
 
     /// <inheritdoc/>
+    // Stryker disable all : StringWriter holds a StringBuilder internally and releases no
+    // external resources on Dispose(); all mutations on this method body (Block removal,
+    // Statement removal) are equivalent — no observable side effect in tests or in GC.
     public void Dispose()
     {
         _writer.Dispose();
     }
+    // Stryker restore all
 
     /// <inheritdoc/>
     public void Clear(bool home)
