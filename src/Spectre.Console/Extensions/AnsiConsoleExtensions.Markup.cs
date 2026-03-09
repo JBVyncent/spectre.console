@@ -53,8 +53,7 @@ public static partial class AnsiConsoleExtensions
         // Stryker disable once all : Equivalent — delegates to Markup(console, string) which also checks null
         ArgumentNullException.ThrowIfNull(console);
 
-        // Stryker disable once all : Killed by AnsiConsoleTests.MarkupFormatOverload tests; Stryker can't trace coverage
-        Markup(console, args.Length == 0 ? format : string.Format(provider, format, args));
+        Markup(console, args.Length == 0 ? format : Console.Markup.EscapeInterpolated(provider, FormattableStringFactory.Create(format, args)));
     }
 
     /// <summary>
