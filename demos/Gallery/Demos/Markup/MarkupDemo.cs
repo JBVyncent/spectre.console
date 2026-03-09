@@ -48,6 +48,23 @@ public sealed class MarkupDemo : IDemoModule
         AnsiConsole.WriteLine("Template literal: ${variable}");
         AnsiConsole.WriteLine();
 
+        // Format-arg escaping (#1763, #1387, #1495)
+        // MarkupLine(string format, params object[] args) and Markup() now auto-escape
+        // any square brackets in argument ToString() output before markup parsing.
+        // Previously, a filename like "[important].txt" would crash with
+        // "Encountered malformed markup tag".
+        AnsiConsole.MarkupLine("[bold underline blue]Format-Arg Escaping[/]");
+        AnsiConsole.MarkupLine("[grey]Arguments with square brackets are safely escaped.[/]");
+        AnsiConsole.WriteLine();
+
+        var filename = "[important].txt";
+        var tag = "[bold]";
+        var version = "[v1.0.0]";
+        AnsiConsole.MarkupLine("[green]File:[/] {0}", filename);
+        AnsiConsole.MarkupLine("[green]Tag:[/]  {0}", tag);
+        AnsiConsole.MarkupLine("[green]Ver:[/]  {0}", version);
+        AnsiConsole.WriteLine();
+
         // Escaped markup characters
         AnsiConsole.MarkupLine("[bold underline blue]Escaped Markup[/]");
         AnsiConsole.WriteLine();
