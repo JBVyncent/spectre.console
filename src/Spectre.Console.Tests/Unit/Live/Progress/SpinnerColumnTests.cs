@@ -604,4 +604,57 @@ public sealed class SpinnerColumnTests
         public override bool IsUnicode => false;
         public override IReadOnlyList<string> Frames => new[] { "-", "WIDE" };
     }
+
+    private sealed class EmptySpinner : Spinner
+    {
+        public override TimeSpan Interval => TimeSpan.FromMilliseconds(100);
+        public override bool IsUnicode => false;
+        public override IReadOnlyList<string> Frames => Array.Empty<string>();
+    }
+
+    // ── Zero frames guard ──────────────────────────────────────────────────
+
+    [Fact]
+    public void Should_Not_Crash_With_Zero_Frame_Spinner_During_Render()
+    {
+        var column = new SpinnerColumn(new EmptySpinner());
+        var task = new ProgressTask(1, "Foo", 100);
+
+        var act = () => Render(column, task, TimeSpan.Zero);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void Should_Render_Space_For_Zero_Frame_Spinner()
+    {
+        var column = new SpinnerColumn(new EmptySpinner());
+        var task = new ProgressTask(1, "Foo", 100);
+
+        var result = Render(column, task, TimeSpan.Zero);
+
+        result.Should().Be(" ");
+    }
+
+    [Fact]
+    public void GetColumnWidth_Should_Not_Crash_With_Zero_Frame_Spinner()
+    {
+        var column = new SpinnerColumn(new EmptySpinner());
+        var options = CreateOptions();
+
+        var act = () => column.GetColumnWidth(options);
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void GetColumnWidth_Should_Return_At_Least_One_For_Zero_Frame_Spinner()
+    {
+        var column = new SpinnerColumn(new EmptySpinner());
+        var options = CreateOptions();
+
+        var width = column.GetColumnWidth(options);
+
+        width!.Value.Should().BeGreaterThanOrEqualTo(1);
+    }
 }

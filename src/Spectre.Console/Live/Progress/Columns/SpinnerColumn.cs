@@ -129,6 +129,11 @@ public sealed class SpinnerColumn : ProgressColumn
         }
 
         var index = task.State.Get<int>(Index);
+        if (spinner.Frames.Count == 0)
+        {
+            return new Markup(" ", Style ?? Spectre.Console.Style.Plain);
+        }
+
         var frame = spinner.Frames[index % spinner.Frames.Count];
         return new Markup(frame.EscapeMarkup(), Style ?? Spectre.Console.Style.Plain);
     }
@@ -154,7 +159,9 @@ public sealed class SpinnerColumn : ProgressColumn
                         ((IRenderable)new Markup(PendingText ?? " ")).Measure(options, int.MaxValue).Max,
                         // Stryker disable once all : Measurement.Max==Min for plain text; " " is a safe fallback
                         ((IRenderable)new Markup(CompletedText ?? " ")).Measure(options, int.MaxValue).Max),
-                    spinner.Frames.Max(frame => Cell.GetCellLength(frame)));
+                    spinner.Frames.Count > 0
+                        ? spinner.Frames.Max(frame => Cell.GetCellLength(frame))
+                        : 1);
             }
 
             return _maxWidth.Value;
