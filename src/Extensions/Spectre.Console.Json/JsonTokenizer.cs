@@ -128,6 +128,26 @@ internal static class JsonTokenizer
                 }
 
                 accumulator.Append('\\').Append(current);
+
+                // \u must be followed by exactly 4 hexadecimal digits
+                if (current == 'u')
+                {
+                    for (var i = 0; i < 4; i++)
+                    {
+                        if (buffer.Eof)
+                        {
+                            throw new InvalidOperationException("Incomplete \\u escape sequence");
+                        }
+
+                        var hex = buffer.Read();
+                        if (!IsHexDigit(hex))
+                        {
+                            throw new InvalidOperationException($"Invalid hex digit '{hex}' in \\u escape sequence");
+                        }
+
+                        accumulator.Append(hex);
+                    }
+                }
             }
             else
             {
@@ -222,4 +242,7 @@ internal static class JsonTokenizer
             accumulator.Append(current);
         }
     }
+
+    private static bool IsHexDigit(char c) =>
+        c is (>= '0' and <= '9') or (>= 'a' and <= 'f') or (>= 'A' and <= 'F');
 }

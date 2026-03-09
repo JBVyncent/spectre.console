@@ -105,6 +105,48 @@ public sealed class JsonTokenizerTests
         act.Should().Throw<InvalidOperationException>();
     }
 
+    // ── Unicode escape validation ────────────────────────────────────────────
+
+    [Theory]
+    [InlineData("\"\\u0041\"")]   // \uXXXX with uppercase hex
+    [InlineData("\"\\u00e9\"")]   // \uXXXX with lowercase hex
+    [InlineData("\"\\uFFFF\"")]   // \uXXXX max value
+    [InlineData("\"\\u0000\"")]   // \uXXXX null char
+    public void Tokenize_ValidUnicodeEscape_Succeeds(string input)
+    {
+        var tokens = JsonTokenizer.Tokenize(input);
+        tokens.Should().HaveCount(1);
+        tokens[0].Type.Should().Be(JsonTokenType.String);
+        tokens[0].Lexeme.Should().Be(input);
+    }
+
+    [Theory]
+    [InlineData("\"\\u\"")]       // \u with no hex digits
+    [InlineData("\"\\u0\"")]      // \u with 1 hex digit
+    [InlineData("\"\\u00\"")]     // \u with 2 hex digits
+    [InlineData("\"\\u004\"")]    // \u with 3 hex digits
+    [InlineData("\"\\uGGGG\"")]   // \u with non-hex chars
+    [InlineData("\"\\u00G0\"")]   // \u with non-hex in middle
+    public void Tokenize_InvalidUnicodeEscape_Throws(string input)
+    {
+        var act = () => JsonTokenizer.Tokenize(input);
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void Tokenize_UnicodeEscape_PreservesHexDigitsInLexeme()
+    {
+        var tokens = JsonTokenizer.Tokenize("\"abc\\u0041def\"");
+        tokens[0].Lexeme.Should().Be("\"abc\\u0041def\"");
+    }
+
+    [Fact]
+    public void Tokenize_MultipleUnicodeEscapes_AllValidated()
+    {
+        var tokens = JsonTokenizer.Tokenize("\"\\u0041\\u0042\"");
+        tokens[0].Lexeme.Should().Be("\"\\u0041\\u0042\"");
+    }
+
     [Fact]
     public void Tokenize_UnterminatedString_Throws()
     {
