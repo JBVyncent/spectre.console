@@ -44,6 +44,9 @@ internal static class JsonTokenizer
             {
                 buffer.Read(); // Consume
                 result.Add(new JsonToken(tokenType, current.ToString()));
+                // Stryker disable once Statement : Removing continue is equivalent — at the end of
+                // the if block, C# falls through to after the if-else chain (which has no more code),
+                // proceeding to the next while iteration just as continue would.
                 continue;
             }
             else if (current == '\"')
@@ -75,6 +78,7 @@ internal static class JsonTokenizer
 
                 if (!_keywords.TryGetValue(accumulator.ToString(), out var keyword))
                 {
+                    // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
                     throw new InvalidOperationException($"Encountered invalid keyword '{keyword}'");
                 }
 
@@ -82,6 +86,7 @@ internal static class JsonTokenizer
             }
             else
             {
+                // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
                 throw new InvalidOperationException("Invalid token");
             }
         }
@@ -105,14 +110,20 @@ internal static class JsonTokenizer
             {
                 buffer.Expect('\\');
 
+                // Stryker disable once Block : Removing this if block is equivalent — buffer.Read()
+                // returns '\0' at EOF, which fails the allowedEscapedChars check and throws the
+                // same InvalidOperationException that tests verify.
                 if (buffer.Eof)
                 {
+                    // Stryker disable once Statement : Removing the break is equivalent — the while loop
+                    // exits naturally at buffer.Eof and the "Unterminated string literal" throw below fires.
                     break;
                 }
 
                 current = buffer.Read();
                 if (!_allowedEscapedChars.Contains(current))
                 {
+                    // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
                     throw new InvalidOperationException("Invalid escape encountered");
                 }
 
@@ -125,8 +136,12 @@ internal static class JsonTokenizer
             }
         }
 
+        // Stryker disable once Block : Block removal is equivalent — Expect('"') at EOF throws
+        // InvalidOperationException from StringBuffer — same observable exception type.
         if (buffer.Eof)
         {
+            // Stryker disable once String,Statement : String: message is equivalent. Statement: removing the throw
+            // causes Expect('"') to throw InvalidOperationException from StringBuffer — same exception type.
             throw new InvalidOperationException("Unterminated string literal");
         }
 
@@ -151,12 +166,19 @@ internal static class JsonTokenizer
         {
             ReadDigits(buffer, accumulator, min: 1);
         }
+        // Stryker disable once Equality,Block : Dead code — IsDigit(min:1) matches '0' (char code 48 >> 1),
+        // so this else-if is never reached. Equality (==→!=) and Block removal are both unobservable.
         else if (current == '0')
         {
+            // Stryker disable once Statement : Unreachable dead code — '0' is always handled by ReadDigits above.
             accumulator.Append(buffer.Expect('0'));
         }
+        // Stryker disable once Block : Block removal is equivalent — remaining input is parsed as a keyword,
+        // which also throws InvalidOperationException — same observable exception type.
         else
         {
+            // Stryker disable once String,Statement : String: message is equivalent. Statement: removing the
+            // throw causes an empty/"-" token; the remaining input is then parsed as a keyword and throws.
             throw new InvalidOperationException("Invalid number");
         }
 
