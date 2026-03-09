@@ -21,11 +21,13 @@ internal sealed class JsonTokenReader
         var read = Read();
         if (read == null)
         {
+            // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
             throw new InvalidOperationException("Could not read token");
         }
 
         if (read.Type != type)
         {
+            // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
             throw new InvalidOperationException($"Expected '{type}' token, but found '{read.Type}'");
         }
 

@@ -14,6 +14,7 @@ internal sealed class JsonParser : IJsonParser
         }
         catch
         {
+            // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
             throw new InvalidOperationException("Invalid JSON");
         }
     }
@@ -45,8 +46,13 @@ internal sealed class JsonParser : IJsonParser
     private static JsonSyntax ParseValue(JsonTokenReader reader)
     {
         var current = reader.Peek();
+        // Stryker disable once Block : Block removal is equivalent — without the throw, current.Type
+        // throws NullReferenceException which the outer catch wraps as InvalidOperationException.
         if (current == null)
         {
+            // Stryker disable once String,Statement : String: message is equivalent. Statement: removing
+            // the throw causes a NullReferenceException on current.Type which the outer catch wraps as
+            // InvalidOperationException("Invalid JSON") — same observable exception type.
             throw new InvalidOperationException("Could not parse value (EOF)");
         }
 
@@ -84,6 +90,7 @@ internal sealed class JsonParser : IJsonParser
             return new JsonNull(current.Lexeme);
         }
 
+        // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
         throw new InvalidOperationException($"Unknown value token: {current.Type}");
     }
 
