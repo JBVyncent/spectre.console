@@ -235,6 +235,81 @@ public sealed class ProgressContextMutationTests
             });
     }
 
+    [Fact]
+    public void RemoveTask_Should_Detach_Child_From_Parent()
+    {
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var parent = ctx.AddTask("Parent");
+                var child = ctx.AddChildTask(parent, "Child");
+
+                parent.Children.Should().HaveCount(1);
+                child.Parent.Should().Be(parent);
+
+                ctx.RemoveTask(child);
+
+                parent.Children.Should().BeEmpty();
+                child.Parent.Should().BeNull();
+            });
+    }
+
+    [Fact]
+    public void RemoveTask_Should_Clear_Parent_Reference_On_Removed_Child()
+    {
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var parent = ctx.AddTask("Parent");
+                var child = ctx.AddChildTask(parent, "Child");
+
+                ctx.RemoveTask(child);
+
+                child.Parent.Should().BeNull();
+            });
+    }
+
+    [Fact]
+    public void RemoveTask_Of_Root_Task_Should_Not_Throw()
+    {
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var task = ctx.AddTask("Root");
+
+                // Root task has no parent — removing should not throw
+                var act = () => ctx.RemoveTask(task);
+                act.Should().NotThrow();
+            });
+    }
+
+    [Fact]
+    public void RemoveTask_Should_Not_Affect_AutoComplete_Of_Parent_With_Remaining_Children()
+    {
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var parent = ctx.AddTask("Parent", autoStart: false);
+                parent.AutoCompleteWithChildren = true;
+
+                var child1 = ctx.AddChildTask(parent, "Child1");
+                var child2 = ctx.AddChildTask(parent, "Child2");
+
+                // Remove child1 — parent still has child2 unfinished
+                ctx.RemoveTask(child1);
+
+                // Finish child2 — now parent should auto-complete
+                child2.StopTask();
+                parent.StartTask();
+
+                // Force propagation by calling GetTasks
+                ctx.Refresh();
+
+                // Parent should be auto-completed since all remaining children are done
+                parent.IsFinished.Should().BeTrue();
+            });
+    }
+
     // ── Refresh ───────────────────────────────────────────────────────────────
 
     [Fact]

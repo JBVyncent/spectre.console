@@ -231,7 +231,16 @@ public sealed class ProgressContext
     {
         lock (_taskLock)
         {
-            return _tasks.Remove(task);
+            if (!_tasks.Remove(task))
+            {
+                return false;
+            }
+
+            // Detach from parent's children list
+            task.Parent?.RemoveChildInternal(task);
+            task.Parent = null;
+
+            return true;
         }
     }
 

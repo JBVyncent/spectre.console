@@ -438,6 +438,15 @@ public sealed class ProgressTask : IProgress<double>
             _children.Add(child);
         }
     }
+
+    // Called from ProgressContext.RemoveTask while _taskLock is held.
+    internal void RemoveChildInternal(ProgressTask child)
+    {
+        lock (_lock)
+        {
+            _children.Remove(child);
+        }
+    }
 }
 
 /// <summary>
