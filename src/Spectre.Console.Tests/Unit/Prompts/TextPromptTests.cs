@@ -480,4 +480,59 @@ public sealed class TextPromptTests
 
         result.Should().Be("[01]");
     }
+
+    [Fact]
+    public void Backspace_Should_Remove_Entire_Surrogate_Pair()
+    {
+        // Given — push a surrogate pair (😀 = U+1F600 = \uD83D\uDE00) then backspace
+        var console = new TestConsole();
+        var high = '\uD83D';
+        var low = '\uDE00';
+        console.Input.PushKey(new ConsoleKeyInfo(high, 0, false, false, false));
+        console.Input.PushKey(new ConsoleKeyInfo(low, 0, false, false, false));
+        console.Input.PushKey(ConsoleKey.Backspace);
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        var result = console.Prompt(new TextPrompt<string>("Enter text:").AllowEmpty());
+
+        // Then — both chars of the surrogate pair should be removed, leaving empty string
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Backspace_Should_Remove_Surrogate_Pair_But_Keep_Preceding_Text()
+    {
+        // Given — push "Hi" + 😀 + backspace
+        var console = new TestConsole();
+        console.Input.PushText("Hi");
+        var high = '\uD83D';
+        var low = '\uDE00';
+        console.Input.PushKey(new ConsoleKeyInfo(high, 0, false, false, false));
+        console.Input.PushKey(new ConsoleKeyInfo(low, 0, false, false, false));
+        console.Input.PushKey(ConsoleKey.Backspace);
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        var result = console.Prompt(new TextPrompt<string>("Enter text:"));
+
+        // Then — only the emoji is removed, "Hi" remains
+        result.Should().Be("Hi");
+    }
+
+    [Fact]
+    public void Backspace_After_BMP_Character_Should_Remove_Single_Char()
+    {
+        // Given — push "abc" + backspace (removes 'c', not a surrogate pair)
+        var console = new TestConsole();
+        console.Input.PushText("abc");
+        console.Input.PushKey(ConsoleKey.Backspace);
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        var result = console.Prompt(new TextPrompt<string>("Enter text:"));
+
+        // Then
+        result.Should().Be("ab");
+    }
 }
