@@ -61,9 +61,10 @@ public sealed class Columns : Renderable, IPaddable, IExpandable
             return new Measurement(maxWidth, maxWidth);
         }
 
-        var rows = _items.Count / Math.Max(columnCount, 1);
+        var effectiveColumnCount = Math.Max(columnCount, 1);
+        var rows = (_items.Count + effectiveColumnCount - 1) / effectiveColumnCount;
         var greatestWidth = 0;
-        for (var row = 0; row < rows; row += Math.Max(1, columnCount))
+        for (var row = 0; row < rows; row++)
         {
             var widths = itemWidths.Skip(row * columnCount).Take(columnCount).ToList();
             var totalWidth = widths.Sum() + (maxPadding * (widths.Count - 1));
