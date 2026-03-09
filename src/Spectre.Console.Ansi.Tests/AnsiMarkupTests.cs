@@ -97,6 +97,51 @@ public sealed class AnsiMarkupTests
         }
     }
 
+    public sealed class TheSegmentToStringMethod
+    {
+        [Fact]
+        public void Should_Include_Link_In_Markup()
+        {
+            var segment = new AnsiMarkupSegment("click", Style.Plain, new Link("https://example.com"));
+            segment.ToString().Should().Be("[link=https://example.com]click[/]");
+        }
+
+        [Fact]
+        public void Should_Include_Both_Style_And_Link()
+        {
+            var segment = new AnsiMarkupSegment("click", new Style(Color.Red), new Link("https://example.com"));
+            segment.ToString().Should().Be("[red link=https://example.com]click[/]");
+        }
+
+        [Fact]
+        public void Should_Output_Plain_Text_When_No_Style_Or_Link()
+        {
+            var segment = new AnsiMarkupSegment("plain", Style.Plain, null);
+            segment.ToString().Should().Be("plain");
+        }
+
+        [Fact]
+        public void Should_Output_Style_Only_When_No_Link()
+        {
+            var segment = new AnsiMarkupSegment("styled", new Style(Color.Blue), null);
+            segment.ToString().Should().Be("[blue]styled[/]");
+        }
+
+        [Fact]
+        public void Should_Output_Link_Keyword_For_EmptyLink()
+        {
+            var segment = new AnsiMarkupSegment("auto", Style.Plain, new Link(Constants.EmptyLink));
+            segment.ToString().Should().Be("[link]auto[/]");
+        }
+
+        [Fact]
+        public void Should_Escape_Markup_In_Text_With_Link()
+        {
+            var segment = new AnsiMarkupSegment("[test]", Style.Plain, new Link("https://x.com"));
+            segment.ToString().Should().Be("[link=https://x.com][[test]][/]");
+        }
+    }
+
     public sealed class TheEscapeMethod
     {
         [Theory]

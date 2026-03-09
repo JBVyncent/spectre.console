@@ -208,9 +208,33 @@ public sealed class AnsiMarkupSegment
     public override string ToString()
     {
         var escaped = Text.EscapeMarkup();
-        return !Style.Equals(Style.Plain)
-            ? $"[{Style.ToMarkup()}]{escaped}[/]"
-            : escaped;
+        var hasStyle = !Style.Equals(Style.Plain);
+        var hasLink = Link != null;
+
+        if (!hasStyle && !hasLink)
+        {
+            return escaped;
+        }
+
+        var tag = new StringBuilder();
+        if (hasStyle)
+        {
+            tag.Append(Style.ToMarkup());
+        }
+
+        if (hasLink)
+        {
+            if (tag.Length > 0)
+            {
+                tag.Append(' ');
+            }
+
+            tag.Append(Link!.Url.Equals(Constants.EmptyLink, StringComparison.Ordinal)
+                ? "link"
+                : $"link={Link.Url}");
+        }
+
+        return $"[{tag}]{escaped}[/]";
     }
 }
 
