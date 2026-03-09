@@ -10,7 +10,14 @@ internal sealed class JsonParser : IJsonParser
         {
             var tokens = JsonTokenizer.Tokenize(json);
             var reader = new JsonTokenReader(tokens);
-            return ParseElement(reader);
+            var result = ParseElement(reader);
+
+            if (!reader.Eof)
+            {
+                throw new InvalidOperationException("Unexpected trailing content after JSON value");
+            }
+
+            return result;
         }
         catch
         {

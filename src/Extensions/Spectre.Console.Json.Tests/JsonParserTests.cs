@@ -198,6 +198,38 @@ public sealed class JsonParserTests
         ((JsonNumber)r2).Lexeme.Should().Be("2");
     }
 
+    // ── Trailing tokens ──────────────────────────────────────────────────────
+
+    [Theory]
+    [InlineData("true false")]
+    [InlineData("{\"a\":1}junk")]
+    [InlineData("null null")]
+    [InlineData("1 2")]
+    [InlineData("\"a\" \"b\"")]
+    [InlineData("[1] [2]")]
+    [InlineData("{} {}")]
+    public void Parse_TrailingTokens_ThrowsInvalidOperationException(string json)
+    {
+        var act = () => Parser.Parse(json);
+        act.Should().Throw<InvalidOperationException>();
+    }
+
+    [Theory]
+    [InlineData("true")]
+    [InlineData("false")]
+    [InlineData("null")]
+    [InlineData("42")]
+    [InlineData("\"hello\"")]
+    [InlineData("{}")]
+    [InlineData("[]")]
+    [InlineData("{\"a\":1}")]
+    [InlineData("[1,2,3]")]
+    public void Parse_SingleValue_DoesNotThrow(string json)
+    {
+        var act = () => Parser.Parse(json);
+        act.Should().NotThrow();
+    }
+
     // ── Unknown token type coverage ───────────────────────────────────────────
 
     [Fact]
