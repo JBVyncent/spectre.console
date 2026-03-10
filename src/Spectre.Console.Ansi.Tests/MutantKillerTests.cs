@@ -2956,9 +2956,9 @@ public sealed class MutantKillerTests
     #endregion
 
     // =========================================================================
-    // AnsiMarkupTagParser hex and RGB color parsing  (NoCoverage lines ~155, ~195)
+    // AnsiMarkupTagParser hex and RGB color parsing
     // ParseHexColor and ParseRgbColor are reached only when the text starts with
-    // '#' or 'rgb'. Need tests that exercise both success and error paths.
+    // '#' or 'rgb'. Tests exercise boundary values for TryParseHexNibble and range checks.
     // =========================================================================
     #region AnsiMarkupTagParser hex/rgb color parsing
 
@@ -2982,6 +2982,88 @@ public sealed class MutantKillerTests
         style.Foreground.B.Should().Be(0x00);
     }
 
+    // TryParseHexNibble boundary tests — each test exercises a boundary character
+    // in the 3-digit hex code path, killing equality mutations on char range checks.
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Boundary_Zero()
+    {
+        // '0' is the lower boundary of the digit range — kills c >= '0' → c > '0'
+        var style = Style.Parse("#000");
+        style.Foreground.R.Should().Be(0);
+        style.Foreground.G.Should().Be(0);
+        style.Foreground.B.Should().Be(0);
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Boundary_Nine()
+    {
+        // '9' is the upper boundary of the digit range — kills c <= '9' → c < '9'
+        var style = Style.Parse("#999");
+        style.Foreground.R.Should().Be(153);
+        style.Foreground.G.Should().Be(153);
+        style.Foreground.B.Should().Be(153);
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Boundary_LowercaseA()
+    {
+        // 'a' is the lower boundary of the lowercase hex range — kills c >= 'a' → c > 'a'
+        var style = Style.Parse("#aaa");
+        style.Foreground.R.Should().Be(170);
+        style.Foreground.G.Should().Be(170);
+        style.Foreground.B.Should().Be(170);
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Boundary_LowercaseF()
+    {
+        // 'f' is the upper boundary of the lowercase hex range — kills c <= 'f' → c < 'f'
+        var style = Style.Parse("#fff");
+        style.Foreground.R.Should().Be(255);
+        style.Foreground.G.Should().Be(255);
+        style.Foreground.B.Should().Be(255);
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Boundary_UppercaseA()
+    {
+        // 'A' is the lower boundary of the uppercase hex range — kills c >= 'A' → c > 'A'
+        var style = Style.Parse("#AAA");
+        style.Foreground.R.Should().Be(170);
+        style.Foreground.G.Should().Be(170);
+        style.Foreground.B.Should().Be(170);
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Boundary_UppercaseF()
+    {
+        // 'F' is the upper boundary of the uppercase hex range — kills c <= 'F' → c < 'F'
+        var style = Style.Parse("#FFF");
+        style.Foreground.R.Should().Be(255);
+        style.Foreground.G.Should().Be(255);
+        style.Foreground.B.Should().Be(255);
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_MixedCase()
+    {
+        // Exercises lowercase path with arithmetic: 'b' → value = 'b' - 'a' + 10 = 11, 11*17 = 187
+        var style = Style.Parse("#abc");
+        style.Foreground.R.Should().Be(170); // a=10, 10*17=170
+        style.Foreground.G.Should().Be(187); // b=11, 11*17=187
+        style.Foreground.B.Should().Be(204); // c=12, 12*17=204
+    }
+
+    [Fact]
+    public void AnsiMarkupTagParser_HexColor_3Digit_Invalid_ThrowsWithMessage()
+    {
+        // Kills TryParseHexNibble return false → return true mutation (line ~209)
+        var act = () => Style.Parse("#xyz");
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*hex*");
+    }
+
     [Fact]
     public void AnsiMarkupTagParser_HexColor_Invalid_ThrowsWithMessage()
     {
@@ -2994,7 +3076,7 @@ public sealed class MutantKillerTests
     [Fact]
     public void AnsiMarkupTagParser_RgbColor_ValidTriple_ParsesCorrectly()
     {
-        // Exercises ParseRgbColor success path (lines ~195–217).
+        // Exercises ParseRgbColor success path.
         var style = Style.Parse("rgb(200,100,50)");
         style.Foreground.R.Should().Be(200);
         style.Foreground.G.Should().Be(100);
@@ -3002,10 +3084,43 @@ public sealed class MutantKillerTests
     }
 
     [Fact]
+    public void AnsiMarkupTagParser_RgbColor_BoundaryValues_ParsesCorrectly()
+    {
+        // Boundary test: 0 and 255 are the exact edges — kills >= 0 → > 0, <= 255 → < 255
+        var style = Style.Parse("rgb(0,255,0)");
+        style.Foreground.R.Should().Be(0);
+        style.Foreground.G.Should().Be(255);
+        style.Foreground.B.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("rgb(256,0,0)")] // r > 255
+    [InlineData("rgb(0,256,0)")] // g > 255
+    [InlineData("rgb(0,0,256)")] // b > 255
+    public void AnsiMarkupTagParser_RgbColor_OutOfRange_Above255_ThrowsWithMessage(string rgb)
+    {
+        // Kills <= 255 → < 255 and or-to-and mutations on per-component range checks
+        var act = () => Style.Parse(rgb);
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*RGB*");
+    }
+
+    [Theory]
+    [InlineData("rgb(-1,0,0)")] // r < 0
+    [InlineData("rgb(0,-1,0)")] // g < 0
+    [InlineData("rgb(0,0,-1)")] // b < 0
+    public void AnsiMarkupTagParser_RgbColor_OutOfRange_Negative_ThrowsWithMessage(string rgb)
+    {
+        // Kills >= 0 → > 0 and or-to-and mutations on per-component range checks
+        var act = () => Style.Parse(rgb);
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*RGB*");
+    }
+
+    [Fact]
     public void AnsiMarkupTagParser_RgbColor_InvalidValues_ThrowsWithMessage()
     {
-        // Kills String mutation on the RGB error message (line ~195).
-        // Non-numeric component causes FormatException in Convert.ToInt32 → caught → error set → outer throws.
+        // Kills String mutation on the RGB error message.
         var act = () => Style.Parse("rgb(abc,0,0)");
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*RGB*");

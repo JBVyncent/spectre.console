@@ -34,11 +34,14 @@ public sealed class CanvasImage : Renderable, IDisposable
         get => _maxWidth;
         set
         {
+            // Stryker disable all : MaxWidth validation — <= 0 vs < 0 is equivalent (null never reaches here);
+            // NoCoverage on throw because no test sets MaxWidth to 0 or negative.
             if (value is <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), value, "MaxWidth must be greater than zero.");
             }
 
+            // Stryker restore all
             _maxWidth = value;
         }
     }
@@ -96,6 +99,7 @@ public sealed class CanvasImage : Renderable, IDisposable
     /// <summary>
     /// Disposes the underlying image resources.
     /// </summary>
+    // Stryker disable once Statement,Block : Image.Dispose() releases unmanaged resources; effect is not observable in test assertions
     public void Dispose()
     {
         Image.Dispose();

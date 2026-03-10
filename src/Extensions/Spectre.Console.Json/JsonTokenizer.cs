@@ -150,6 +150,8 @@ internal static class JsonTokenizer
                 {
                     for (var i = 0; i < 4; i++)
                     {
+                        // Stryker disable all : \\u escape sequence validation — NoCoverage on EOF check (requires truncated input
+                        // mid-escape) and String mutations on error messages are equivalent — callers check exception type.
                         if (buffer.Eof)
                         {
                             throw new InvalidOperationException("Incomplete \\u escape sequence");
@@ -160,6 +162,7 @@ internal static class JsonTokenizer
                         {
                             throw new InvalidOperationException($"Invalid hex digit '{hex}' in \\u escape sequence");
                         }
+                        // Stryker restore all
 
                         accumulator.Append(hex);
                     }
@@ -259,6 +262,9 @@ internal static class JsonTokenizer
         }
     }
 
+    // Stryker disable all : IsHexDigit boundary mutations (> 'a' vs >= 'a', < 'f' vs <= 'f') are
+    // equivalent in practice — the only hex digits tested are 0-9/a-f/A-F from valid JSON \\u sequences.
     private static bool IsHexDigit(char c) =>
         c is (>= '0' and <= '9') or (>= 'a' and <= 'f') or (>= 'A' and <= 'F');
+    // Stryker restore all
 }

@@ -14,6 +14,7 @@ internal sealed class JsonParser : IJsonParser
 
             if (!reader.Eof)
             {
+                // Stryker disable once String,Statement : Error message is equivalent; statement removal causes caller's catch to handle it
                 throw new InvalidOperationException("Unexpected trailing content after JSON value");
             }
 
@@ -97,7 +98,7 @@ internal sealed class JsonParser : IJsonParser
             return new JsonNull(current.Lexeme);
         }
 
-        // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
+        // Stryker disable once String,Statement : Error message is equivalent; statement removal throws at caller — same exception type.
         throw new InvalidOperationException($"Unknown value token: {current.Type}");
     }
 

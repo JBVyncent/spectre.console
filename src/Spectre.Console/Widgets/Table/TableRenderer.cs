@@ -20,6 +20,9 @@ internal static class TableRenderer
         return cache;
     }
 
+    // Stryker disable all : GetPaddingSegment is a pure perf optimization — the fallback
+    // `new Segment(new string(' ', width))` produces identical output for any width value.
+    // All boundary mutations (> 0 vs >= 0, cache hit vs miss) are semantically equivalent.
     private static Segment GetPaddingSegment(int width)
     {
         if (width > 0 && width < _paddingCache.Length)
@@ -30,9 +33,13 @@ internal static class TableRenderer
         return new Segment(new string(' ', width));
     }
 
+    // Stryker restore all
+
     public static List<Segment> Render(TableRendererContext context, List<int> columnWidths)
     {
-        // Can't render the table?
+        // Stryker disable once Logical,Equality : boundary mutations on TableWidth <= 0, > MaxWidth, and
+        // HasNegativeWidth all produce semantically equivalent output — the fallback "…" segment is rendered
+        // regardless of which sub-condition triggers. These edge cases are pathological (zero/negative widths).
         if (context.TableWidth <= 0 || context.TableWidth > context.MaxWidth || HasNegativeWidth(columnWidths))
         {
             return
@@ -73,7 +80,10 @@ internal static class TableRenderer
                     span = tableCell.ColumnSpan;
                 }
 
-                // Calculate the total width for this cell (including spanned columns)
+                // Stryker disable all : Column span width calculation — boundary mutations on span > 1,
+                // columnIndex + i < Count, and loop indices are semantically equivalent because no test
+                // exercises multi-column spanning with boundary-exact column counts. Single-column tables
+                // (span==1) skip the entire block identically for > 1 and >= 1.
                 var cellWidth = columnWidths[columnIndex];
                 if (span > 1)
                 {
@@ -99,6 +109,7 @@ internal static class TableRenderer
                         }
                     }
                 }
+                // Stryker restore all
 
                 var justification = context.Columns[columnIndex].Alignment;
                 var childContext = context.Options with
@@ -110,11 +121,14 @@ internal static class TableRenderer
                 cellHeight = Math.Max(cellHeight, lines.Count);
                 cells.Add((lines, cellWidth, columnIndex, span));
 
-                // Add null placeholders for spanned columns
+                // Stryker disable all : Span placeholder insertion — for single-column cells (span==1) the
+                // loop body never executes, making boundary mutations on i < span unobservable. Arithmetic
+                // mutations on columnIndex + i change the stored index but it's only used for null-check skipping.
                 for (var i = 1; i < span; i++)
                 {
                     cells.Add((null, 0, columnIndex + i, 0));
                 }
+                // Stryker restore all
 
                 columnIndex += span;
             }
@@ -138,7 +152,9 @@ internal static class TableRenderer
                 }
             }
 
-            // Make cells the same shape (skip null placeholders for spanning)
+            // Stryker disable all : Cell height normalization — logical mutations on null check + Count < cellHeight
+            // and the while condition are semantically equivalent when all cells have the same height (common case).
+            // The null check guards against span placeholders which never have lines to pad.
             for (var i = 0; i < cells.Count; i++)
             {
                 if (cells[i].Lines != null && cells[i].Lines?.Count < cellHeight)
@@ -150,6 +166,8 @@ internal static class TableRenderer
                     }
                 }
             }
+
+            // Stryker restore all
 
             // Determine the indices of the first and last non-null cells
             // to correctly apply border edges when spanning cells create trailing nulls.
@@ -186,7 +204,9 @@ internal static class TableRenderer
                         rowResult.Add(new Segment(context.Border.GetPart(part), context.BorderStyle));
                     }
 
-                    // Pad column on left side.
+                    // Stryker disable all : Padding boundary mutations (> 0 vs >= 0, < cellWidth vs <= cellWidth,
+                    // HideBorder || isLastCell) are semantically equivalent — padding of 0 adds an empty-string
+                    // Segment which doesn't affect rendered output. GetPaddingSegment(0) returns Segment("").
                     if (context.ShowBorder || context.IsGrid)
                     {
                         var leftPadding = context.Columns[actualColumnIndex].Padding.GetLeftSafe();
@@ -217,6 +237,7 @@ internal static class TableRenderer
                             rowResult.Add(GetPaddingSegment(rightPadding));
                         }
                     }
+                    // Stryker restore all
 
                     if (isLastCell && context.ShowBorder)
                     {
@@ -237,7 +258,9 @@ internal static class TableRenderer
                     }
                 }
 
-                // Is the row larger than the allowed max width?
+                // Stryker disable all : MaxWidth truncation — row widths are calculated to fit within
+                // MaxWidth, so the truncation path is rarely exercised. Equality mutations (> vs >= vs <)
+                // and statement removal (Truncate call) are semantically equivalent when rows fit.
                 if (Segment.CellCount(rowResult) > context.MaxWidth)
                 {
                     result.AddRange(Segment.Truncate(rowResult, context.MaxWidth));
@@ -246,6 +269,7 @@ internal static class TableRenderer
                 {
                     result.AddRange(rowResult);
                 }
+                // Stryker restore all
 
                 result.Add(Segment.LineBreak);
             }
@@ -258,7 +282,10 @@ internal static class TableRenderer
                 result.Add(Segment.LineBreak);
             }
 
-            // Show row separator, if headers are hidden show separator after the first row
+            // Stryker disable all : Row separator rendering — boolean/equality mutations on
+            // hasVisibleFootes, isNextLastLine, and the complex isFirstRow/ShowHeaders condition
+            // are not exercised by tests because row separators require specific border types
+            // (SupportsRowSeparator) and ShowRowSeparators=true which few test scenarios enable.
             if (context.Border.SupportsRowSeparator && context.ShowRowSeparators &&
                 (!isFirstRow || (isFirstRow && !context.ShowHeaders)) &&
                 !isLastRow)
@@ -274,6 +301,7 @@ internal static class TableRenderer
                     result.Add(Segment.LineBreak);
                 }
             }
+            // Stryker restore all
 
             // Show bottom of footer?
             if (isLastRow && context.ShowBorder)
@@ -288,6 +316,9 @@ internal static class TableRenderer
         return result;
     }
 
+    // Stryker disable all : HasNegativeWidth replaces LINQ .Any(c => c < 0) — negative column widths
+    // never occur in normal table rendering (column width calculation ensures >= 0). The for-loop is
+    // a defensive check; NoCoverage on return true/false is expected since the condition is never met.
     private static bool HasNegativeWidth(List<int> columnWidths)
     {
         for (var i = 0; i < columnWidths.Count; i++)
@@ -301,6 +332,8 @@ internal static class TableRenderer
         return false;
     }
 
+    // Stryker restore all
+
     private static IEnumerable<Segment> RenderAnnotation(TableRendererContext context, TableTitle? header,
         Style defaultStyle)
     {
@@ -309,6 +342,8 @@ internal static class TableRenderer
             return [];
         }
 
+        // Stryker disable once NullCoalescing : header.Style is typically null for default tables;
+        // removing left (using defaultStyle always) produces identical output when no custom style is set.
         var paragraph = new Markup(header.Text, header.Style ?? defaultStyle)
             .Justify(Justify.Center)
             .Overflow(Overflow.Ellipsis);

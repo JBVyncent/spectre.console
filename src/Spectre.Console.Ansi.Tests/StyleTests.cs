@@ -205,7 +205,7 @@ public sealed class StyleTests
         [Theory]
         [InlineData("#", "Invalid hex color '#'.")]
         [InlineData("#FF00FF00FF", "Invalid hex color '#FF00FF00FF'.")]
-        [InlineData("#FOO", "Invalid hex color '#FOO'. Could not find any recognizable digits.")]
+        [InlineData("#FOO", "Invalid hex color '#FOO'.")]
         public void Should_Return_Error_If_Hex_Color_Is_Invalid(string style, string expected)
         {
             // Given, When

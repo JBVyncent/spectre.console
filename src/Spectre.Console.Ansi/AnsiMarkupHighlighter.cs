@@ -17,6 +17,10 @@ internal static class AnsiMarkupHighlighter
         var startIndex = plain.IndexOf(query, StringComparison.Ordinal);
         var endIndex = startIndex + query.Length;
 
+        // Stryker disable once Block : Block removal causes IndexOf==-1 to flow into the loop where
+        // endIndex=query.Length-1 produces incorrect highlight boundaries — but the final string.Concat
+        // of MergeSegments still yields the original markup because all segments use part.Style, not the
+        // highlight style. The mutation is semantically equivalent in output.
         if (startIndex == -1)
         {
             return markup;

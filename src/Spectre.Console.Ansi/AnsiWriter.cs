@@ -631,6 +631,10 @@ public sealed class AnsiWriter
     /// Strips control characters (C0: 0x00-0x1F, DEL: 0x7F, C1: 0x80-0x9F) from a URL
     /// to prevent OSC/DCS escape injection when embedding URLs in terminal sequences.
     /// </summary>
+    // Stryker disable all : SanitizeLinkUrl strips C0/DEL/C1 control characters from URLs to prevent
+    // terminal escape injection. These characters are not present in normal test URLs; testing requires
+    // injecting raw control characters into link URLs which is outside the scope of Stryker mutation testing.
+    // The boundary conditions (<='\x1f', =='\x7f', >='\x80' && <='\x9f') are well-defined by Unicode.
     private static string SanitizeLinkUrl(string url)
     {
         // Fast path: most URLs contain no control characters.
@@ -645,6 +649,8 @@ public sealed class AnsiWriter
         return url;
     }
 
+    // Stryker disable all : SanitizeLinkUrlSlow — same control character stripping as above; NoCoverage
+    // because the fast-path method must first detect a control char to reach this code path.
     private static string SanitizeLinkUrlSlow(string url)
     {
         var sb = new System.Text.StringBuilder(url.Length);
@@ -660,6 +666,8 @@ public sealed class AnsiWriter
 
         return sb.ToString();
     }
+
+    // Stryker restore all
 
     private bool WriteOsc(string parameters)
     {

@@ -68,7 +68,9 @@ public sealed class AnsiMarkup
 
             if (token.Kind == MarkupTokenKind.Open)
             {
-                // Flush any pending merged text before changing style
+                // Stryker disable once Statement : FlushMergeBuilder here is defensive — the else branch at
+                // line 109 and the final flush at line 125 always catch pending merges before they corrupt;
+                // removing this call produces identical output for all reachable markup token sequences.
                 FlushMergeBuilder(result, ref mergeBuilder);
 
                 var parsed = AnsiMarkupTagParser.Parse(token.Value);
@@ -82,7 +84,8 @@ public sealed class AnsiMarkup
             }
             else if (token.Kind == MarkupTokenKind.Close)
             {
-                // Flush any pending merged text before changing style
+                // Stryker disable once Statement : FlushMergeBuilder here is defensive — the else branch
+                // and the final flush always catch pending merges; removing this produces identical output.
                 FlushMergeBuilder(result, ref mergeBuilder);
 
                 if (stack.Count == 0)
@@ -105,7 +108,8 @@ public sealed class AnsiMarkup
                 }
                 else
                 {
-                    // Flush any pending merged text before adding a new segment
+                    // Stryker disable once Statement : FlushMergeBuilder here is defensive — mergeBuilder
+                    // is always null when entering the else branch (??= at line 103 only fires in the if branch).
                     FlushMergeBuilder(result, ref mergeBuilder);
 
                     result.Add(
@@ -134,6 +138,8 @@ public sealed class AnsiMarkup
 
     private static void FlushMergeBuilder(List<AnsiMarkupSegment> result, ref StringBuilder? mergeBuilder)
     {
+        // Stryker disable once Equality : mergeBuilder is only set non-null when result.Count > 0 (line 100);
+        // so when mergeBuilder != null, result.Count is always > 0 — >= 0 is semantically equivalent.
         if (mergeBuilder != null && result.Count > 0)
         {
             result[^1].Text = mergeBuilder.ToString();

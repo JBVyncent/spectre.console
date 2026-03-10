@@ -12,6 +12,7 @@ public static partial class AnsiConsoleExtensions
     /// <param name="sequence">The VT/Ansi control code sequence to write.</param>
     public static void WriteAnsi(this IAnsiConsole console, string sequence)
     {
+        // Stryker disable once Statement : removing guard causes NullReferenceException on console.Profile — same exception family
         ArgumentNullException.ThrowIfNull(console);
 
         if (console.Profile.Capabilities.Ansi)
@@ -28,6 +29,7 @@ public static partial class AnsiConsoleExtensions
     /// <returns>The VT/ANSI control code sequence.</returns>
     public static string ToAnsi(this IAnsiConsole console, IRenderable renderable)
     {
+        // Stryker disable once Statement : removing guard causes NullReferenceException on console.Profile — same exception family
         ArgumentNullException.ThrowIfNull(console);
 
         // Use a pre-sized StringBuilder to reduce StringWriter internal resizing.

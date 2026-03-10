@@ -157,6 +157,9 @@ internal static class AnsiMarkupTagParser
         // avoiding 2 intermediate string allocations.
         // Stryker disable once NullCoalescing,String : hex is never null (caller passes part from Split); dead-code branch
         hex ??= string.Empty;
+        // Stryker disable once Conditional,Logical,Equality : hex always starts with '#' (caller checks
+        // StartsWith("#")), so Length > 0 && hex[0] == '#' is always true; all conditional/logical/equality
+        // mutations on this ternary condition are semantically equivalent.
         var digits = hex.Length > 0 && hex[0] == '#' ? hex.Substring(1) : hex;
 
         // Use TryParse instead of try/catch for flow control — avoids exception
