@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;netstandard2.0</TargetFrameworks>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <Description>A library that extends Spectre.Console with network console support over TCP.</Description>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IsAotCompatible Condition="'$(TargetFramework)' != 'netstandard2.0'" >true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Spectre.Console\Spectre.Console.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Polyfill" Condition="'$(TargetFramework)' == 'netstandard2.0'" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
+</Project>
