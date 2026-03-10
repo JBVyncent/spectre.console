@@ -6,6 +6,10 @@ internal static class JsonTokenizer
     private static readonly Dictionary<string, JsonTokenType> _keywords;
     private static readonly HashSet<char> _allowedEscapedChars;
 
+    // Cache single-char token strings to avoid per-token char.ToString() allocations.
+    // These 6 structural tokens appear frequently in JSON and are always single characters.
+    private static readonly Dictionary<char, string> _tokenStrings;
+
     static JsonTokenizer()
     {
         _typeLookup = new Dictionary<char, JsonTokenType>
@@ -16,6 +20,16 @@ internal static class JsonTokenizer
             { ']', JsonTokenType.RightBracket },
             { ':', JsonTokenType.Colon },
             { ',', JsonTokenType.Comma },
+        };
+
+        _tokenStrings = new Dictionary<char, string>
+        {
+            { '{', "{" },
+            { '}', "}" },
+            { '[', "[" },
+            { ']', "]" },
+            { ':', ":" },
+            { ',', "," },
         };
 
         _keywords = new Dictionary<string, JsonTokenType>
@@ -43,7 +57,7 @@ internal static class JsonTokenizer
             if (_typeLookup.TryGetValue(current, out var tokenType))
             {
                 buffer.Read(); // Consume
-                result.Add(new JsonToken(tokenType, current.ToString()));
+                result.Add(new JsonToken(tokenType, _tokenStrings[current]));
                 // Stryker disable once Statement : Removing continue is equivalent — at the end of
                 // the if block, C# falls through to after the if-else chain (which has no more code),
                 // proceeding to the next while iteration just as continue would.
@@ -76,13 +90,15 @@ internal static class JsonTokenizer
                     accumulator.Append(current);
                 }
 
-                if (!_keywords.TryGetValue(accumulator.ToString(), out var keyword))
+                // Call ToString() once and reuse for both lookup and token creation.
+                var keywordText = accumulator.ToString();
+                if (!_keywords.TryGetValue(keywordText, out var keyword))
                 {
                     // Stryker disable once String : Error message content is an equivalent mutation — callers check exception type, not message.
-                    throw new InvalidOperationException($"Encountered invalid keyword '{accumulator}'");
+                    throw new InvalidOperationException($"Encountered invalid keyword '{keywordText}'");
                 }
 
-                result.Add(new JsonToken(keyword, accumulator.ToString()));
+                result.Add(new JsonToken(keyword, keywordText));
             }
             else
             {
