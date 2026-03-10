@@ -80,12 +80,17 @@ public sealed class PhantomRunner : IAsyncDisposable
     /// <param name="width">Terminal width in columns.</param>
     /// <param name="height">Terminal height in rows.</param>
     /// <param name="workingDirectory">Optional working directory for the process.</param>
+    /// <param name="environmentVariables">
+    /// Optional environment variables to set on the host process.
+    /// These are inherited by the child process running inside ConPTY.
+    /// </param>
     /// <returns>A <see cref="PhantomRunner"/> ready for interaction.</returns>
     public static PhantomRunner Launch(
         string commandLine,
         int width = 120,
         int height = 40,
-        string? workingDirectory = null)
+        string? workingDirectory = null,
+        IDictionary<string, string>? environmentVariables = null)
     {
         ArgumentNullException.ThrowIfNull(commandLine);
 
@@ -119,6 +124,15 @@ public sealed class PhantomRunner : IAsyncDisposable
         process.StartInfo.Arguments = argBuilder.ToString();
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
+
+        // Set environment variables — inherited by the child process via CreateProcessW
+        if (environmentVariables != null)
+        {
+            foreach (var (key, value) in environmentVariables)
+            {
+                process.StartInfo.EnvironmentVariables[key] = value;
+            }
+        }
 
         if (!process.Start())
         {

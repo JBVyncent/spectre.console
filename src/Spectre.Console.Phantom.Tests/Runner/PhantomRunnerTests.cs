@@ -8,72 +8,84 @@ namespace Spectre.Console.Phantom.Tests.Runner;
 /// send keystrokes, and assert on the rendered screen state.
 /// </summary>
 /// <remarks>
-/// All Gallery tests are currently skipped because Spectre.Console's SelectionPrompt
-/// detects a non-interactive terminal under ConPTY. Needs SPECTRE_CONSOLE_FORCE_INTERACTIVE
-/// env var support or ConPTY console mode fixes to enable.
+/// Gallery uses Spectre.Console's SelectionPrompt which checks
+/// <c>Profile.Capabilities.Interactive</c>. Under ConPTY,
+/// <c>System.Console.IsInputRedirected</c> returns <c>true</c> (false negative).
+/// We set <c>SPECTRE_CONSOLE_FORCE_INTERACTIVE=1</c> to override the detection.
 /// </remarks>
 [Trait("Category", "Integration")]
 public sealed class PhantomRunnerTests
 {
-    private const string SkipReason =
-        "Gallery uses SelectionPrompt which detects non-interactive terminal under ConPTY. " +
-        "Needs SPECTRE_CONSOLE_FORCE_INTERACTIVE env var or ConPTY console mode fixes.";
-
     private static readonly string GalleryExe = Path.GetFullPath(
         Path.Combine(
             AppContext.BaseDirectory,
             "..", "..", "..", "..", "..", "demos", "Gallery", "bin", "Release", "net10.0", "Gallery.exe"));
 
-    [Fact(Skip = SkipReason)]
+    private static readonly Dictionary<string, string> ForceInteractive = new()
+    {
+        ["SPECTRE_CONSOLE_FORCE_INTERACTIVE"] = "1",
+    };
+
+    private static PhantomRunner LaunchGallery()
+    {
+        return PhantomRunner.Launch(
+            GalleryExe,
+            width: 120,
+            height: 50,
+            environmentVariables: ForceInteractive);
+    }
+
+    [Fact]
     public async Task Should_Launch_Gallery_And_See_Menu()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
-        runner.AssertScreenContains("Tables");
+        // Wait for menu items to render (not just the header)
+        await runner.WaitForText("Tables");
+        runner.AssertScreenContains("Select a demo");
         runner.AssertScreenContains("Markup");
         runner.AssertScreenContains("Exit");
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_Tables_And_See_Demo_Complete()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Tables");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(15));
         runner.AssertNoExceptions();
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_Rules_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Rules");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(15));
         runner.AssertNoExceptions();
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_Charts_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Charts");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(15));
         runner.AssertNoExceptions();
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_Exceptions_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Exceptions");
 
         // The Exceptions demo intentionally shows exceptions — so we check it completes
@@ -82,34 +94,34 @@ public sealed class PhantomRunnerTests
         // Don't call AssertNoExceptions here — this demo SHOULD show exception text
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_Unicode_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Unicode");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(15));
         runner.AssertNoExceptions();
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_BugFixes_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Bug Fixes");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(20));
         runner.AssertNoExceptions();
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Exit_Gallery_Cleanly()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Exit");
         await runner.WaitForText("Thanks for exploring");
 
@@ -117,13 +129,13 @@ public sealed class PhantomRunnerTests
         exitCode.Should().Be(0);
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Return_To_Menu_After_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
         // Navigate to Rules (a quick, non-interactive demo)
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Rules");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(15));
 
@@ -131,27 +143,27 @@ public sealed class PhantomRunnerTests
         await runner.AnswerConfirmation("Return to menu?", yes: true);
 
         // Should see the menu again
-        await runner.WaitForText("Select a demo");
-        runner.AssertScreenContains("Tables");
+        await runner.WaitForText("Tables");
+        runner.AssertScreenContains("Select a demo");
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Should_Navigate_To_Markup_Demo()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
         await runner.NavigateToChoice("Markup");
         await runner.WaitForText("Demo complete", timeout: TimeSpan.FromSeconds(15));
         runner.AssertNoExceptions();
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task Screen_Snapshot_Contains_Figlet_Header()
     {
-        await using var runner = PhantomRunner.Launch(GalleryExe, width: 120, height: 50);
+        await using var runner = LaunchGallery();
 
-        await runner.WaitForText("Select a demo");
+        await runner.WaitForText("Tables");
 
         // The FigletText "Gallery" header should be visible
         var snapshot = runner.GetScreenSnapshot();

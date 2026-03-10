@@ -56,8 +56,7 @@ public sealed class ConPtyDiagnosticTests
         runner.TypeLine("exit");
     }
 
-    [Fact(Skip = "Gallery uses SelectionPrompt which detects non-interactive terminal. " +
-                 "Needs SPECTRE_CONSOLE_FORCE_INTERACTIVE env var or ConPTY console mode fixes.")]
+    [Fact]
     public async Task PhantomRunner_Reads_Gallery()
     {
         var galleryExe = Path.GetFullPath(
@@ -67,11 +66,18 @@ public sealed class ConPtyDiagnosticTests
 
         File.Exists(galleryExe).Should().BeTrue($"Gallery.exe should exist at {galleryExe}");
 
-        await using var runner = PhantomRunner.Launch(galleryExe, width: 120, height: 50);
+        await using var runner = PhantomRunner.Launch(
+            galleryExe,
+            width: 120,
+            height: 50,
+            environmentVariables: new Dictionary<string, string>
+            {
+                ["SPECTRE_CONSOLE_FORCE_INTERACTIVE"] = "1",
+            });
         runner.DefaultTimeout = TimeSpan.FromSeconds(15);
 
-        await runner.WaitForText("Select a demo");
-        runner.AssertScreenContains("Tables");
+        await runner.WaitForText("Tables");
+        runner.AssertScreenContains("Select a demo");
     }
 
     [Fact]
