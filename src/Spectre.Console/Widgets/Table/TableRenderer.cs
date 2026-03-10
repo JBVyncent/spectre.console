@@ -5,10 +5,35 @@ internal static class TableRenderer
     private static readonly Style _defaultHeadingStyle = Color.Silver;
     private static readonly Style _defaultCaptionStyle = Color.Grey;
 
+    // Cache small padding segments to avoid repeated string + Segment allocations.
+    // Padding values are typically 0-4 in practice (Spectre default is 1).
+    private static readonly Segment[] _paddingCache = CreatePaddingCache(16);
+
+    private static Segment[] CreatePaddingCache(int size)
+    {
+        var cache = new Segment[size];
+        for (var i = 0; i < size; i++)
+        {
+            cache[i] = new Segment(new string(' ', i));
+        }
+
+        return cache;
+    }
+
+    private static Segment GetPaddingSegment(int width)
+    {
+        if (width > 0 && width < _paddingCache.Length)
+        {
+            return _paddingCache[width];
+        }
+
+        return new Segment(new string(' ', width));
+    }
+
     public static List<Segment> Render(TableRendererContext context, List<int> columnWidths)
     {
         // Can't render the table?
-        if (context.TableWidth <= 0 || context.TableWidth > context.MaxWidth || columnWidths.Any(c => c < 0))
+        if (context.TableWidth <= 0 || context.TableWidth > context.MaxWidth || HasNegativeWidth(columnWidths))
         {
             return
             [
@@ -22,14 +47,18 @@ internal static class TableRenderer
         var result = new List<Segment>();
         result.AddRange(RenderAnnotation(context, context.Title, _defaultHeadingStyle));
 
+        // Pre-allocate the row result list once and reuse across all cell rows.
+        // A typical row has ~(columns * 4) segments (border + left pad + content + right pad).
+        var rowResult = new List<Segment>(columnWidths.Count * 4);
+
         // Iterate all rows
         foreach (var (index, isFirstRow, isLastRow, row) in context.Rows.Enumerate())
         {
             var cellHeight = 1;
 
-            // Get the list of cells for the row and calculate the cell height
-            // Store rendered lines, calculated width, column index, and span for each cell
-            var cells = new List<(List<SegmentLine>? Lines, int Width, int ColumnIndex, int Span)>();
+            // Get the list of cells for the row and calculate the cell height.
+            // Store rendered lines, calculated width, column index, and span for each cell.
+            var cells = new List<(List<SegmentLine>? Lines, int Width, int ColumnIndex, int Span)>(columnWidths.Count);
             var columnIndex = 0;
 
             foreach (var item in row)
@@ -58,6 +87,7 @@ internal static class TableRenderer
                             {
                                 cellWidth += 1;
                             }
+
                             cellWidth += columnWidths[columnIndex + i];
 
                             // Add padding from intermediate columns
@@ -126,10 +156,11 @@ internal static class TableRenderer
             var firstNonNullIndex = cells.FindIndex(c => c.Lines != null);
             var lastNonNullIndex = cells.FindLastIndex(c => c.Lines != null);
 
-            // Iterate through each cell row
-            foreach (var cellRowIndex in Enumerable.Range(0, cellHeight))
+            // Iterate through each cell row using a simple for loop instead of Enumerable.Range
+            for (var cellRowIndex = 0; cellRowIndex < cellHeight; cellRowIndex++)
             {
-                var rowResult = new List<Segment>();
+                // Reuse the pre-allocated list instead of allocating a new one per cell row
+                rowResult.Clear();
 
                 foreach (var (cellIndex, _, _, cellData) in cells.Enumerate())
                 {
@@ -161,18 +192,18 @@ internal static class TableRenderer
                         var leftPadding = context.Columns[actualColumnIndex].Padding.GetLeftSafe();
                         if (leftPadding > 0)
                         {
-                            rowResult.Add(new Segment(new string(' ', leftPadding)));
+                            rowResult.Add(GetPaddingSegment(leftPadding));
                         }
                     }
 
                     // Add content
                     rowResult.AddRange(cell[cellRowIndex]);
 
-                    // Pad cell content right
-                    var length = cell[cellRowIndex].Sum(segment => segment.CellCount());
+                    // Pad cell content right — use Segment.CellCount() instead of LINQ Sum()
+                    var length = Segment.CellCount(cell[cellRowIndex]);
                     if (length < cellWidth)
                     {
-                        rowResult.Add(new Segment(new string(' ', cellWidth - length)));
+                        rowResult.Add(GetPaddingSegment(cellWidth - length));
                     }
 
                     // Pad column on the right side (use the LAST column in the span)
@@ -183,7 +214,7 @@ internal static class TableRenderer
                         var rightPadding = context.Columns[rightColumnIndex].Padding.GetRightSafe();
                         if (rightPadding > 0)
                         {
-                            rowResult.Add(new Segment(new string(' ', rightPadding)));
+                            rowResult.Add(GetPaddingSegment(rightPadding));
                         }
                     }
 
@@ -255,6 +286,19 @@ internal static class TableRenderer
 
         result.AddRange(RenderAnnotation(context, context.Caption, _defaultCaptionStyle));
         return result;
+    }
+
+    private static bool HasNegativeWidth(List<int> columnWidths)
+    {
+        for (var i = 0; i < columnWidths.Count; i++)
+        {
+            if (columnWidths[i] < 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static IEnumerable<Segment> RenderAnnotation(TableRendererContext context, TableTitle? header,
