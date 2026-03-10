@@ -152,77 +152,96 @@ internal static class AnsiMarkupTagParser
     {
         error = null;
 
+        // Caller guarantees hex starts with '#' (checked via StartsWith("#")).
+        // Strip the leading '#' with Substring(1) instead of ReplaceExact + Trim,
+        // avoiding 2 intermediate string allocations.
         // Stryker disable once NullCoalescing,String : hex is never null (caller passes part from Split); dead-code branch
         hex ??= string.Empty;
-        hex = hex.ReplaceExact("#", string.Empty).Trim();
+        var digits = hex.Length > 0 && hex[0] == '#' ? hex.Substring(1) : hex;
 
-        try
+        // Use TryParse instead of try/catch for flow control — avoids exception
+        // allocation on invalid input and is faster on the error path.
+        if (digits.Length == 6)
         {
-            if (!string.IsNullOrWhiteSpace(hex))
+            if (byte.TryParse(digits.Substring(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var r) &&
+                byte.TryParse(digits.Substring(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var g) &&
+                byte.TryParse(digits.Substring(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var b))
             {
-                if (hex.Length == 6)
-                {
-                    return new Color(
-                        (byte)Convert.ToUInt32(hex.Substring(0, 2), 16),
-                        (byte)Convert.ToUInt32(hex.Substring(2, 2), 16),
-                        (byte)Convert.ToUInt32(hex.Substring(4, 2), 16));
-                }
-                else if (hex.Length == 3)
-                {
-                    return new Color(
-                        (byte)Convert.ToUInt32(new string(hex[0], 2), 16),
-                        (byte)Convert.ToUInt32(new string(hex[1], 2), 16),
-                        (byte)Convert.ToUInt32(new string(hex[2], 2), 16));
-                }
+                return new Color(r, g, b);
             }
         }
-        catch (Exception ex)
+        else if (digits.Length == 3)
         {
-            error = $"Invalid hex color '#{hex}'. {ex.Message}";
-            return null;
+            if (TryParseHexNibble(digits[0], out var r) &&
+                TryParseHexNibble(digits[1], out var g) &&
+                TryParseHexNibble(digits[2], out var b))
+            {
+                // Expand single hex digit to double: 0xF -> 0xFF (F * 17 = 255)
+                return new Color((byte)(r * 17), (byte)(g * 17), (byte)(b * 17));
+            }
         }
 
-        error = $"Invalid hex color '#{hex}'.";
+        error = $"Invalid hex color '{hex}'.";
         return null;
+    }
+
+    private static bool TryParseHexNibble(char c, out int value)
+    {
+        if (c >= '0' && c <= '9')
+        {
+            value = c - '0';
+            return true;
+        }
+
+        if (c >= 'a' && c <= 'f')
+        {
+            value = c - 'a' + 10;
+            return true;
+        }
+
+        if (c >= 'A' && c <= 'F')
+        {
+            value = c - 'A' + 10;
+            return true;
+        }
+
+        value = 0;
+        return false;
     }
 
     private static Color? ParseRgbColor(string rgb, out string? error)
     {
-        try
+        error = null;
+
+        // Stryker disable once NullCoalescing,String : rgb is never null in practice (caller validates); dead-code branch
+        var normalized = rgb ?? string.Empty;
+        // Stryker disable once Equality : length==3 means exactly "rgb" which has no parenthesized values;
+        // >= 3 and > 3 both fail to parse it (Substring(3) is empty, StartsWith("(") is false)
+        if (normalized.Length >= 3)
         {
-            error = null;
+            // Strip "rgb" prefix — use Substring(3) once instead of chaining Trim calls.
+            normalized = normalized.Substring(3).Trim();
 
-            // Stryker disable once NullCoalescing,String : rgb is never null in practice (caller validates); dead-code branch
-            var normalized = rgb ?? string.Empty;
-            // Stryker disable once Equality : length==3 means exactly "rgb" which has no parenthesized values;
-            // >= 3 and > 3 both fail to parse it (Substring(3) is empty, StartsWith("(") is false)
-            if (normalized.Length >= 3)
+            // Stryker disable once String : mutating "(" to "" makes StartsWith always true, but EndsWith(")")
+            // still gates the code path; all invalid inputs produce the same null result via a different code path
+            if (normalized.StartsWith("(", StringComparison.OrdinalIgnoreCase) &&
+               normalized.EndsWith(")", StringComparison.OrdinalIgnoreCase))
             {
-                // Trim parentheses
-                normalized = normalized.Substring(3).Trim();
+                // Strip parentheses with a single Substring instead of chained Trim('(').Trim(')').
+                normalized = normalized.Substring(1, normalized.Length - 2);
 
-                // Stryker disable once String : mutating "(" to "" makes StartsWith always true, but EndsWith(")")
-                // still gates the code path; all invalid inputs produce the same null result via a different code path
-                if (normalized.StartsWith("(", StringComparison.OrdinalIgnoreCase) &&
-                   normalized.EndsWith(")", StringComparison.OrdinalIgnoreCase))
+                var parts = normalized.Split([','], StringSplitOptions.RemoveEmptyEntries);
+                // Use TryParse instead of try/catch for flow control — avoids exception
+                // allocation on invalid input (e.g., "rgb(foo,bar,baz)").
+                if (parts.Length == 3 &&
+                    int.TryParse(parts[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) &&
+                    int.TryParse(parts[1].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var g) &&
+                    int.TryParse(parts[2].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var b) &&
+                    r is >= 0 and <= 255 && g is >= 0 and <= 255 && b is >= 0 and <= 255)
                 {
-                    normalized = normalized.Trim('(').Trim(')');
-
-                    var parts = normalized.Split([','], StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 3)
-                    {
-                        return new Color(
-                            (byte)Convert.ToInt32(parts[0], CultureInfo.InvariantCulture),
-                            (byte)Convert.ToInt32(parts[1], CultureInfo.InvariantCulture),
-                            (byte)Convert.ToInt32(parts[2], CultureInfo.InvariantCulture));
-                    }
+                    return new Color((byte)r, (byte)g, (byte)b);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            error = $"Invalid RGB color '{rgb}'. {ex.Message}";
-            return null;
         }
 
         error = $"Invalid RGB color '{rgb}'.";
