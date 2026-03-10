@@ -4,7 +4,7 @@ namespace Spectre.Console;
 /// Representation of non-circular tree data.
 /// Each node added to the tree may only be present in it a single time, in order to facilitate cycle detection.
 /// </summary>
-public sealed class Tree : Renderable, IHasTreeNodes
+public sealed class Tree : Renderable, IHasTreeNodes, IThemeable
 {
     private readonly TreeNode _root;
     private bool _expanded = true;
@@ -13,6 +13,9 @@ public sealed class Tree : Renderable, IHasTreeNodes
     /// Gets or sets the tree style.
     /// </summary>
     public Style? Style { get; set; }
+
+    /// <inheritdoc/>
+    public Theme? Theme { get; set; }
 
     /// <summary>
     ///  Gets or sets the tree guide lines.
@@ -131,7 +134,7 @@ public sealed class Tree : Renderable, IHasTreeNodes
     private Segment GetGuide(RenderOptions options, TreeGuidePart part)
     {
         var guide = Guide.GetSafeTreeGuide(safe: !options.Unicode);
-        return new Segment(guide.GetPart(part), Style ?? Spectre.Console.Style.Plain);
+        return new Segment(guide.GetPart(part), Theme.Resolve(Style, Theme?.TreeStyle, Spectre.Console.Style.Plain));
     }
 }
 

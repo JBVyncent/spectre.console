@@ -4,7 +4,7 @@ namespace Spectre.Console;
 /// A renderable horizontal rule.
 /// </summary>
 // Stryker disable all : NoCoverage — rule rendering pipeline; Stryker cannot trace coverage through layout rendering
-public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
+public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder, IThemeable
 {
     /// <summary>
     /// Gets or sets the rule title markup text.
@@ -15,6 +15,9 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
     /// Gets or sets the rule style.
     /// </summary>
     public Style? Style { get; set; }
+
+    /// <inheritdoc/>
+    public Theme? Theme { get; set; }
 
     /// <summary>
     /// Gets or sets the rule's title justification.
@@ -98,7 +101,7 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
 
         return
         [
-            new Segment(text, Style ?? Spectre.Console.Style.Plain),
+            new Segment(text, Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain)),
             Segment.LineBreak
         ];
     }
@@ -106,7 +109,7 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
     private IEnumerable<Segment> GetTitleSegments(RenderOptions options, string title, int width)
     {
         title = title.NormalizeNewLines().ReplaceExact("\n", " ").Trim();
-        var markup = new Markup(title, Style);
+        var markup = new Markup(title, Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
         return ((IRenderable)markup).Render(options with
         {
             SingleLine = true
@@ -124,11 +127,11 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
         if (alignment == Justify.Left)
         {
             var left = new Segment(borderPart.Repeat(TitlePadding) + new string(' ', TitleSpacing),
-                Style ?? Spectre.Console.Style.Plain);
+                Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
 
             var rightLength = Math.Max(0, width - titleLength - left.CellCount() - TitleSpacing);
             var right = new Segment(new string(' ', TitleSpacing) + borderPart.Repeat(rightLength),
-                Style ?? Spectre.Console.Style.Plain);
+                Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
 
             return (left, right);
         }
@@ -136,22 +139,22 @@ public sealed class Rule : Renderable, IHasJustification, IHasBoxBorder
         {
             var leftLength = Math.Max(0, ((width - titleLength) / 2) - TitleSpacing);
             var left = new Segment(borderPart.Repeat(leftLength) + new string(' ', TitleSpacing),
-                Style ?? Spectre.Console.Style.Plain);
+                Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
 
             var rightLength = Math.Max(0, width - titleLength - left.CellCount() - TitleSpacing);
             var right = new Segment(new string(' ', TitleSpacing) + borderPart.Repeat(rightLength),
-                Style ?? Spectre.Console.Style.Plain);
+                Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
 
             return (left, right);
         }
         else if (alignment == Justify.Right)
         {
             var right = new Segment(new string(' ', TitleSpacing) + borderPart.Repeat(TitlePadding),
-                Style ?? Spectre.Console.Style.Plain);
+                Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
 
             var leftLength = Math.Max(0, width - titleLength - right.CellCount() - TitleSpacing);
             var left = new Segment(borderPart.Repeat(leftLength) + new string(' ', TitleSpacing),
-                Style ?? Spectre.Console.Style.Plain);
+                Theme.Resolve(Style, Theme?.RuleStyle, Spectre.Console.Style.Plain));
 
             return (left, right);
         }

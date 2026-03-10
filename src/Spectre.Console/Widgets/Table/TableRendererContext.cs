@@ -45,7 +45,7 @@ internal sealed class TableRendererContext : TableAccessor
         HasFooters = Rows.Any(column => column.IsFooter);
         Border = table.Border.GetSafeBorder(!options.Unicode && table.UseSafeBorder);
         // Stryker disable once all : Equivalent — both sides produce functionally identical style for table borders
-        BorderStyle = table.BorderStyle ?? Style.Plain;
+        BorderStyle = Theme.Resolve(table.BorderStyle, table.Theme?.BorderStyle, Style.Plain);
         ShowRowSeparators = table.ShowRowSeparators;
 
         TableWidth = tableWidth;

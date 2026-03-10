@@ -4,7 +4,7 @@ namespace Spectre.Console;
 /// A renderable panel.
 /// </summary>
 // Stryker disable all : NoCoverage — panel rendering pipeline; Stryker cannot trace coverage through nested rendering
-public sealed class Panel : Renderable, IHasBoxBorder, IHasBorder, IExpandable, IPaddable
+public sealed class Panel : Renderable, IHasBoxBorder, IHasBorder, IExpandable, IPaddable, IThemeable
 {
     private const int EdgeWidth = 2;
 
@@ -18,6 +18,9 @@ public sealed class Panel : Renderable, IHasBoxBorder, IHasBorder, IExpandable, 
 
     /// <inheritdoc/>
     public Style? BorderStyle { get; set; }
+
+    /// <inheritdoc/>
+    public Theme? Theme { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether or not the panel should
@@ -103,7 +106,7 @@ public sealed class Panel : Renderable, IHasBoxBorder, IHasBorder, IExpandable, 
     protected override IEnumerable<Segment> Render(RenderOptions options, int maxWidth)
     {
         var border = options.GetSafeBorder(this);
-        var borderStyle = BorderStyle ?? Style.Plain;
+        var borderStyle = Theme.Resolve(BorderStyle, Theme?.BorderStyle, Style.Plain);
 
         var showBorder = border is not NoBoxBorder;
         var edgeWidth = showBorder ? EdgeWidth : 0;

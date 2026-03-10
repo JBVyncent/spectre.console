@@ -4,7 +4,7 @@ namespace Spectre.Console;
 /// Represents text rendered with a FIGlet font.
 /// </summary>
 // Stryker disable all : NoCoverage — Figlet rendering pipeline; visual output verified by snapshot tests but Stryker cannot trace line-level coverage
-public sealed class FigletText : Renderable, IHasJustification
+public sealed class FigletText : Renderable, IHasJustification, IThemeable
 {
     private readonly FigletFont _font;
     private readonly string _text;
@@ -13,6 +13,9 @@ public sealed class FigletText : Renderable, IHasJustification
     /// Gets or sets the color of the text.
     /// </summary>
     public Color? Color { get; set; }
+
+    /// <inheritdoc/>
+    public Theme? Theme { get; set; }
 
     /// <inheritdoc/>
     public Justify? Justification { get; set; }
@@ -60,7 +63,9 @@ public sealed class FigletText : Renderable, IHasJustification
         maxWidth = Math.Min(maxWidth, 1000);
 
         // Stryker disable once all : NoCoverage — Figlet rendering pipeline; NoCoverage through FigletText render
-        var style = new Style(Color ?? Console.Color.Default);
+        var resolvedColor = Color ?? Theme?.AccentStyle?.Foreground ?? Console.Color.Default;
+        // Stryker disable once all : NoCoverage — Figlet rendering pipeline; NoCoverage through FigletText render
+        var style = new Style(resolvedColor);
         // Stryker disable once all : NoCoverage — Figlet rendering pipeline; NoCoverage through FigletText render
         var alignment = Justification ?? Console.Justify.Left;
 

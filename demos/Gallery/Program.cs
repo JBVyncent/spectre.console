@@ -10,6 +10,7 @@ using Gallery.Demos.Rules;
 using Gallery.Demos.Sixel;
 using Gallery.Demos.Status;
 using Gallery.Demos.Tables;
+using Gallery.Demos.Themes;
 using Gallery.Demos.Unicode;
 using Spectre.Console;
 
@@ -26,6 +27,7 @@ var modules = new IDemoModule[]
     new RulesDemo(),
     new ExceptionsDemo(),
     new SixelDemo(),
+    new ThemesDemo(),
     new UnicodeDemo(),
     new BugFixesDemo(),
 };

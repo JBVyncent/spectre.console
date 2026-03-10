@@ -3,7 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// A renderable table.
 /// </summary>
-public sealed class Table : Renderable, IHasTableBorder, IExpandable
+public sealed class Table : Renderable, IHasTableBorder, IExpandable, IThemeable
 {
     private readonly List<TableColumn> _columns;
 
@@ -22,6 +22,9 @@ public sealed class Table : Renderable, IHasTableBorder, IExpandable
 
     /// <inheritdoc/>
     public Style? BorderStyle { get; set; }
+
+    /// <inheritdoc/>
+    public Theme? Theme { get; set; }
 
     /// <inheritdoc/>
     public bool UseSafeBorder { get; set; } = true;
