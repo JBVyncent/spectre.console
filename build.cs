@@ -42,7 +42,7 @@ Task("Build")
     });
 });
 
-Task("Test")
+Task("Test-Unit")
     .IsDependentOn("Build")
     .Does(ctx =>
 {
@@ -53,8 +53,28 @@ Task("Test")
         NoLogo = true,
         NoRestore = true,
         NoBuild = true,
+        Filter = "Category!=Integration&Category!=Flaky",
     });
 });
+
+Task("Test-Integration")
+    .IsDependentOn("Build")
+    .Does(ctx =>
+{
+    ctx.DotNetTest(solution, new DotNetTestSettings
+    {
+        Configuration = configuration,
+        Verbosity = DotNetVerbosity.Minimal,
+        NoLogo = true,
+        NoRestore = true,
+        NoBuild = true,
+        Filter = "Category=Integration&Category!=Flaky",
+    });
+});
+
+Task("Test")
+    .IsDependentOn("Test-Unit")
+    .IsDependentOn("Test-Integration");
 
 Task("Package")
     .IsDependentOn("Test")

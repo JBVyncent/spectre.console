@@ -270,23 +270,51 @@ Every `Stryker disable` comment MUST include a justification. Valid categories:
 | `Killed by <TestName>` | Test exists but Stryker can't trace coverage | `Killed by FooTests.Bar — assertion verifies dimensions change` |
 | Descriptive reason | Explains why mutation doesn't change behavior | `Arithmetic — scaling mutations produce valid but visually different output` |
 
-#### Metadata for new/touched disables
+#### Permanent vs temporary disables
 
-Every new or modified `Stryker disable` comment MUST include:
+Stryker disables fall into two categories with different documentation requirements:
+
+**Permanent disables** — the mutation is inherently equivalent or untestable by design.
+These require only a justification. No issue, owner, or expiry needed because the
+condition will not change unless the code is restructured.
+
+| Category | Why it's permanent |
+|----------|--------------------|
+| `Equivalent` | Mutation produces identical observable behavior — a fact about code semantics |
+| `Killed by <TestName>` | Test kills the mutant but Stryker can't trace coverage — a tooling limitation |
+| `Arithmetic` / `String` on hash codes or error messages | Semantically equivalent by definition |
+
+Example:
+`// Stryker disable once Statement : Equivalent — downstream also throws ArgumentNullException`
+
+**Temporary disables** — the mutation is real but untestable due to missing infrastructure
+or a known gap. These represent technical debt and MUST include tracking metadata:
 
 - Issue id (e.g., `Issue #1234`)
 - Owner (e.g., `@handle` or owning team)
 - Expiry date in ISO format (`YYYY-MM-DD`)
 
+| Category | Why it's temporary |
+|----------|-------------------|
+| `NoCoverage` (infrastructure gap) | Test infra doesn't exist yet but could be built |
+| `NoCoverage` (rendering pipeline) | Coverage tracing fails through complex pipelines — may be fixable |
+
 Example:
-`// Stryker disable once Statement : Equivalent — downstream also throws; Issue #1234; Owner @console-team; Expires 2026-06-30`
+`// Stryker disable once Block : NoCoverage — requires ConPTY test infra; Issue #42; Owner @JBVyncent; Expires 2026-06-30`
+
+**Distinguishing permanent NoCoverage from temporary**: If the code path is internal and
+exercised only through the rendering pipeline (Stryker can't trace coverage through
+`IRenderable.Render`), and the rendering output IS verified by snapshot tests, that is a
+permanent tooling limitation — use `NoCoverage` without metadata. If the code path is
+genuinely untested and could be reached with better test infrastructure, that is temporary
+debt — use `NoCoverage` with metadata.
 
 #### What is NEVER acceptable
 
 - Blanket `// Stryker disable all` on entire files without per-section justification
 - Disabling mutations that ARE distinguishable by tests (write the test instead)
 - "Too complex" or "Not important" as justification
-- New/touched disable comments without issue, owner, and expiry metadata
+- Temporary disables without issue, owner, and expiry metadata
 
 ### 6.4 NoCoverage vs Survived
 
@@ -300,9 +328,11 @@ Example:
 
 Run a periodic disable audit (at least once per release cycle):
 
-- `rg -n "Stryker disable" src` and review all new/changed disable comments.
-- Remove or test-fix expired disables; do not silently extend expiry.
-- If extension is required, update issue status, owner acknowledgment, and new expiry.
+- `rg -n "Stryker disable" src` and review all disable comments.
+- **Permanent disables**: Verify justification is still accurate. If code was restructured,
+  the disable may no longer be needed — remove it and write a test.
+- **Temporary disables**: Remove or test-fix expired ones; do not silently extend expiry.
+  If extension is required, update issue status, owner acknowledgment, and new expiry.
 
 ---
 
@@ -393,7 +423,7 @@ Before marking any testing work as complete, verify:
 - [ ] No new flaky quarantines were added without issue + owner + expiry
 - [ ] Stryker mutation score is 100% for the affected assembly
 - [ ] PR includes evidence artifacts for unit/integration/mutation gates (CI links or command summaries with TFM + result)
-- [ ] Every new or touched `Stryker disable` comment has justification + issue + owner + expiry
+- [ ] Every new or touched `Stryker disable` comment has justification (+ issue/owner/expiry for temporary disables)
 - [ ] Snapshot baseline changes include explicit reviewer approval and PR delta note
 - [ ] New tests are committed alongside the code they test
 - [ ] Test class follows project naming and organization conventions

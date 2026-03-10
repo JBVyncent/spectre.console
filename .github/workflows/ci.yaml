@@ -31,11 +31,25 @@ jobs:
             --contract .engineering-excellence/change-contract.json \
             --evidence .engineering-excellence/evidence-bundle.json
 
+      - name: Restore Tools
+        shell: bash
+        run: dotnet tool restore
+
       - name: Build
         shell: bash
-        run: |
-          dotnet tool restore
-          dotnet make
+        run: dotnet make --target Build
+
+      - name: Unit Tests (blocking gate)
+        shell: bash
+        run: dotnet make --target Test-Unit
+
+      - name: Integration Tests (blocking gate)
+        shell: bash
+        run: dotnet make --target Test-Integration
+
+      - name: Package
+        shell: bash
+        run: dotnet make --target Package --no-lint
 
       - name: Upload Verify Test Results
         if: failure()
@@ -44,3 +58,52 @@ jobs:
           name: verify-test-results
           path: |
             **/*.received.*
+
+  ###################################################
+  # MUTATION (Stryker)
+  ###################################################
+
+  mutation:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'run-stryker')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: Spectre.Console.Tests
+            config: stryker-config.json
+          - project: Spectre.Console.Ansi.Tests
+            config: stryker-config.json
+          - project: Spectre.Console.Json.Tests
+            config: stryker-config.json
+          - project: Spectre.Console.ImageSharp.Tests
+            config: stryker-config.json
+          - project: Spectre.Console.Testing.Tests
+            config: stryker-config.json
+          - project: Spectre.Console.Phantom.Tests
+            config: stryker-config.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK (global.json)
+        uses: actions/setup-dotnet@v5
+
+      - name: Install Stryker
+        shell: bash
+        run: dotnet tool install --global dotnet-stryker
+
+      - name: Run Stryker (${{ matrix.project }})
+        shell: bash
+        working-directory: src/${{ matrix.project }}
+        run: dotnet stryker --config-file ${{ matrix.config }}
+
+      - name: Upload Stryker Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stryker-report-${{ matrix.project }}
+          path: src/${{ matrix.project }}/StrykerOutput/**/reports/*
