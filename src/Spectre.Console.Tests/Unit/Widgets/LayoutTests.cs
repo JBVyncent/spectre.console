@@ -293,4 +293,40 @@ public sealed class LayoutTests
         // Then
         return Verifier.Verify(console.Output);
     }
+
+    [Fact]
+    public void Panel_In_Layout_Preserves_Bottom_Border_When_Content_Wraps()
+    {
+        // GitHub #1569: When a non-expanded Panel with wrapping text is placed
+        // inside a Layout, the bottom border was lost because Panel rendered all
+        // content without height constraint, and Layout then truncated from the
+        // bottom. The fix makes Panel respect options.Height from Layout.
+        var console = new TestConsole().Size(new Size(20, 6));
+        var panel = new Panel(new Text("Lorem ipsum dolor sit amet, consectetur odio."));
+        var layout = new Layout().Update(panel);
+
+        console.Write(layout);
+
+        var output = console.Output;
+
+        // The panel should have both top and bottom borders visible
+        output.Should().Contain("\u250c");
+        output.Should().Contain("\u2514");
+    }
+
+    [Fact]
+    public void Expanded_Panel_In_Layout_Also_Preserves_Bottom_Border()
+    {
+        // Same scenario as #1569 but with Expand=true — this path was already
+        // correct, but verify it stays correct.
+        var console = new TestConsole().Size(new Size(20, 6));
+        var panel = new Panel(new Text("Lorem ipsum dolor sit amet, consectetur odio.")) { Expand = true };
+        var layout = new Layout().Update(panel);
+
+        console.Write(layout);
+
+        var output = console.Output;
+        output.Should().Contain("\u250c");
+        output.Should().Contain("\u2514");
+    }
 }

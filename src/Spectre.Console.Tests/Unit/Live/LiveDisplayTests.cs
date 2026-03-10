@@ -259,4 +259,46 @@ public sealed class LiveDisplayTests
 
         live.Cropping(VerticalOverflowCropping.Top).Should().BeSameAs(live);
     }
+
+    // ── Recording / output capture ─────────────────────────────────────────
+
+    [Fact]
+    public void Small_Table_In_Live_Display_Produces_Nonempty_Output()
+    {
+        // GitHub #1723: LiveDisplay recording returned empty for small tables
+        // that didn't overflow the terminal height. The fix ensures
+        // Completed() always re-renders the final state so recorders capture it.
+        var console = new TestConsole().Interactive();
+        var table = new Table();
+        table.AddColumn("Foo");
+        table.AddColumn("Bar");
+
+        var live = new LiveDisplay(console, table);
+        live.AutoClear = false;
+
+        live.Start(ctx =>
+        {
+            table.AddRow("Foo 0", "Bar 0");
+            table.AddRow("Foo 1", "Bar 1");
+            ctx.Refresh();
+        });
+
+        var output = console.Output;
+        output.Should().Contain("Foo");
+        output.Should().Contain("Bar");
+        output.Should().Contain("Foo 0");
+        output.Should().Contain("Bar 1");
+    }
+
+    [Fact]
+    public void Live_Display_With_Text_Produces_Output()
+    {
+        // Simpler reproduction: even a basic Text renderable should be recorded.
+        var console = new TestConsole().Interactive();
+        var live = new LiveDisplay(console, new Text("Hello, World!"));
+
+        live.Start(ctx => { });
+
+        console.Output.Should().Contain("Hello, World!");
+    }
 }

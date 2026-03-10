@@ -121,12 +121,10 @@ public sealed class Panel : Renderable, IHasBoxBorder, IHasBorder, IExpandable, 
                 ? options.Height - verticalBorderSize
                 : null;
 
-        if (!Expand)
-        {
-            // Set the height to the explicit height (or null)
-            // if the panel isn't expandable.
-            height = Height != null ? Height - verticalBorderSize : null;
-        }
+        // Note: Expand controls WIDTH only (line 114). Height must always
+        // respect options.Height from Layout; otherwise the Panel renders
+        // all content, Layout truncates from the bottom, and the bottom
+        // border is lost (GitHub #1569).
 
         // Start building the panel
         var result = new List<Segment>();

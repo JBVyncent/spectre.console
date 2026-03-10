@@ -14,12 +14,13 @@ internal static class StringUriExtensions
 
             if (uri.Scheme == "file")
             {
-                // For local files, we need to append
-                // the host name. Otherwise the terminal
-                // will most probably not allow it.
+                // Use empty host for file URIs to produce file:///path format.
+                // Windows Terminal and most other terminals require this format;
+                // using Dns.GetHostName() produces file://HOSTNAME/path which is
+                // not recognized by Windows Terminal (see GitHub #1592).
                 var builder = new UriBuilder(uri)
                 {
-                    Host = Dns.GetHostName(),
+                    Host = string.Empty,
                 };
 
                 uri = builder.Uri;

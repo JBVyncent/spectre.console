@@ -112,7 +112,22 @@ public sealed class Progress
         // Stryker disable all : Equivalent — ConfigureAwait(false) vs ConfigureAwait(true); no SynchronizationContext in tests
         _ = await StartAsync<object?>(async progressContext =>
         {
-            await action(progressContext).ConfigureAwait(false);
+            // Use try-catch to preserve AggregateException from Task.WhenAll (GitHub #1579).
+            var task = action(progressContext);
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch
+            {
+                if (task.Exception is { InnerExceptions.Count: > 1 })
+                {
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(task.Exception).Throw();
+                }
+
+                throw;
+            }
+
             return null;
         }).ConfigureAwait(false);
         // Stryker restore all
@@ -152,12 +167,12 @@ public sealed class Progress
                     // Stryker disable once all : NoCoverage — ProgressRefreshThread created inside RunExclusive
                     using var thread = new ProgressRefreshThread(context, renderer.RefreshRate);
                     // Stryker disable once all : Equivalent — ConfigureAwait(false) vs true; no SynchronizationContext in tests
-                    result = await action(context).ConfigureAwait(false);
+                    result = await AwaitPreservingAggregateException(action(context)).ConfigureAwait(false);
                 }
                 else
                 {
                     // Stryker disable once all : Equivalent — ConfigureAwait(false) vs true; no SynchronizationContext in tests
-                    result = await action(context).ConfigureAwait(false);
+                    result = await AwaitPreservingAggregateException(action(context)).ConfigureAwait(false);
                 }
 
                 // Stryker disable once all : NoCoverage — context.Refresh inside RunExclusive
@@ -188,6 +203,32 @@ public sealed class Progress
         // Stryker disable once all : NoCoverage — fallback renderer only used on non-ANSI terminals
         return FallbackRenderer ?? new FallbackProgressRenderer(_timeProvider);
     }
+
+    // Stryker disable all : NoCoverage — async helper inside RunExclusive; Stryker cannot trace coverage
+    /// <summary>
+    /// Awaits a task but preserves <see cref="AggregateException"/> when the task has
+    /// multiple inner exceptions (e.g. from Task.WhenAll).
+    /// Normal <c>await</c> unwraps to the first exception only (GitHub #1579).
+    /// </summary>
+    private static async Task<T> AwaitPreservingAggregateException<T>(Task<T> task)
+    {
+        try
+        {
+            return await task.ConfigureAwait(false);
+        }
+        catch
+        {
+            // If the task has multiple exceptions (e.g. Task.WhenAll), rethrow the
+            // AggregateException with all of them instead of just the first one.
+            if (task.Exception is { InnerExceptions.Count: > 1 })
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(task.Exception).Throw();
+            }
+
+            throw;
+        }
+    }
+    // Stryker restore all
 }
 
 /// <summary>

@@ -29,11 +29,18 @@ internal sealed class LiveDisplayRenderer : IRenderHook
             }
             else
             {
-                if (_context.Live.HasRenderable && _context.Live.DidOverflow)
+                if (_context.Live.HasRenderable)
                 {
-                    // Redraw the whole live renderable
+                    // Always redraw the live renderable so the final state is
+                    // captured by any active recorder (GitHub #1723).
+                    // Previously this only happened when DidOverflow was true,
+                    // causing small tables to produce empty recording output.
                     _console.Write(_context.Live.RestoreCursor());
-                    _context.Live.Overflow = VerticalOverflow.Visible;
+                    if (_context.Live.DidOverflow)
+                    {
+                        _context.Live.Overflow = VerticalOverflow.Visible;
+                    }
+
                     _console.Write(_context.Live.Target);
                 }
 

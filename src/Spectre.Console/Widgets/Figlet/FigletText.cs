@@ -53,6 +53,12 @@ public sealed class FigletText : Renderable, IHasJustification
     /// <inheritdoc/>
     protected override IEnumerable<Segment> Render(RenderOptions options, int maxWidth)
     {
+        // Guard against absurdly large maxWidth (e.g. int.MaxValue from test harnesses like
+        // CommandAppTester) that would cause OOM when allocating padding strings for centering.
+        // No reasonable terminal exceeds 1000 columns, and FigletText at that width is extreme.
+        // Stryker disable once all : NoCoverage — Figlet rendering pipeline; NoCoverage through FigletText render
+        maxWidth = Math.Min(maxWidth, 1000);
+
         // Stryker disable once all : NoCoverage — Figlet rendering pipeline; NoCoverage through FigletText render
         var style = new Style(Color ?? Console.Color.Default);
         // Stryker disable once all : NoCoverage — Figlet rendering pipeline; NoCoverage through FigletText render

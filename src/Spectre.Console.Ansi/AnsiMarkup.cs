@@ -196,10 +196,11 @@ public sealed class AnsiMarkup
     /// <param name="markup">The markup text.</param>
     /// <param name="query">The search text to highlight.</param>
     /// <param name="style">The highlight style.</param>
+    /// <param name="comparison">The string comparison to use for matching. Defaults to <see cref="StringComparison.Ordinal"/>.</param>
     /// <returns>Highlighted markup text, using the specified style.</returns>
-    public static string Highlight(string markup, string query, Style style)
+    public static string Highlight(string markup, string query, Style style, StringComparison comparison = StringComparison.Ordinal)
     {
-        return AnsiMarkupHighlighter.Highlight(markup, query, style);
+        return AnsiMarkupHighlighter.Highlight(markup, query, style, comparison);
     }
 }
 

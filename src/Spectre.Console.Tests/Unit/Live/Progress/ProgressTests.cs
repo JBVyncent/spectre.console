@@ -670,4 +670,48 @@ public sealed class ProgressTests
         task?.Speed.Should().NotBeNull();
         task?.Speed.Should().BeGreaterThan(0.0);
     }
+
+    [Fact]
+    public async Task StartAsync_Should_Preserve_AggregateException_From_WhenAll()
+    {
+        // Given — GitHub #1579: StartAsync should preserve AggregateException
+        // when the user RETURNS Task.WhenAll directly (no await in the user's lambda)
+        var console = new TestConsole();
+        var progress = new Progress(console)
+        {
+            AutoRefresh = false,
+        };
+
+        async Task Fail1()
+        {
+            await Task.Yield();
+            throw new InvalidOperationException("First");
+        }
+
+        async Task Fail2()
+        {
+            await Task.Yield();
+            throw new ArgumentException("Second");
+        }
+
+        // Start both tasks so they are running before we pass Task.WhenAll
+        var t1 = Fail1();
+        var t2 = Fail2();
+
+        // When — return Task.WhenAll directly (not awaited in the lambda)
+        var task = progress.StartAsync(ctx =>
+        {
+            ctx.AddTask("Test");
+            return Task.WhenAll(t1, t2);
+        });
+
+        // Then — the flattened exception should contain BOTH exceptions.
+        // Async wrapping may add AggregateException layers, so use Flatten().
+        var ex = await Record.ExceptionAsync(() => task);
+        ex.Should().NotBeNull();
+        task.Exception.Should().NotBeNull();
+        var flattened = task.Exception!.Flatten().InnerExceptions;
+        flattened.Should().Contain(e => e is InvalidOperationException);
+        flattened.Should().Contain(e => e is ArgumentException);
+    }
 }

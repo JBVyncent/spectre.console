@@ -1,4 +1,5 @@
 using Gallery.Demos;
+using Gallery.Demos.BugFixes;
 using Gallery.Demos.Charts;
 using Gallery.Demos.Exceptions;
 using Gallery.Demos.LiveDisplay;
@@ -26,6 +27,7 @@ var modules = new IDemoModule[]
     new ExceptionsDemo(),
     new SixelDemo(),
     new UnicodeDemo(),
+    new BugFixesDemo(),
 };
 
 // Header

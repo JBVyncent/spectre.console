@@ -256,6 +256,79 @@ public sealed class AnsiMarkupTests
             // Then
             result.Should().Be(value);
         }
+
+        [Fact]
+        public void Should_Highlight_Case_Insensitive_When_Specified()
+        {
+            // Given
+            var value = "Hello World";
+            var searchText = "hello";
+
+            // When
+            var result = AnsiMarkup.Highlight(value, searchText, _highlightStyle, StringComparison.OrdinalIgnoreCase);
+
+            // Then
+            result.Should().Be("[bold on yellow]Hello[/] World");
+        }
+
+        [Fact]
+        public void Should_Not_Highlight_Case_Insensitive_By_Default()
+        {
+            // Given
+            var value = "Hello World";
+            var searchText = "hello";
+
+            // When
+            var result = AnsiMarkup.Highlight(value, searchText, _highlightStyle);
+
+            // Then — Ordinal (default) does not match
+            result.Should().Be("Hello World");
+        }
+
+        [Fact]
+        public void Should_Highlight_Text_With_Escaped_Brackets()
+        {
+            // Given — text like "[[01]] My first item" (escaped brackets in markup)
+            var value = "[[[[01]]]] My first item";
+            var searchText = "first";
+
+            // When
+            var result = AnsiMarkup.Highlight(value, searchText, _highlightStyle);
+
+            // Then — the brackets should be preserved and "first" highlighted
+            result.Should().Be("[[[[01]]]] My [bold on yellow]first[/] item");
+        }
+
+        [Fact]
+        public void Should_Highlight_Case_Insensitive_With_Escaped_Brackets()
+        {
+            // Given — text with escaped brackets and case-insensitive search
+            var value = "[[[[01]]]] My First Item";
+            var searchText = "first";
+
+            // When
+            var result = AnsiMarkup.Highlight(value, searchText, _highlightStyle, StringComparison.OrdinalIgnoreCase);
+
+            // Then
+            result.Should().Be("[[[[01]]]] My [bold on yellow]First[/] Item");
+        }
+
+        [Fact]
+        public void Should_Highlight_Bracket_Character_In_Escaped_Text()
+        {
+            // Given — text with escaped brackets, searching for bracket char
+            var value = "[[01]] My item";
+            var searchText = "[";
+
+            // When — search for literal [ in the plain text
+            var result = AnsiMarkup.Highlight(value, searchText, _highlightStyle);
+
+            // Then — the [ should be highlighted while preserving valid markup
+            // Parse the result to ensure it's valid markup
+            var parsed = AnsiMarkup.Parse(result);
+            var plainText = string.Concat(parsed.Select(s => s.Text));
+            plainText.Should().Be("[01] My item");
+        }
     }
 
     public sealed class TheWriteMethod

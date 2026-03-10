@@ -2,7 +2,7 @@ namespace Spectre.Console;
 
 internal static class AnsiMarkupHighlighter
 {
-    public static string Highlight(string markup, string query, Style style)
+    public static string Highlight(string markup, string query, Style style, StringComparison comparison = StringComparison.Ordinal)
     {
         ArgumentNullException.ThrowIfNull(markup);
         ArgumentNullException.ThrowIfNull(query);
@@ -14,7 +14,7 @@ internal static class AnsiMarkupHighlighter
 
         var parts = IndexedMarkupSegment.Parse(markup);
         var plain = string.Concat(parts.Select(p => p.Text));
-        var startIndex = plain.IndexOf(query, StringComparison.Ordinal);
+        var startIndex = plain.IndexOf(query, comparison);
         var endIndex = startIndex + query.Length;
 
         // Stryker disable once Block : Block removal causes IndexOf==-1 to flow into the loop where

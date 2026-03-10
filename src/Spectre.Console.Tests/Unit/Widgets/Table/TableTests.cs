@@ -1023,4 +1023,58 @@ public sealed class TableTests
         var distinct = lines.Select(l => l.Length).Distinct().ToArray();
         distinct.Length.Should().Be(1, $"Expected all table rows to have the same width, but got widths: {string.Join(", ", distinct)}");
     }
+
+    [Fact]
+    public void Should_Handle_Combining_Characters_In_Table_Cells()
+    {
+        // Given — combining diacritical marks should not misalign table borders (GitHub #1599)
+        var console = new TestConsole().Width(80);
+        var table = new Table();
+        table.Border = TableBorder.Rounded;
+        table.AddColumn("Field");
+        table.AddColumn("Value");
+        table.AddRow("Row 1", "1");
+        table.AddRow("Row 2", "2 ąśłćż");
+        table.AddRow("Row 3", "3 єшерти");
+        table.AddRow("Row 4", "4 a\u0301b\u0301c\u0301d\u0301"); // combining accents
+
+        // When
+        console.Write(table);
+
+        // Then — all lines should have the same VISUAL width (cell count, not string length).
+        // Combining characters add extra chars to the string but not to the visual width.
+        var lines = console.Output
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.TrimEnd('\r'))
+            .ToArray();
+
+        var distinct = lines.Select(l => Cell.GetCellLength(l)).Distinct().ToArray();
+        distinct.Length.Should().Be(1, $"Expected all table rows to have the same cell width, but got widths: {string.Join(", ", distinct)}");
+    }
+
+    [Fact]
+    public void Cell_GetCellLength_Returns_Zero_For_Combining_Characters()
+    {
+        // Given — combining acute accent U+0301
+        var combiningAccent = 0x0301;
+
+        // When
+        var width = Cell.GetCellLength(combiningAccent);
+
+        // Then — combining characters should have zero width
+        width.Should().Be(0, "Combining characters should not contribute to cell width");
+    }
+
+    [Fact]
+    public void Cell_GetCellLength_Handles_Base_Plus_Combiner()
+    {
+        // Given — 'a' followed by combining acute accent = one displayed character
+        var text = "a\u0301";
+
+        // When
+        var width = Cell.GetCellLength(text);
+
+        // Then — should be 1 (one cell for 'a', zero for the combining mark)
+        width.Should().Be(1, "Base char + combining mark should have width 1");
+    }
 }

@@ -99,4 +99,28 @@ public sealed class FigletTests
         // Then
         await Verifier.Verify(console.Output);
     }
+
+    [Fact]
+    public void Should_Not_Throw_OOM_When_Width_Is_MaxValue()
+    {
+        // Given — simulates CommandAppTester which can set width to int.MaxValue
+        var console = new TestConsole().Width(int.MaxValue);
+        var text = new FigletText("Hello").Centered();
+
+        // When / Then — should not throw OutOfMemoryException
+        var ex = Record.Exception(() => console.Write(text));
+        ex.Should().BeNull();
+    }
+
+    [Fact]
+    public void Should_Not_Throw_OOM_When_Width_Is_Very_Large()
+    {
+        // Given — large but not max width
+        var console = new TestConsole().Width(100_000);
+        var text = new FigletText("Hi").Justify(Justify.Right);
+
+        // When / Then
+        var ex = Record.Exception(() => console.Write(text));
+        ex.Should().BeNull();
+    }
 }

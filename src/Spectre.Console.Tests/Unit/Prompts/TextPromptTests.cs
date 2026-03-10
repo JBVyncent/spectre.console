@@ -535,4 +535,49 @@ public sealed class TextPromptTests
         // Then
         result.Should().Be("ab");
     }
+
+    [Fact]
+    public void Should_Append_Colon_When_Prompt_Has_No_Colon()
+    {
+        // Given — prompt text without colon (GitHub #1638)
+        var console = new TestConsole();
+        console.Input.PushText("test");
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        console.Prompt(new TextPrompt<string>("Enter value"));
+
+        // Then — output should include the colon suffix
+        console.Output.Should().Contain("Enter value:");
+    }
+
+    [Fact]
+    public void Should_Not_Double_Colon_When_Prompt_Already_Has_Colon()
+    {
+        // Given — prompt text already ends with colon
+        var console = new TestConsole();
+        console.Input.PushText("test");
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        console.Prompt(new TextPrompt<string>("Enter value:"));
+
+        // Then — should NOT have double colon
+        console.Output.Should().Contain("Enter value:");
+        console.Output.Should().NotContain("Enter value::");
+    }
+
+    [Fact]
+    public void Should_Append_Colon_When_Prompt_Has_Default_Value()
+    {
+        // Given — prompt with default value
+        var console = new TestConsole();
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        console.Prompt(new TextPrompt<string>("Enter value").DefaultValue("foo"));
+
+        // Then — should have colon after the default value display
+        console.Output.Should().Contain(":");
+    }
 }

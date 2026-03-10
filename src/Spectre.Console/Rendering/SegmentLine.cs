@@ -7,9 +7,13 @@ namespace Spectre.Console.Rendering;
 public sealed class SegmentLine : List<Segment>
 {
     /// <summary>
-    /// Gets the width of the line.
+    /// Gets the cell width of the line.
     /// </summary>
-    public int Length => this.Sum(segment => segment.Text.Length);
+    /// <remarks>
+    /// Uses cell count (not <see cref="string.Length"/>) so that combining characters
+    /// (U+0300–U+036F) and other zero-width codepoints are handled correctly.
+    /// </remarks>
+    public int Length => this.Sum(segment => segment.CellCount());
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SegmentLine"/> class.

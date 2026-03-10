@@ -142,6 +142,23 @@ public sealed class ExceptionTests
         return Verifier.Verify(result).UseParameters(exceptionFormats);
     }
 
+    [Fact]
+    public void File_Uri_Should_Use_Empty_Host_For_Windows_Terminal_Compat()
+    {
+        // Given — a local file path (GitHub #1592)
+        var path = @"C:\Users\test\file.cs";
+
+        // When
+        var result = path.TryGetUri(out var uri);
+
+        // Then — should produce file:/// with no hostname
+        result.Should().BeTrue();
+        uri.Should().NotBeNull();
+        uri!.Scheme.Should().Be("file");
+        uri.Host.Should().BeEmpty();
+        uri.AbsoluteUri.Should().StartWith("file:///");
+    }
+
     public static Exception GetException(Action action)
     {
         try

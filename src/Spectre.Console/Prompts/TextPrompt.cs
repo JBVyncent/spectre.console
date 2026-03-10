@@ -243,10 +243,10 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
         var builder = new StringBuilder();
         builder.Append(_prompt.TrimEnd());
 
-        var appendSuffix = false;
+        var hasExtra = false;
         if (ShowChoices && Choices.Count > 0)
         {
-            appendSuffix = true;
+            hasExtra = true;
             var converter = Converter ?? TypeConverterHelper.ConvertToString;
             var choices = string.Join("/", Choices.Select(choice => converter(choice).EscapeMarkup()));
             var choicesStyle = ChoicesStyle?.ToMarkup() ?? "blue";
@@ -255,7 +255,7 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
 
         if (ShowDefaultValue && DefaultValue != null)
         {
-            appendSuffix = true;
+            hasExtra = true;
             var converter = Converter ?? TypeConverterHelper.ConvertToString;
             var defaultValueStyle = DefaultValueStyle?.ToMarkup() ?? "green";
             var defaultValue = converter(DefaultValue.Value);
@@ -268,9 +268,25 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
         }
 
         var markup = builder.ToString().Trim();
-        if (appendSuffix)
+
+        // Always append colon when choices or defaults are shown (separator after extra info).
+        // When no extras, append colon for consistency (GitHub #1638), unless the prompt
+        // already ends with common prompt terminators (? : > $ #).
+        if (hasExtra)
         {
             markup += ":";
+        }
+        else
+        {
+            var promptText = _prompt.TrimEnd();
+            if (promptText.Length > 0)
+            {
+                var last = promptText[^1];
+                if (last != ':' && last != '?' && last != '>' && last != '$' && last != '#')
+                {
+                    markup += ":";
+                }
+            }
         }
 
         console.Markup(markup + " ");

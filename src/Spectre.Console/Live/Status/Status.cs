@@ -119,7 +119,23 @@ public sealed class Status
         return await progress.StartAsync(async ctx =>
         {
             var statusContext = new StatusContext(ctx, ctx.AddTask(status), spinnerColumn);
-            return await func(statusContext).ConfigureAwait(false);
+
+            // Preserve AggregateException from Task.WhenAll (GitHub #1579).
+            // Normal 'await' unwraps to the first inner exception only.
+            var task = func(statusContext);
+            try
+            {
+                return await task.ConfigureAwait(false);
+            }
+            catch
+            {
+                if (task.Exception is { InnerExceptions.Count: > 1 })
+                {
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(task.Exception).Throw();
+                }
+
+                throw;
+            }
         }).ConfigureAwait(false);
         // Stryker restore all
     }
