@@ -8,6 +8,7 @@ public sealed class AnsiWriter
     private readonly TextWriter _output;
     private readonly List<byte> _codes;
     private readonly List<byte> _styleBuffer;
+    private readonly System.Text.StringBuilder _sgrBuilder;
     private int _linkCount;
 
     /// <summary>
@@ -26,6 +27,7 @@ public sealed class AnsiWriter
         _output = output;
         _codes = [];
         _styleBuffer = [];
+        _sgrBuilder = new System.Text.StringBuilder(32);
 
         Capabilities = AnsiCapabilities.Create(_output);
     }
@@ -42,6 +44,7 @@ public sealed class AnsiWriter
         _output = output;
         _codes = [];
         _styleBuffer = [];
+        _sgrBuilder = new System.Text.StringBuilder(32);
 
         Capabilities = capabilities;
     }
@@ -583,7 +586,20 @@ public sealed class AnsiWriter
             return false;
         }
 
-        WriteCsi(string.Join(";", codes), 'm');
+        // Build the complete SGR escape sequence (\e[...m) in a single StringBuilder
+        // pass to avoid 3 intermediate string allocations from the WriteCsi chain.
+        _sgrBuilder.Clear();
+        _sgrBuilder.Append("\e[");
+        _sgrBuilder.Append(codes[0]);
+        for (var i = 1; i < codes.Count; i++)
+        {
+            _sgrBuilder.Append(';');
+            _sgrBuilder.Append(codes[i]);
+        }
+
+        _sgrBuilder.Append('m');
+        _output.Write(_sgrBuilder.ToString());
+
         // Stryker disable once Boolean : return value of WriteSgr is not observed by any caller
         return true;
     }
