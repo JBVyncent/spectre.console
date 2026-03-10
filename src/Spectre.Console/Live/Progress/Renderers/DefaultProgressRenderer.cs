@@ -113,10 +113,22 @@ internal sealed class DefaultProgressRenderer : ProgressRenderer
             var layout = new Grid();
             layout.AddColumn();
 
-            foreach (var task in tasks.Where(tsk => !((tsk.HideWhenCompleted ?? _hideCompleted) && tsk.IsFinished)))
+            // Use simple loops instead of LINQ Where + Select + ToArray to avoid
+            // delegate allocations and intermediate array creation in this rendering hot path.
+            var renderedColumns = new IRenderable[_columns.Count];
+            foreach (var task in tasks)
             {
-                var columns = _columns.Select(column => column.Render(renderContext, task, delta));
-                grid.AddRow(columns.ToArray());
+                if ((task.HideWhenCompleted ?? _hideCompleted) && task.IsFinished)
+                {
+                    continue;
+                }
+
+                for (var i = 0; i < _columns.Count; i++)
+                {
+                    renderedColumns[i] = _columns[i].Render(renderContext, task, delta);
+                }
+
+                grid.AddRow(renderedColumns);
             }
 
             layout.AddRow(grid);
