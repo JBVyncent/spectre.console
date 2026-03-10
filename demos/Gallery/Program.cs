@@ -12,6 +12,7 @@ using Gallery.Demos.Status;
 using Gallery.Demos.Tables;
 using Gallery.Demos.Themes;
 using Gallery.Demos.Unicode;
+using Gallery.Demos.Wizard;
 using Spectre.Console;
 
 // Register all demo modules
@@ -28,6 +29,7 @@ var modules = new IDemoModule[]
     new ExceptionsDemo(),
     new SixelDemo(),
     new ThemesDemo(),
+    new WizardDemo(),
     new UnicodeDemo(),
     new BugFixesDemo(),
 };
