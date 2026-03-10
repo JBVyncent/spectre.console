@@ -57,6 +57,10 @@ public sealed class AnsiMarkup
         var result = new List<AnsiMarkupSegment>();
         var stack = new Stack<(Style Style, Link? Link)>();
         var link = default(Link?);
+        // Reusable StringBuilder for merging adjacent text tokens with the same style.
+        // Avoids repeated string concatenation (result[^1].Text += token.Value) which
+        // allocates a new string per merge operation.
+        var mergeBuilder = (StringBuilder?)null;
 
         while (tokenizer.MoveNext())
         {
@@ -64,6 +68,9 @@ public sealed class AnsiMarkup
 
             if (token.Kind == MarkupTokenKind.Open)
             {
+                // Flush any pending merged text before changing style
+                FlushMergeBuilder(result, ref mergeBuilder);
+
                 var parsed = AnsiMarkupTagParser.Parse(token.Value);
                 stack.Push((style.Value, link));
                 if (parsed.Link != null)
@@ -75,6 +82,9 @@ public sealed class AnsiMarkup
             }
             else if (token.Kind == MarkupTokenKind.Close)
             {
+                // Flush any pending merged text before changing style
+                FlushMergeBuilder(result, ref mergeBuilder);
+
                 if (stack.Count == 0)
                 {
                     throw new InvalidOperationException(
@@ -89,11 +99,15 @@ public sealed class AnsiMarkup
             {
                 if (result.Count > 0 && result[^1].Style.Equals(style) && result[^1].Link == link)
                 {
-                    // Merge segments
-                    result[^1].Text += token.Value;
+                    // Merge segments using StringBuilder instead of string concat
+                    mergeBuilder ??= new StringBuilder(result[^1].Text);
+                    mergeBuilder.Append(token.Value);
                 }
                 else
                 {
+                    // Flush any pending merged text before adding a new segment
+                    FlushMergeBuilder(result, ref mergeBuilder);
+
                     result.Add(
                         new AnsiMarkupSegment(
                         token.Value, style.Value, link));
@@ -107,12 +121,24 @@ public sealed class AnsiMarkup
             // Stryker restore all
         }
 
+        // Flush final pending merged text
+        FlushMergeBuilder(result, ref mergeBuilder);
+
         if (stack.Count > 0)
         {
             throw new InvalidOperationException("Unbalanced markup stack. Did you forget to close a tag?");
         }
 
         return result;
+    }
+
+    private static void FlushMergeBuilder(List<AnsiMarkupSegment> result, ref StringBuilder? mergeBuilder)
+    {
+        if (mergeBuilder != null && result.Count > 0)
+        {
+            result[^1].Text = mergeBuilder.ToString();
+            mergeBuilder = null;
+        }
     }
 
     /// <summary>
