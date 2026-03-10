@@ -31,6 +31,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Spectre.Console.Phantom\Spectre.Console.Phantom.csproj" />
+    <!-- Build the host EXE so PhantomRunner can find it at runtime -->
+    <ProjectReference Include="..\Spectre.Console.Phantom.Host\Spectre.Console.Phantom.Host.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
