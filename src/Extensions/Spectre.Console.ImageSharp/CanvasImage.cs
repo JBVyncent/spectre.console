@@ -158,19 +158,27 @@ public sealed class CanvasImage : Renderable, IDisposable
                 Scale = false,
             };
 
-            for (var y = 0; y < image.Height; y++)
+            // Use ProcessPixelRows for direct Span<Rgba32> row access instead of
+            // per-pixel image[x, y] indexer calls. Each indexer access performs bounds
+            // checking; ProcessPixelRows provides contiguous row spans that enable
+            // sequential memory access without per-pixel validation overhead.
+            image.ProcessPixelRows(accessor =>
             {
-                for (var x = 0; x < image.Width; x++)
+                for (var y = 0; y < accessor.Height; y++)
                 {
-                    if (image[x, y].A == 0)
+                    var row = accessor.GetRowSpan(y);
+                    for (var x = 0; x < row.Length; x++)
                     {
-                        continue;
-                    }
+                        ref var pixel = ref row[x];
+                        if (pixel.A == 0)
+                        {
+                            continue;
+                        }
 
-                    canvas.SetPixel(x, y, new Color(
-                        image[x, y].R, image[x, y].G, image[x, y].B));
+                        canvas.SetPixel(x, y, new Color(pixel.R, pixel.G, pixel.B));
+                    }
                 }
-            }
+            });
 
             return ((IRenderable)canvas).Render(options, maxWidth);
         }
