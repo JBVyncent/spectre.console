@@ -305,8 +305,15 @@ public sealed class Layout : Renderable, IRatioResolvable, IHasVisibility
         // Stryker disable once all : NoCoverage — layout render map builder; NoCoverage through layout rendering pipeline
         var regionMap = MakeRegionMap(maxWidth, renderHeight);
 
-        foreach (var (layout, region) in regionMap.Where(x => !x.Layout.HasChildren(visibleOnly: true)))
+        // Use simple loop with continue instead of LINQ Where to avoid
+        // delegate allocation and iterator overhead in the rendering path.
+        foreach (var (layout, region) in regionMap)
         {
+            if (layout.HasChildren(visibleOnly: true))
+            {
+                continue;
+            }
+
             // Stryker disable once all : NoCoverage — layout render map builder; NoCoverage through layout rendering pipeline
             var segments = layout.Renderable.Render(options with { Height = region.Height }, region.Width);
 
