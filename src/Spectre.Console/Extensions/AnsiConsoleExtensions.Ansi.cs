@@ -30,10 +30,12 @@ public static partial class AnsiConsoleExtensions
     {
         ArgumentNullException.ThrowIfNull(console);
 
-        // TODO: Make this a bit more efficient
-        var buffer = new StringWriter();
+        // Use a pre-sized StringBuilder to reduce StringWriter internal resizing.
+        // Typical ANSI output for a styled renderable is 64-256 chars.
+        var sb = new System.Text.StringBuilder(256);
+        var buffer = new StringWriter(sb);
         var ansi = new AnsiWriter(buffer, console.Profile.Capabilities);
         ansi.Write(console, renderable);
-        return buffer.ToString();
+        return sb.ToString();
     }
 }
