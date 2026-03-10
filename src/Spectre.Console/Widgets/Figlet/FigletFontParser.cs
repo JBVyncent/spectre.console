@@ -67,8 +67,7 @@ internal static class FigletFontParser
         var style = NumberStyles.Integer;
         if (index.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
         {
-            // TODO: ReplaceExact should not be used
-            index = index.ReplaceExact("0x", string.Empty).ReplaceExact("0x", string.Empty);
+            index = index.Substring(2);
             style = NumberStyles.HexNumber;
         }
 
