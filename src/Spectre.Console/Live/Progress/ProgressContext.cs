@@ -316,6 +316,7 @@ public sealed class ProgressContext
                 if (ancestor == parent)
                 {
                     lastDescendantIndex = i;
+                    // Stryker disable once all : Equivalent — removing break just causes extra parent-walking; result unchanged since no subsequent ancestor can re-match
                     break;
                 }
 

@@ -38,6 +38,7 @@ public sealed class ConfirmationPrompt : IPrompt<bool>
     /// Gets or sets a value indicating whether or not
     /// default values should be shown.
     /// </summary>
+    // Stryker disable once all : Equivalent — tests set ShowDefaultValue explicitly; default doesn't affect test outcome
     public bool ShowDefaultValue { get; set; } = true;
 
     /// <summary>

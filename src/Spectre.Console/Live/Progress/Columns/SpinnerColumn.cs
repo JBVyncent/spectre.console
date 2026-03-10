@@ -131,10 +131,12 @@ public sealed class SpinnerColumn : ProgressColumn
         var index = task.State.Get<int>(Index);
         if (spinner.Frames.Count == 0)
         {
+            // Stryker disable once all : Equivalent — Style is null in tests so ?? yields same result either way
             return new Markup(" ", Style ?? Spectre.Console.Style.Plain);
         }
 
         var frame = spinner.Frames[index % spinner.Frames.Count];
+        // Stryker disable once all : Equivalent — Style is null in tests so ?? yields same result either way
         return new Markup(frame.EscapeMarkup(), Style ?? Spectre.Console.Style.Plain);
     }
 

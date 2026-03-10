@@ -374,4 +374,93 @@ public sealed class ProgressContextMutationTests
                 after.Id.Should().NotBe(t2.Id);
             });
     }
+
+    // ── AddChildTask mutant killers ───────────────────────────────────────────
+
+    [Fact]
+    public void AddChildTask_Passes_AutoStart_And_MaxValue()
+    {
+        // Kills L201 object initializer mutation: new ProgressTaskSettings { AutoStart = autoStart, MaxValue = maxValue }
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var parent = ctx.AddTask("Parent");
+                var child = ctx.AddChildTask(parent, "Child", autoStart: false, maxValue: 42);
+                child.IsStarted.Should().BeFalse();
+                child.MaxValue.Should().Be(42);
+            });
+    }
+
+    [Fact]
+    public void AddChildTask_With_Settings_Throws_When_Parent_IsNull()
+    {
+        // Kills L218 statement mutation: removing ArgumentNullException.ThrowIfNull(parent)
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var settings = new ProgressTaskSettings { AutoStart = true, MaxValue = 100 };
+                var act = () => ctx.AddChildTask(null!, "Child", settings);
+                act.Should().Throw<ArgumentNullException>();
+            });
+    }
+
+    // ── ValidateReferenceTask mutant killers ──────────────────────────────────
+
+    [Fact]
+    public void AddTaskBefore_Throws_When_ReferenceTask_IsNull()
+    {
+        // Kills L273 statement mutation: removing ArgumentNullException.ThrowIfNull(referenceTask)
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var act = () => ctx.AddTaskBefore("X", null!);
+                act.Should().Throw<ArgumentNullException>();
+            });
+    }
+
+    [Fact]
+    public void AddTaskBefore_Throws_When_ReferenceTask_Not_In_Context()
+    {
+        // Kills L277 NoCoverage: throw InvalidOperationException in ValidateReferenceTask
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                // Create a task from a different context
+                ProgressTask foreignTask = null!;
+                new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+                    .Start(otherCtx =>
+                    {
+                        foreignTask = otherCtx.AddTask("Foreign");
+                    });
+
+                var act = () => ctx.AddTaskBefore("X", foreignTask);
+                act.Should().Throw<InvalidOperationException>()
+                    .WithMessage("*does not belong*");
+            });
+    }
+
+    // ── FindChildInsertionIndex mutant killers ────────────────────────────────
+
+    [Fact]
+    public void AddChildTask_Multiple_Children_Inserted_In_Order()
+    {
+        // Kills L319 statement mutation: removing break in FindChildInsertionIndex
+        // Without break, the descendant walk continues past the match, potentially
+        // giving wrong insertion index for subsequent children.
+        new Progress(CreateInteractiveConsole()) { AutoRefresh = false }
+            .Start(ctx =>
+            {
+                var parent = ctx.AddTask("Parent");
+                var child1 = ctx.AddChildTask(parent, "Child1");
+                var child2 = ctx.AddChildTask(parent, "Child2");
+                var child3 = ctx.AddChildTask(parent, "Child3");
+
+                // All children should be in order after parent
+                var tasks = ctx.GetTasks();
+                var parentIdx = tasks.IndexOf(parent);
+                tasks.IndexOf(child1).Should().Be(parentIdx + 1);
+                tasks.IndexOf(child2).Should().Be(parentIdx + 2);
+                tasks.IndexOf(child3).Should().Be(parentIdx + 3);
+            });
+    }
 }

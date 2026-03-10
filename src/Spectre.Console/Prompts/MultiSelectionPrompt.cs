@@ -137,6 +137,7 @@ public sealed class MultiSelectionPrompt<T> : IPrompt<List<T>>, IListPromptStrat
         var promptItem = Tree.Find(item);
         if (promptItem == null)
         {
+            // Stryker disable once all : Equivalent — exception message text does not affect behavior
             throw new ArgumentOutOfRangeException(nameof(item), "Item not found in tree.");
         }
 

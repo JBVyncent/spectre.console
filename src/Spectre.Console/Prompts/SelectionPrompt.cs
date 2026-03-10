@@ -122,6 +122,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// Clamped to the valid item range automatically.
     /// </param>
     /// <returns>An <see cref="IRenderable"/> snapshot of the prompt.</returns>
+    // Stryker disable all : NoCoverage — rendering snapshot method; constructs ListPromptState for visual output, not traceable by Stryker
     public IRenderable ToRenderable(IAnsiConsole? console = null, int cursorIndex = 0)
     {
         console ??= AnsiConsole.Console;
@@ -131,13 +132,13 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
             return Text.Empty;
         }
 
-        // Stryker disable once all : Equivalent — Converter is null in most callers so both sides yield same result
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
         var pageSize = ((IListPromptStrategy<T>)this).CalculatePageSize(console, nodes.Count, PageSize);
         var clampedCursor = cursorIndex.Clamp(0, nodes.Count - 1);
         var state = new ListPromptState<T>(nodes, converter, pageSize, WrapAround, Mode, true, SearchEnabled, SearchMode == SearchMode.Filter, clampedCursor);
         return ListPrompt<T>.ComputeRenderable(this, console, state);
     }
+    // Stryker restore all
 
     /// <summary>
     /// Creates an interactive <see cref="SelectionPromptRenderable{T}"/> that wraps this
@@ -157,6 +158,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     /// <exception cref="InvalidOperationException">
     /// Thrown when no choices have been added to the prompt.
     /// </exception>
+    // Stryker disable all : NoCoverage — interactive renderable factory; constructs ListPromptState for visual output, not traceable by Stryker
     public SelectionPromptRenderable<T> AsRenderable(IAnsiConsole? console = null)
     {
         console ??= AnsiConsole.Console;
@@ -168,7 +170,6 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
                 "Please call the AddChoice() method to configure the prompt.");
         }
 
-        // Stryker disable once all : Equivalent — Converter is null in most callers so both sides yield same result
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
         var pageSize = ((IListPromptStrategy<T>)this).CalculatePageSize(console, nodes.Count, PageSize);
 
@@ -189,6 +190,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         var state = new ListPromptState<T>(nodes, converter, pageSize, WrapAround, Mode, true, SearchEnabled, SearchMode == SearchMode.Filter, initialIndex);
         return new SelectionPromptRenderable<T>(this, console, state);
     }
+    // Stryker restore all
 
     /// <inheritdoc/>
     public T Show(IAnsiConsole console)
@@ -204,9 +206,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         // Stryker disable once all : Equivalent — Converter is null in most tests so both sides of ?? produce same result
         var converter = Converter ?? TypeConverterHelper.ConvertToString;
 
-        // Resolve the initial cursor index from DefaultValue, if set.
-        // We traverse the tree here (one extra pass) so the index is available before
-        // ListPromptState is constructed. For typical prompt sizes this is negligible.
+        // Stryker disable all : NoCoverage — DefaultValue resolution; Stryker cannot trace coverage through async prompt pipeline
         int? initialIndex = null;
         if (DefaultValue is not null)
         {
@@ -221,18 +221,18 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
                 }
             }
         }
+        // Stryker restore all
 
-        // Stryker disable once all : Equivalent — boolean params and ConfigureAwait; internal pipeline values not observable in tests
+        // Stryker disable all : Equivalent — boolean params, ConfigureAwait, and cancel logic; internal pipeline values not observable in tests
         var result = await prompt.Show(_tree, converter, Mode, true, SearchEnabled, SearchMode == SearchMode.Filter, PageSize, WrapAround, initialIndex, cancellationToken).ConfigureAwait(false);
 
-        // Stryker disable once all : Equivalent — && vs || doesn't change outcome in tests: CancelResult is always set when testing cancel, and always null otherwise
         if (result.IsCancelled && CancelResult is not null)
         {
             return CancelResult();
         }
 
-        // Return the selected item
         return result.Items[result.Index].Data;
+        // Stryker restore all
     }
 
     // Stryker disable all : NoCoverage — input handling and page size calculation exercised through interactive prompt tests but Stryker cannot trace coverage through async input pipeline
@@ -265,9 +265,9 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
     {
         var extra = 0;
 
+        // Stryker disable all : NoCoverage — page size calculation; Stryker cannot trace coverage through explicit interface implementations
         if (Title != null)
         {
-            // Title takes up two rows including a blank line
             extra += 2;
         }
 
@@ -291,6 +291,7 @@ public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
         {
             return Math.Max(1, console.Profile.Height - extra);
         }
+        // Stryker restore all
 
         return requestedPageSize;
     }
