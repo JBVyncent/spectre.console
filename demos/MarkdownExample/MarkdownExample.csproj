@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Spectre.Console\Spectre.Console.csproj" />
-    <ProjectReference Include="..\..\src\Extensions\Spectre.Console.ImageSharp\Spectre.Console.ImageSharp.csproj" />
     <ProjectReference Include="..\..\src\Extensions\Spectre.Console.Markdown\Spectre.Console.Markdown.csproj" />
   </ItemGroup>
 
