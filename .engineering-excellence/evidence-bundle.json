@@ -1,0 +1,56 @@
+{
+  "bundle_version": "1.0",
+  "generated_at_utc": "2026-03-10T00:00:00Z",
+  "contract_path": ".engineering-excellence/change-contract.json",
+  "gates": {
+    "unit": {
+      "status": "SKIPPED",
+      "command": "dotnet test src/ -c Release --filter \"Category!=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"],
+      "evidence": {
+        "type": "command_summary",
+        "value": "Bootstrap policy-only change. Validation delegated to CI execution."
+      },
+      "waiver": {
+        "issue": "#bootstrap-agentic-gates",
+        "owner": "@console-team",
+        "expires_on": "2026-04-30",
+        "reason": "Initial bootstrap of contract/evidence system before first full-gate PR run."
+      }
+    },
+    "integration": {
+      "status": "SKIPPED",
+      "command": "dotnet test src/ -c Release --filter \"Category=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"],
+      "evidence": {
+        "type": "command_summary",
+        "value": "Bootstrap policy-only change. Validation delegated to CI execution."
+      },
+      "waiver": {
+        "issue": "#bootstrap-agentic-gates",
+        "owner": "@console-team",
+        "expires_on": "2026-04-30",
+        "reason": "Initial bootstrap of contract/evidence system before first full-gate PR run."
+      }
+    },
+    "mutation": {
+      "status": "SKIPPED",
+      "command": "dotnet stryker --config-file stryker-config.json",
+      "score": null,
+      "evidence": {
+        "type": "command_summary",
+        "value": "Bootstrap policy-only change. Validation delegated to CI execution."
+      },
+      "waiver": {
+        "issue": "#bootstrap-agentic-gates",
+        "owner": "@console-team",
+        "expires_on": "2026-04-30",
+        "reason": "Initial bootstrap of contract/evidence system before first full-gate PR run."
+      }
+    }
+  },
+  "attestations": {
+    "snapshot_baseline_approved": true,
+    "notes": "Bootstrap PR. Replace SKIPPED + waiver with PASS evidence in subsequent PRs."
+  }
+}

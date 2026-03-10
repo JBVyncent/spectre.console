@@ -278,10 +278,10 @@ public sealed class TextPrompt<T> : IPrompt<T>, IHasCulture
         }
         else
         {
-            var promptText = _prompt.TrimEnd();
-            if (promptText.Length > 0)
+            var plainText = Markup.Remove(_prompt).TrimEnd();
+            if (plainText.Length > 0)
             {
-                var last = promptText[^1];
+                var last = plainText[^1];
                 if (last != ':' && last != '?' && last != '>' && last != '$' && last != '#')
                 {
                     markup += ":";

@@ -1,6 +1,6 @@
 # Testing Mandate — Spectre.Console Fork
 
-Version: 2.0 | Effective: 2026-03-09
+Version: 2.1 | Effective: 2026-03-10
 Applies to: All production code in `src/` across all assemblies.
 
 ---
@@ -18,8 +18,10 @@ until it can be — or its exclusion is justified and documented inline.
 | Target | Threshold | Exceptions |
 |--------|-----------|------------|
 | Line/Branch Coverage | 100% | None. Untestable code is refactored or excluded with justification. |
-| Test Pass Rate | 100% | Zero failing tests. Zero skipped tests. Both `net8.0` and `net10.0` TFMs. |
+| Test Pass Rate | 100% | Zero failing tests in required CI gates on supported TFMs. |
+| Flaky Test Policy | Time-boxed quarantine only | Skips are allowed only via Flaky Quarantine policy in §8.2 (issue + owner + expiry). |
 | Stryker Mutation Score | 100% | Equivalent mutants are disabled with inline documentation. |
+| CI Tiering | Required | Unit, Integration, and Mutation gates run separately with explicit filters. |
 | Commit Discipline | One commit per logical change | Tests ship with the code they cover, never separately. |
 
 ---
@@ -131,8 +133,11 @@ public void Encode_Should_Reject_MaxColors_Below_Two()
 - **One assertion concept per test.** Multiple `.Should()` calls are fine if they assert
   the same logical outcome. Do not test unrelated behaviors in one method.
 - **No test interdependence.** Tests must pass in any order, in parallel.
-- **No file system, network, or clock dependencies.** Use `TestConsole`, in-memory
-  streams, and injected `TimeProvider`.
+- **Unit tests have no file system, network, or clock dependencies.** Use `TestConsole`,
+  in-memory streams, and injected `TimeProvider`.
+- **Integration tests may use real infrastructure only when necessary.** Tag them with
+  `[Trait("Category", "Integration")]`, isolate their side effects, and run them in a
+  separate CI tier.
 
 ### 5.2 Assertion strength
 
@@ -151,6 +156,8 @@ For Spectre.Console widget tests:
 
 - **Snapshot tests**: Use expectation files for complex visual output. Compare against
   golden files in `Expectations/`.
+- **Snapshot baseline changes**: Require explicit reviewer approval and a PR note that
+  explains the expected visual delta and why the baseline changed.
 - **Structural tests**: Use `GetSegments()` or `console.Output` to verify specific
   content without full visual comparison.
 - **ANSI tests**: Enable `EmitAnsiSequences()` on `TestConsole` to capture escape codes.
@@ -160,7 +167,8 @@ For Spectre.Console widget tests:
 
 ### 5.4 Null guard tests
 
-Every public method with `ArgumentNullException.ThrowIfNull()` gets a corresponding test:
+Every public boundary method with `ArgumentNullException.ThrowIfNull()` gets a
+corresponding contract test:
 
 ```csharp
 [Fact]
@@ -171,6 +179,9 @@ public void Foo_Throws_If_Bar_Is_Null()
        .WithParameterName("bar");
 }
 ```
+
+Internal pass-through methods do not need duplicate null-guard tests when boundary
+coverage already proves the public contract.
 
 If the null guard is redundant (a downstream call throws the same exception), disable
 it with `// Stryker disable once Statement : Equivalent — <downstream> also throws`.
@@ -259,11 +270,23 @@ Every `Stryker disable` comment MUST include a justification. Valid categories:
 | `Killed by <TestName>` | Test exists but Stryker can't trace coverage | `Killed by FooTests.Bar — assertion verifies dimensions change` |
 | Descriptive reason | Explains why mutation doesn't change behavior | `Arithmetic — scaling mutations produce valid but visually different output` |
 
+#### Metadata for new/touched disables
+
+Every new or modified `Stryker disable` comment MUST include:
+
+- Issue id (e.g., `Issue #1234`)
+- Owner (e.g., `@handle` or owning team)
+- Expiry date in ISO format (`YYYY-MM-DD`)
+
+Example:
+`// Stryker disable once Statement : Equivalent — downstream also throws; Issue #1234; Owner @console-team; Expires 2026-06-30`
+
 #### What is NEVER acceptable
 
 - Blanket `// Stryker disable all` on entire files without per-section justification
 - Disabling mutations that ARE distinguishable by tests (write the test instead)
 - "Too complex" or "Not important" as justification
+- New/touched disable comments without issue, owner, and expiry metadata
 
 ### 6.4 NoCoverage vs Survived
 
@@ -272,6 +295,14 @@ Every `Stryker disable` comment MUST include a justification. Valid categories:
 | **NoCoverage** | Mutant generated, but no test executed that code path | Write a test that exercises the path, OR disable with `NoCoverage` justification |
 | **Survived** | A test ran but didn't catch the mutation | Strengthen the assertion (more specific value, tighter boundary), OR disable if equivalent |
 | **Timeout** | Mutation caused an infinite loop or deadlock | Usually indicates the mutation broke a loop condition — may need a disable if the test can't detect it |
+
+### 6.5 Disable debt audit
+
+Run a periodic disable audit (at least once per release cycle):
+
+- `rg -n "Stryker disable" src` and review all new/changed disable comments.
+- Remove or test-fix expired disables; do not silently extend expiry.
+- If extension is required, update issue status, owner acknowledgment, and new expiry.
 
 ---
 
@@ -290,9 +321,10 @@ When modifying existing code (bug fixes, enhancements, refactoring):
 
 1. **Update existing tests** if behavior intentionally changed.
 2. **Add new tests** for the new behavior or fixed bug.
-3. **Run the full test suite** — `dotnet test src/ -c Release`
-4. **Run Stryker** on the affected assembly to verify mutation score remains 100%.
-5. **Check for breaking changes**: If a public API signature changed (parameters,
+3. **Run the unit gate** — `dotnet test src/ -c Release --filter "Category!=Integration&Category!=Flaky"`
+4. **Run the integration gate** (if affected) — `dotnet test src/ -c Release --filter "Category=Integration&Category!=Flaky"`
+5. **Run Stryker** on the affected assembly to verify mutation score remains 100%.
+6. **Check for breaking changes**: If a public API signature changed (parameters,
    return type, exception type), flag it explicitly in the commit message.
 
 ### 7.3 Side-effect awareness
@@ -307,18 +339,65 @@ When fixing bugs, verify these are not silently broken:
 
 ---
 
-## 8. Test Completeness Checklist
+## 8. CI Gates & Completion Checklist
+
+### 8.1 Required CI test tiers
+
+Run and enforce gates in this order:
+
+1. **Unit gate (blocking)** — `dotnet test src/ -c Release --filter "Category!=Integration&Category!=Flaky"`
+2. **Integration gate (blocking)** — `dotnet test src/ -c Release --filter "Category=Integration&Category!=Flaky"`
+3. **Mutation gate (blocking for affected assemblies)** — `dotnet stryker --config-file stryker-config.json`
+
+### 8.1.1 Evidence artifacts (required)
+
+For each blocking gate, attach evidence in the PR using either:
+
+- CI job link showing pass/fail status
+- Command output summary including gate type, TFM(s), and pass/fail result
+
+### 8.2 Flaky quarantine policy (exception path)
+
+A test may be skipped only under quarantine, and only temporarily.
+Quarantined tests MUST include all metadata:
+
+- `Trait("Category", "Flaky")`
+- Linked issue id (e.g., `Issue #1234`)
+- Owner (`@handle` or team)
+- Expiry date in ISO format (`YYYY-MM-DD`)
+
+Example:
+
+```csharp
+[Trait("Category", "Flaky")]
+[Fact(Skip = "Flaky quarantine: Issue #1234; Owner @console-team; Expires 2026-04-15")]
+public void Test_Name()
+{
+    ...
+}
+```
+
+Rules:
+
+- Quarantined tests do not run in blocking gates.
+- Quarantined tests run in a non-blocking scheduled job.
+- On or before expiry, either fix and unquarantine or renew with owner approval.
+
+### 8.3 Completion checklist
 
 Before marking any testing work as complete, verify:
 
-- [ ] All tests pass on both `net8.0` and `net10.0`
 - [ ] `dotnet build src/ -c Release` produces 0 warnings, 0 errors
-- [ ] `dotnet test src/ -c Release` produces 0 failures (excluding known pre-existing flaky tests)
+- [ ] Unit gate passes on both `net8.0` and `net10.0` where supported
+- [ ] Integration gate passes on both `net8.0` and `net10.0` where supported
+- [ ] No new flaky quarantines were added without issue + owner + expiry
 - [ ] Stryker mutation score is 100% for the affected assembly
-- [ ] Every `Stryker disable` comment has an inline justification
+- [ ] PR includes evidence artifacts for unit/integration/mutation gates (CI links or command summaries with TFM + result)
+- [ ] Every new or touched `Stryker disable` comment has justification + issue + owner + expiry
+- [ ] Snapshot baseline changes include explicit reviewer approval and PR delta note
 - [ ] New tests are committed alongside the code they test
 - [ ] Test class follows project naming and organization conventions
-- [ ] No test depends on file system, network, real clock, or test execution order
+- [ ] Unit tests do not depend on file system, network, real clock, or execution order
 
 ---
 

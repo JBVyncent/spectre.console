@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spectre.console/schemas/change-contract.schema.json",
+  "title": "Agentic Change Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "summary",
+    "owner",
+    "risk_class",
+    "behavioral_deltas",
+    "invariants",
+    "rollback",
+    "acceptance_gates",
+    "merge_blockers",
+    "telemetry_metrics",
+    "waiver_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 2
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    },
+    "behavioral_deltas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 5 }
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "statement", "verification"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "statement": { "type": "string", "minLength": 5 },
+          "verification": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "enum": ["unit", "integration", "mutation", "property", "fuzz", "perf"] }
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trigger", "plan"],
+      "properties": {
+        "trigger": { "type": "string", "minLength": 5 },
+        "plan": { "type": "string", "minLength": 5 }
+      }
+    },
+    "acceptance_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "integration", "mutation"],
+      "properties": {
+        "unit": { "$ref": "#/$defs/testGate" },
+        "integration": { "$ref": "#/$defs/testGate" },
+        "mutation": {
+          "allOf": [
+            { "$ref": "#/$defs/baseGate" },
+            {
+              "type": "object",
+              "required": ["minimum_score"],
+              "properties": {
+                "minimum_score": { "type": "number", "minimum": 0, "maximum": 100 }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "merge_blockers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "telemetry_metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["non_blocking"],
+      "properties": {
+        "non_blocking": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "waiver_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires_issue_owner_expiry"],
+      "properties": {
+        "requires_issue_owner_expiry": { "type": "boolean", "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "baseGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "command"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "command": { "type": "string", "minLength": 5 }
+      }
+    },
+    "testGate": {
+      "allOf": [
+        { "$ref": "#/$defs/baseGate" },
+        {
+          "type": "object",
+          "required": ["tfms"],
+          "properties": {
+            "tfms": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

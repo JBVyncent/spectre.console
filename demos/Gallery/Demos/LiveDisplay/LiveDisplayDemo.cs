@@ -85,7 +85,7 @@ public sealed class LiveDisplayDemo : IDemoModule
         //   ClearToBottom()   ESC[0J — erase from cursor to bottom
         //   ClearToTop()      ESC[1J — erase from cursor to top
         AnsiConsole.MarkupLine("[bold underline blue]Targeted Erase Operations[/]");
-        AnsiConsole.MarkupLine("[grey](ESC[2K / ESC[0K / ESC[1K / ESC[0J / ESC[1J)[/]");
+        AnsiConsole.MarkupLine("[grey](ESC[[2K]] / ESC[[0K]] / ESC[[1K]] / ESC[[0J]] / ESC[[1J]])[/]");
         AnsiConsole.WriteLine();
 
         // Write a line, pause, then erase it and replace with clean content
@@ -103,8 +103,8 @@ public sealed class LiveDisplayDemo : IDemoModule
         // Write several lines then erase below cursor
         AnsiConsole.MarkupLine("[cyan]Line one[/]");
         AnsiConsole.MarkupLine("[cyan]Line two[/]");
-        AnsiConsole.Markup("[cyan]Line thr");
+        AnsiConsole.Markup("[cyan]Line thr[/]");
         AnsiConsole.ClearToBottom();   // erase from here to bottom
-        AnsiConsole.MarkupLine("[green]ree (ClearToBottom erased the rest of the line)[/]");
+        AnsiConsole.MarkupLine("[green]ee (ClearToBottom erased the rest)[/]");
     }
 }

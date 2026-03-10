@@ -11,11 +11,22 @@ Fixes #
 - [ ] I have checked that there isn't already another pull request that solves the above issue
 - [ ] All newly added code is adequately covered by tests
 - [ ] All existing tests are still running without errors
+- [ ] I updated `.engineering-excellence/change-contract.json` for this PR
+- [ ] I updated `.engineering-excellence/evidence-bundle.json` with gate evidence or waiver metadata
 
 <!-- 
 If you have used generative AI to create this pull request, you will need to disclose this here,
 i.e. What AI agent you used and to what extent.
 -->
+
+## Agentic Evidence
+
+- Contract file: `.engineering-excellence/change-contract.json`
+- Evidence file: `.engineering-excellence/evidence-bundle.json`
+- CI links or command summaries for unit/integration/mutation gates:
+  - Unit:
+  - Integration:
+  - Mutation:
 
 ## Changes
 

@@ -568,6 +568,22 @@ public sealed class TextPromptTests
     }
 
     [Fact]
+    public void Should_Not_Double_Colon_When_Prompt_Has_Colon_Inside_Markup()
+    {
+        // Given — colon is the last visible char but inside a markup tag
+        var console = new TestConsole();
+        console.Input.PushText("test");
+        console.Input.PushKey(ConsoleKey.Enter);
+
+        // When
+        console.Prompt(new TextPrompt<string>("[green]Enter value:[/]"));
+
+        // Then — should NOT have double colon
+        console.Output.Should().Contain("Enter value:");
+        console.Output.Should().NotContain("Enter value::");
+    }
+
+    [Fact]
     public void Should_Append_Colon_When_Prompt_Has_Default_Value()
     {
         // Given — prompt with default value

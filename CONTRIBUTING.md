@@ -50,6 +50,11 @@ The assembly `Spectre.Console` should have no dependencies except the .NET BCL l
 Make sure to run all unit tests before creating a pull request.
 Any new code should also have reasonable unit test coverage.
 
+### Outcome-first quality gates
+
+Merge decisions are based on outcome evidence, not human-proxy complexity metrics.
+Cyclomatic complexity, LOC, and style scoring can be tracked for telemetry, but are non-blocking.
+
 ## Contributing process
 ### Get buyoff or find open community issues or features
 
@@ -93,6 +98,9 @@ Prerequisites:
  * You are making commits in a feature branch.
  * All code should compile without errors or warnings.
  * All tests should be passing.
+ * Update `.engineering-excellence/change-contract.json` to describe intended behavior changes, invariants, and rollback trigger.
+ * Update `.engineering-excellence/evidence-bundle.json` with unit/integration/mutation gate evidence (or waiver metadata with issue, owner, and expiry).
+ * Validate both artifacts with `python3 tools/ci/agentic_gatekeeper.py`.
 
 Submitting PR:
 
@@ -159,3 +167,4 @@ Harder for us roughly translates to a longer SLA for your pull request.
 
 This contribution guide was taken from the [Chocolatey project](https://chocolatey.org/)
 with permission and was edited to follow Spectre.Console's conventions and processes.
+

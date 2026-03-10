@@ -24,6 +24,13 @@ jobs:
       - name: Setup .NET SDK (global.json)
         uses: actions/setup-dotnet@v5
 
+      - name: Validate Agentic Contract + Evidence
+        shell: bash
+        run: |
+          python3 tools/ci/agentic_gatekeeper.py \
+            --contract .engineering-excellence/change-contract.json \
+            --evidence .engineering-excellence/evidence-bundle.json
+
       - name: Build
         shell: bash
         run: |

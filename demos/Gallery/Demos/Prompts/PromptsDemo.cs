@@ -108,18 +108,15 @@ public sealed class PromptsDemo : IDemoModule
         AnsiConsole.MarkupLine("[grey]Press UpArrow to recall previous entries, DownArrow to move forward.[/]");
         AnsiConsole.WriteLine();
 
-        var history = new List<string>();
+        var history = new List<string> { "alpha", "bravo", "charlie" };
 
-        for (var i = 0; i < 3; i++)
-        {
-            var historyEntry = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[green]Entry {i + 1}[/] (try UpArrow for history):")
-                    .WithHistory(history));
-            AnsiConsole.MarkupInterpolated($"  Entered: [bold]{historyEntry}[/]");
-            AnsiConsole.WriteLine();
-        }
-
-        AnsiConsole.MarkupLine($"History contains [bold]{history.Count}[/] entries.");
+        AnsiConsole.MarkupLine("[grey]History pre-seeded with: alpha, bravo, charlie[/]");
+        var historyEntry = AnsiConsole.Prompt(
+            new TextPrompt<string>("[green]Type or press UpArrow:[/]")
+                .WithHistory(history));
+        AnsiConsole.MarkupInterpolated($"  Entered: [bold]{historyEntry}[/]");
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine($"History now contains [bold]{history.Count}[/] entries.");
         AnsiConsole.WriteLine();
 
         // Editable default value (#595)

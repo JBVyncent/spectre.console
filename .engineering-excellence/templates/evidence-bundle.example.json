@@ -1,0 +1,37 @@
+{
+  "bundle_version": "1.0",
+  "generated_at_utc": "2026-03-10T00:00:00Z",
+  "contract_path": ".engineering-excellence/change-contract.json",
+  "gates": {
+    "unit": {
+      "status": "PASS",
+      "command": "dotnet test src/ -c Release --filter \"Category!=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"],
+      "evidence": {
+        "type": "command_summary",
+        "value": "Pass: all unit tests green on both TFMs."
+      }
+    },
+    "integration": {
+      "status": "PASS",
+      "command": "dotnet test src/ -c Release --filter \"Category=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"],
+      "evidence": {
+        "type": "command_summary",
+        "value": "Pass: integration tests green on both TFMs."
+      }
+    },
+    "mutation": {
+      "status": "PASS",
+      "command": "dotnet stryker --config-file stryker-config.json",
+      "score": 100,
+      "evidence": {
+        "type": "command_summary",
+        "value": "Pass: mutation score reached 100."
+      }
+    }
+  },
+  "attestations": {
+    "snapshot_baseline_approved": true
+  }
+}

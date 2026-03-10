@@ -1,0 +1,62 @@
+{
+  "contract_version": "1.0",
+  "summary": "Bootstrap the agentic engineering excellence starter pack with mandatory contract/evidence artifacts, schema definitions, and a CI validator.",
+  "owner": "@console-team",
+  "risk_class": "MEDIUM",
+  "behavioral_deltas": [
+    {
+      "id": "B1",
+      "description": "Introduce contract-first and evidence-first merge policy artifacts and validation tooling."
+    }
+  ],
+  "invariants": [
+    {
+      "id": "I1",
+      "statement": "Merge blockers are outcome gates and evidence validity, not human-proxy complexity metrics.",
+      "verification": ["unit", "integration", "mutation"]
+    },
+    {
+      "id": "I2",
+      "statement": "Any waived required gate carries issue, owner, and expiry metadata.",
+      "verification": ["unit"]
+    }
+  ],
+  "rollback": {
+    "trigger": "Gatekeeper causes sustained false negatives for compliant PRs.",
+    "plan": "Disable the workflow validation step and revert starter-pack files in one commit."
+  },
+  "acceptance_gates": {
+    "unit": {
+      "required": true,
+      "command": "dotnet test src/ -c Release --filter \"Category!=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"]
+    },
+    "integration": {
+      "required": true,
+      "command": "dotnet test src/ -c Release --filter \"Category=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"]
+    },
+    "mutation": {
+      "required": true,
+      "command": "dotnet stryker --config-file stryker-config.json",
+      "minimum_score": 100
+    }
+  },
+  "merge_blockers": [
+    "unit_gate_pass",
+    "integration_gate_pass",
+    "mutation_score_minimum",
+    "contract_and_evidence_validation",
+    "no_expired_waivers"
+  ],
+  "telemetry_metrics": {
+    "non_blocking": [
+      "cyclomatic_complexity",
+      "loc",
+      "style_score"
+    ]
+  },
+  "waiver_policy": {
+    "requires_issue_owner_expiry": true
+  }
+}

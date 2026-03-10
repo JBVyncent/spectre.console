@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spectre.console/schemas/evidence-bundle.schema.json",
+  "title": "Agentic Evidence Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bundle_version",
+    "generated_at_utc",
+    "contract_path",
+    "gates"
+  ],
+  "properties": {
+    "bundle_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "integration", "mutation"],
+      "properties": {
+        "unit": { "$ref": "#/$defs/gate" },
+        "integration": { "$ref": "#/$defs/gate" },
+        "mutation": {
+          "allOf": [
+            { "$ref": "#/$defs/gate" },
+            {
+              "type": "object",
+              "properties": {
+                "score": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "attestations": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "command", "evidence"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "SKIPPED"]
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tfms": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["ci_link", "command_summary"]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "waiver": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["issue", "owner", "expires_on", "reason"],
+          "properties": {
+            "issue": { "type": "string", "minLength": 2 },
+            "owner": { "type": "string", "minLength": 2 },
+            "expires_on": { "type": "string", "format": "date" },
+            "reason": { "type": "string", "minLength": 5 }
+          }
+        }
+      }
+    }
+  }
+}

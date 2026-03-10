@@ -1,0 +1,57 @@
+{
+  "contract_version": "1.0",
+  "summary": "Describe the behavior change in one paragraph.",
+  "owner": "@console-team",
+  "risk_class": "MEDIUM",
+  "behavioral_deltas": [
+    {
+      "id": "B1",
+      "description": "Describe the intended behavior change."
+    }
+  ],
+  "invariants": [
+    {
+      "id": "I1",
+      "statement": "State a behavior that must remain true.",
+      "verification": ["unit", "mutation"]
+    }
+  ],
+  "rollback": {
+    "trigger": "Define an objective rollback trigger.",
+    "plan": "Define how to revert safely."
+  },
+  "acceptance_gates": {
+    "unit": {
+      "required": true,
+      "command": "dotnet test src/ -c Release --filter \"Category!=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"]
+    },
+    "integration": {
+      "required": true,
+      "command": "dotnet test src/ -c Release --filter \"Category=Integration&Category!=Flaky\"",
+      "tfms": ["net8.0", "net10.0"]
+    },
+    "mutation": {
+      "required": true,
+      "command": "dotnet stryker --config-file stryker-config.json",
+      "minimum_score": 100
+    }
+  },
+  "merge_blockers": [
+    "unit_gate_pass",
+    "integration_gate_pass",
+    "mutation_score_minimum",
+    "contract_and_evidence_validation",
+    "no_expired_waivers"
+  ],
+  "telemetry_metrics": {
+    "non_blocking": [
+      "cyclomatic_complexity",
+      "loc",
+      "style_score"
+    ]
+  },
+  "waiver_policy": {
+    "requires_issue_owner_expiry": true
+  }
+}

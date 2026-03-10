@@ -69,7 +69,7 @@ public sealed class MarkupDemo : IDemoModule
         AnsiConsole.MarkupLine("[bold underline blue]Escaped Markup[/]");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("Use [[double brackets]] to show literal [[ and ]]");
-        AnsiConsole.MarkupLine("Markup: [green][[green]text[[/]][/]");
+        AnsiConsole.MarkupLine("Markup: [green][[green]]text[[/]][/]");
         AnsiConsole.WriteLine();
 
         // Paragraphs and wrapping

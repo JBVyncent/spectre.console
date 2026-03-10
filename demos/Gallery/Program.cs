@@ -40,12 +40,12 @@ AnsiConsole.WriteLine();
 while (true)
 {
     var choices = modules.Select(m => $"{m.Name} — {m.Description}").ToList();
-    choices.Add("[red]Exit[/]");
+    choices.Add("Exit");
 
     var selection = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("[bold green]Select a demo to run:[/]")
-            .PageSize(12)
+            .PageSize(15)
             .HighlightStyle(Style.Parse("cyan bold"))
             .AddChoices(choices));
 

@@ -65,13 +65,16 @@ public sealed class StatusDemo : IDemoModule
         AnsiConsole.MarkupLine("[bold underline blue]Spinner Styles[/]");
         AnsiConsole.WriteLine();
 
+        // Use ASCII-only spinners so they display correctly on all terminals.
+        // Unicode spinners (Dots, Star, Arrow, Bounce) fall back to Line on
+        // non-Unicode terminals, making them all look identical.
         var spinners = new[]
         {
-            ("Dots", Spinner.Known.Dots),
             ("Line", Spinner.Known.Line),
-            ("Star", Spinner.Known.Star),
-            ("Arrow", Spinner.Known.Arrow),
-            ("Bounce", Spinner.Known.Bounce),
+            ("SimpleDots", Spinner.Known.SimpleDots),
+            ("Star2", Spinner.Known.Star2),
+            ("Flip", Spinner.Known.Flip),
+            ("Balloon", Spinner.Known.Balloon),
         };
 
         foreach (var (name, spinner) in spinners)
@@ -81,10 +84,12 @@ public sealed class StatusDemo : IDemoModule
                 .SpinnerStyle(Style.Parse("cyan"))
                 .Start($"[grey]{name} spinner[/]", _ =>
                 {
-                    Thread.Sleep(1200);
+                    Thread.Sleep(1500);
                 });
+            AnsiConsole.MarkupLineInterpolated($"  [green]*[/] {name}");
         }
 
+        AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[green]All spinners demonstrated.[/]");
     }
 }

@@ -1,17 +1,19 @@
 ```
 
-BenchmarkDotNet v0.15.8, macOS Tahoe 26.2 (25C56) [Darwin 25.2.0]
-Apple M3 Pro, 1 CPU, 11 logical and 11 physical cores
-.NET SDK 10.0.101
-  [Host]    : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT armv8.0-a
-  .NET 10.0 : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT armv8.0-a
-  .NET 8.0  : .NET 8.0.17 (8.0.17, 8.0.1725.26602), Arm64 RyuJIT armv8.0-a
-  .NET 9.0  : .NET 9.0.10 (9.0.10, 9.0.1025.47515), Arm64 RyuJIT armv8.0-a
+BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6937/22H2/2022Update)
+Intel Core i7-6700 CPU 3.40GHz (Max: 3.41GHz) (Skylake), 1 CPU, 8 logical and 4 physical cores
+.NET SDK 10.0.103
+  [Host]    : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+  .NET 10.0 : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+  .NET 8.0  : .NET 8.0.24 (8.0.24, 8.0.2426.7010), X64 RyuJIT x86-64-v3
 
 
 ```
-| Method           | Job       | Runtime   | Mean     | Error   | StdDev  | Gen0   | Gen1   | Allocated |
-|----------------- |---------- |---------- |---------:|--------:|--------:|-------:|-------:|----------:|
-| RenderableToAnsi | .NET 10.0 | .NET 10.0 | 786.6 ns | 1.87 ns | 1.75 ns | 0.3662 | 0.0010 |   2.99 KB |
-| RenderableToAnsi | .NET 8.0  | .NET 8.0  | 897.3 ns | 2.21 ns | 1.96 ns | 0.3815 | 0.0010 |   3.12 KB |
-| RenderableToAnsi | .NET 9.0  | .NET 9.0  | 935.2 ns | 3.13 ns | 2.77 ns | 0.3700 | 0.0010 |   3.02 KB |
+| Method           | Job       | Runtime   | Mean     | Error    | StdDev   | Gen0   | Allocated |
+|----------------- |---------- |---------- |---------:|---------:|---------:|-------:|----------:|
+| RenderableToAnsi | .NET 10.0 | .NET 10.0 | 38.18 μs | 0.759 μs | 0.960 μs | 0.9155 |   3.92 KB |
+| RenderableToAnsi | .NET 8.0  | .NET 8.0  | 60.22 μs | 1.123 μs | 1.813 μs | 0.9766 |   4.38 KB |
+| RenderableToAnsi | .NET 9.0  | .NET 9.0  |       NA |       NA |       NA |     NA |        NA |
+
+Benchmarks with issues:
+  AnsiBenchmarks.RenderableToAnsi: .NET 9.0(Runtime=.NET 9.0)
