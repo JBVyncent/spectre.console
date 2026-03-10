@@ -92,9 +92,9 @@ public sealed class AnsiWriter
             }
 
             _styleBuffer.Clear();
-            _styleBuffer.AddRange(AnsiCodeBuilder.Build(style.Decoration));
-            _styleBuffer.AddRange(AnsiCodeBuilder.Build(Capabilities.ColorSystem, style.Foreground, true));
-            _styleBuffer.AddRange(AnsiCodeBuilder.Build(Capabilities.ColorSystem, style.Background, false));
+            AnsiCodeBuilder.BuildInto(_styleBuffer, style.Decoration);
+            AnsiCodeBuilder.BuildInto(_styleBuffer, Capabilities.ColorSystem, style.Foreground, true);
+            AnsiCodeBuilder.BuildInto(_styleBuffer, Capabilities.ColorSystem, style.Background, false);
 
             shouldClose = WriteSgr(_styleBuffer);
         }
@@ -171,9 +171,9 @@ public sealed class AnsiWriter
             }
 
             _codes.Clear();
-            _codes.AddRange(AnsiCodeBuilder.Build(style.Decoration));
-            _codes.AddRange(AnsiCodeBuilder.Build(Capabilities.ColorSystem, style.Foreground, true));
-            _codes.AddRange(AnsiCodeBuilder.Build(Capabilities.ColorSystem, style.Background, false));
+            AnsiCodeBuilder.BuildInto(_codes, style.Decoration);
+            AnsiCodeBuilder.BuildInto(_codes, Capabilities.ColorSystem, style.Foreground, true);
+            AnsiCodeBuilder.BuildInto(_codes, Capabilities.ColorSystem, style.Background, false);
 
             WriteSgr(_codes);
         }
@@ -212,7 +212,7 @@ public sealed class AnsiWriter
         if (Capabilities.Ansi)
         {
             _codes.Clear();
-            _codes.AddRange(AnsiCodeBuilder.Build(decoration));
+            AnsiCodeBuilder.BuildInto(_codes, decoration);
 
             WriteSgr(_codes);
         }
@@ -233,7 +233,7 @@ public sealed class AnsiWriter
         if (Capabilities.Ansi)
         {
             _codes.Clear();
-            _codes.AddRange(AnsiCodeBuilder.Build(Capabilities.ColorSystem, color, false));
+            AnsiCodeBuilder.BuildInto(_codes, Capabilities.ColorSystem, color, false);
 
             WriteSgr(_codes);
         }
@@ -254,7 +254,7 @@ public sealed class AnsiWriter
         if (Capabilities.Ansi)
         {
             _codes.Clear();
-            _codes.AddRange(AnsiCodeBuilder.Build(Capabilities.ColorSystem, color, true));
+            AnsiCodeBuilder.BuildInto(_codes, Capabilities.ColorSystem, color, true);
 
             WriteSgr(_codes);
         }
@@ -677,76 +677,89 @@ public sealed class AnsiWriter
     }
 }
 
+// Builds SGR byte codes directly into a caller-provided List<byte>,
+// avoiding iterator state machines and intermediate array allocations
+// that IEnumerable<byte> with yield return or collection literals would cause.
 file static class AnsiCodeBuilder
 {
-    public static IEnumerable<byte> Build(Decoration decoration)
+    public static void BuildInto(List<byte> target, Decoration decoration)
     {
         if ((decoration & Decoration.Bold) != 0)
         {
-            yield return 1;
+            target.Add(1);
         }
 
         if ((decoration & Decoration.Dim) != 0)
         {
-            yield return 2;
+            target.Add(2);
         }
 
         if ((decoration & Decoration.Italic) != 0)
         {
-            yield return 3;
+            target.Add(3);
         }
 
         if ((decoration & Decoration.Underline) != 0)
         {
-            yield return 4;
+            target.Add(4);
         }
 
         if ((decoration & Decoration.SlowBlink) != 0)
         {
-            yield return 5;
+            target.Add(5);
         }
 
         if ((decoration & Decoration.RapidBlink) != 0)
         {
-            yield return 6;
+            target.Add(6);
         }
 
         if ((decoration & Decoration.Invert) != 0)
         {
-            yield return 7;
+            target.Add(7);
         }
 
         if ((decoration & Decoration.Conceal) != 0)
         {
-            yield return 8;
+            target.Add(8);
         }
 
         if ((decoration & Decoration.Strikethrough) != 0)
         {
-            yield return 9;
+            target.Add(9);
         }
     }
 
-    public static IEnumerable<byte> Build(ColorSystem system, Color color, bool foreground)
+    public static void BuildInto(List<byte> target, ColorSystem system, Color color, bool foreground)
     {
         if (color == Color.Default)
         {
-            return [];
+            return;
         }
 
-        return system switch
+        switch (system)
         {
-            ColorSystem.NoColors => [], // No colors
-            ColorSystem.TrueColor => GetTrueColor(color, foreground), // 24-bit
-            ColorSystem.EightBit => GetEightBit(color, foreground), // 8-bit
-            ColorSystem.Standard => GetFourBit(color, foreground), // 4-bit
-            ColorSystem.Legacy => GetThreeBit(color, foreground), // 3-bit
-            // Stryker disable once String : Dead code — all ColorSystem enum values are handled; default branch is unreachable
-            _ => throw new InvalidOperationException("Could not determine ANSI color."),
-        };
+            case ColorSystem.NoColors:
+                break;
+            case ColorSystem.TrueColor:
+                AddTrueColor(target, color, foreground);
+                break;
+            case ColorSystem.EightBit:
+                AddEightBit(target, color, foreground);
+                break;
+            case ColorSystem.Standard:
+                AddFourBit(target, color, foreground);
+                break;
+            case ColorSystem.Legacy:
+                AddThreeBit(target, color, foreground);
+                break;
+            default:
+                // Stryker disable once String : Dead code — all ColorSystem enum values are handled; default branch is unreachable
+                throw new InvalidOperationException("Could not determine ANSI color.");
+        }
     }
 
-    private static IEnumerable<byte> GetThreeBit(Color color, bool foreground)
+    private static void AddThreeBit(List<byte> target, Color color, bool foreground)
     {
         var number = color.Number;
         if (number == null || color.Number >= 8)
@@ -759,10 +772,10 @@ file static class AnsiCodeBuilder
         // Stryker restore all
 
         var mod = foreground ? 30 : 40;
-        return [(byte)(number.Value + mod)];
+        target.Add((byte)(number.Value + mod));
     }
 
-    private static IEnumerable<byte> GetFourBit(Color color, bool foreground)
+    private static void AddFourBit(List<byte> target, Color color, bool foreground)
     {
         var number = color.Number;
         if (number == null || color.Number >= 16)
@@ -775,10 +788,10 @@ file static class AnsiCodeBuilder
         // Stryker restore all
 
         var mod = number < 8 ? (foreground ? 30 : 40) : (foreground ? 82 : 92);
-        return [(byte)(number.Value + mod)];
+        target.Add((byte)(number.Value + mod));
     }
 
-    private static IEnumerable<byte> GetEightBit(Color color, bool foreground)
+    private static void AddEightBit(List<byte> target, Color color, bool foreground)
     {
         // Stryker disable all : null coalescing mutations are semantically equivalent — for named colors Number is set and
         // ExactOrClosest(EightBit) returns the same color; for unnamed colors Number is null and ExactOrClosest is always called
@@ -789,17 +802,24 @@ file static class AnsiCodeBuilder
         // Stryker restore all
 
         var mod = foreground ? (byte)38 : (byte)48;
-        return [mod, 5, (byte)number];
+        target.Add(mod);
+        target.Add(5);
+        target.Add((byte)number);
     }
 
-    private static IEnumerable<byte> GetTrueColor(Color color, bool foreground)
+    private static void AddTrueColor(List<byte> target, Color color, bool foreground)
     {
         if (color.Number != null)
         {
-            return GetEightBit(color, foreground);
+            AddEightBit(target, color, foreground);
+            return;
         }
 
         var mod = foreground ? (byte)38 : (byte)48;
-        return [mod, 2, color.R, color.G, color.B];
+        target.Add(mod);
+        target.Add(2);
+        target.Add(color.R);
+        target.Add(color.G);
+        target.Add(color.B);
     }
 }
