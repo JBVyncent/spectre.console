@@ -38,22 +38,24 @@ var modules = new IDemoModule[]
     new BugFixesDemo(),
 };
 
-// Header
-AnsiConsole.Write(new FigletText("Gallery")
-    .Color(Color.Cyan1)
-    .Centered());
-AnsiConsole.Write(new Rule("[grey]Spectre.Console Feature Gallery[/]").RuleStyle(Style.Parse("cyan")));
-AnsiConsole.WriteLine();
-
 while (true)
 {
+    // Draw header fresh each iteration so it doesn't consume terminal lines
+    // that the SelectionPrompt needs for cursor save/restore to work correctly
+    AnsiConsole.Clear();
+    AnsiConsole.Write(new FigletText("Gallery")
+        .Color(Color.Cyan1)
+        .Centered());
+    AnsiConsole.Write(new Rule("[grey]Spectre.Console Feature Gallery[/]").RuleStyle(Style.Parse("cyan")));
+    AnsiConsole.WriteLine();
+
     var choices = modules.Select(m => $"{m.Name} — {m.Description}").ToList();
     choices.Add("Exit");
 
     var selection = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("[bold green]Select a demo to run:[/]")
-            .PageSize(15)
+            .PageSize(17)
             .HighlightStyle(Style.Parse("cyan bold"))
             .AddChoices(choices));
 
@@ -88,8 +90,6 @@ while (true)
     {
         break;
     }
-
-    AnsiConsole.Clear();
 }
 
 AnsiConsole.MarkupLine("[bold cyan]Thanks for exploring the Gallery![/]");
