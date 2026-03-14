@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\src\Extensions\Spectre.Console.ImageSharp\Spectre.Console.ImageSharp.csproj" />
     <ProjectReference Include="..\..\src\Extensions\Spectre.Console.Markdown\Spectre.Console.Markdown.csproj" />
     <ProjectReference Include="..\..\src\Extensions\Spectre.Console.Network\Spectre.Console.Network.csproj" />
+    <ProjectReference Include="..\..\src\Extensions\Spectre.Console.Tui\Spectre.Console.Tui.csproj" />
   </ItemGroup>
 
 </Project>

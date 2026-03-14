@@ -15,6 +15,7 @@ using Gallery.Demos.Unicode;
 using Gallery.Demos.Markdown;
 using Gallery.Demos.Wizard;
 using Gallery.Demos.NetworkConsole;
+using Gallery.Demos.Tui;
 using Spectre.Console;
 
 // Register all demo modules
@@ -36,6 +37,7 @@ var modules = new IDemoModule[]
     new NetworkConsoleDemo(),
     new UnicodeDemo(),
     new BugFixesDemo(),
+    new TuiDemo(),
 };
 
 while (true)
@@ -55,7 +57,7 @@ while (true)
     var selection = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("[bold green]Select a demo to run:[/]")
-            .PageSize(17)
+            .PageSize(19)
             .HighlightStyle(Style.Parse("cyan bold"))
             .AddChoices(choices));
 
