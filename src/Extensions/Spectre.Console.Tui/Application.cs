@@ -140,6 +140,16 @@ public sealed class Application : IDisposable
             return;
         }
 
+        // F-keys: route to StatusBar actions before focused widget
+        if (keyEvent.Key >= ConsoleKey.F1 && keyEvent.Key <= ConsoleKey.F24 && RootWidget != null)
+        {
+            var fKeyName = keyEvent.Key.ToString(); // "F1", "F2", ..., "F10"
+            if (TryInvokeStatusBarAction(RootWidget, fKeyName))
+            {
+                return;
+            }
+        }
+
         var focused = _focusManager.Focused;
         if (focused != null && focused.OnKeyEvent(keyEvent))
         {
@@ -151,6 +161,33 @@ public sealed class Application : IDisposable
             var direction = keyEvent.Shift ? FocusDirection.Backward : FocusDirection.Forward;
             _focusManager.MoveFocus(direction);
         }
+    }
+
+    private static bool TryInvokeStatusBarAction(Widget widget, string fKeyName)
+    {
+        if (widget is Widgets.Chrome.StatusBar statusBar)
+        {
+            for (var i = 0; i < statusBar.Items.Count; i++)
+            {
+                var item = statusBar.Items[i];
+                if (item.Key.Equals(fKeyName, StringComparison.OrdinalIgnoreCase) && item.Action != null)
+                {
+                    item.Action.Invoke();
+                    return true;
+                }
+            }
+        }
+
+        var children = widget.GetChildren();
+        for (var i = 0; i < children.Count; i++)
+        {
+            if (TryInvokeStatusBarAction(children[i], fKeyName))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void HandleMouseEvent(MouseEvent mouseEvent)

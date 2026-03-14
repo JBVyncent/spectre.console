@@ -13,9 +13,27 @@ var menuBar = new MenuBar();
 var fileMenu = new MenuItem("File");
 fileMenu.Activated += (_, _) => app.Quit();
 menuBar.AddItem(fileMenu);
-menuBar.AddItem(new MenuItem("Edit"));
-menuBar.AddItem(new MenuItem("View"));
-menuBar.AddItem(new MenuItem("Help"));
+
+var editMenu = new MenuItem("Edit");
+editMenu.Activated += (_, _) =>
+{
+    // Edit menu placeholder — future: cut/copy/paste operations
+};
+menuBar.AddItem(editMenu);
+
+var viewMenu = new MenuItem("View");
+viewMenu.Activated += (_, _) =>
+{
+    // View menu placeholder — future: toggle hidden files, sort order
+};
+menuBar.AddItem(viewMenu);
+
+var helpMenu = new MenuItem("Help");
+helpMenu.Activated += (_, _) =>
+{
+    // Help menu placeholder — future: about dialog, keybindings help
+};
+menuBar.AddItem(helpMenu);
 
 var leftPanel = CreateFilePanel("Left", Environment.CurrentDirectory);
 var rightPanel = CreateFilePanel("Right", Path.GetDirectoryName(Environment.CurrentDirectory) ?? "/");
@@ -29,12 +47,27 @@ var splitter = new Splitter
 };
 
 var statusBar = new StatusBar();
-statusBar.AddItem("F3", "View ");
-statusBar.AddItem("F5", "Copy ");
-statusBar.AddItem("F6", "Move ");
-statusBar.AddItem("F7", "MkDir");
-statusBar.AddItem("F8", "Del  ");
-statusBar.AddItem("F10", "Quit");
+statusBar.AddItem("F3", "View ", () =>
+{
+    // F3 View placeholder — future: open file in viewer
+});
+statusBar.AddItem("F5", "Copy ", () =>
+{
+    // F5 Copy placeholder — future: copy selected file
+});
+statusBar.AddItem("F6", "Move ", () =>
+{
+    // F6 Move placeholder — future: move/rename selected file
+});
+statusBar.AddItem("F7", "MkDir", () =>
+{
+    // F7 MkDir placeholder — future: create new directory
+});
+statusBar.AddItem("F8", "Del  ", () =>
+{
+    // F8 Delete placeholder — future: delete selected file
+});
+statusBar.AddItem("F10", "Quit", () => app.Quit());
 
 var root = new VStack();
 root.Add(menuBar);

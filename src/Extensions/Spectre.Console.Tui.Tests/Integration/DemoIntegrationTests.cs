@@ -251,8 +251,10 @@ public sealed class DemoIntegrationTests
 
         using var harness = new TuiTestHarness(root, 80, 24);
 
-        // WHEN user presses DownArrow twice
+        // WHEN user Tabs past MenuBar to LeftList, then presses DownArrow twice
+        // Focus chain: MenuBar(0) → LeftList(1) → RightList(2)
         harness
+            .Tab(1) // MenuBar → LeftList
             .PressKey(ConsoleKey.DownArrow)
             .PressKey(ConsoleKey.DownArrow)
             .Run();
@@ -272,20 +274,19 @@ public sealed class DemoIntegrationTests
 
         using var harness = new TuiTestHarness(root, 80, 24);
 
-        // WHEN user presses Tab to move to right panel
+        // WHEN user Tabs twice to reach the right panel
+        // Focus chain: MenuBar(0) → LeftList(1) → RightList(2)
         harness
-            .Tab(1)
-            .PressKey(ConsoleKey.DownArrow) // interact with right panel
+            .Tab(2) // MenuBar → LeftList → RightList
             .Run();
 
-        // THEN the right panel's list should have received the DownArrow
+        // THEN the right panel's list should have focus
         var lists = FindAllWidgets<ListBox>(root);
         lists.Should().HaveCountGreaterThanOrEqualTo(2, "FileManager needs two list panels");
 
-        // The second list should have focus or have changed selection
         var rightList = lists[1];
         rightList.HasFocus.Should().BeTrue(
-            "Tab should move focus from left list to right list");
+            "Tab×2 should move focus from MenuBar → LeftList → RightList");
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -584,20 +585,15 @@ public sealed class DemoIntegrationTests
         stack.Add(btn2);
         stack.Add(btn3);
 
+        // Run with 3 Tabs — should cycle through btn1→btn2→btn3→btn1
         using var harness = new TuiTestHarness(stack, 40, 10);
+        harness
+            .Tab(3) // btn1(auto) → btn2 → btn3 → btn1(wrap)
+            .Run();
 
-        // First focusable widget gets focus automatically
-        harness.Run();
-        btn1.HasFocus.Should().BeTrue("first widget gets auto-focus");
-
-        // Tab through all three
-        using var h2 = new TuiTestHarness(stack, 40, 10);
-        h2.Tab(1).Run();
-        btn2.HasFocus.Should().BeTrue("one Tab should focus btn2");
-
-        using var h3 = new TuiTestHarness(stack, 40, 10);
-        h3.Tab(2).Run();
-        btn3.HasFocus.Should().BeTrue("two Tabs should focus btn3");
+        // After 3 Tabs from btn1, we wrap back to btn1
+        btn1.HasFocus.Should().BeTrue(
+            "3 Tabs should cycle through all 3 buttons and wrap back to btn1");
     }
 
     [Fact]

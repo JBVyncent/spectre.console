@@ -14,7 +14,13 @@ var menuBar = new MenuBar();
 var fileMenu = new MenuItem("File");
 fileMenu.Activated += (_, _) => app.Quit();
 menuBar.AddItem(fileMenu);
-menuBar.AddItem(new MenuItem("View"));
+
+var viewMenu = new MenuItem("View");
+viewMenu.Activated += (_, _) =>
+{
+    // View menu placeholder — future: toggle columns, sort order
+};
+menuBar.AddItem(viewMenu);
 
 // System info panel
 var infoPanel = new TuiPanel

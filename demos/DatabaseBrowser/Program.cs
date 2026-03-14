@@ -13,9 +13,27 @@ var menuBar = new MenuBar();
 var connMenu = new MenuItem("Connection");
 connMenu.Activated += (_, _) => app.Quit();
 menuBar.AddItem(connMenu);
-menuBar.AddItem(new MenuItem("Query"));
-menuBar.AddItem(new MenuItem("Tools"));
-menuBar.AddItem(new MenuItem("Help"));
+
+var queryMenu = new MenuItem("Query");
+queryMenu.Activated += (_, _) =>
+{
+    // Query menu placeholder — future: execute query, clear results
+};
+menuBar.AddItem(queryMenu);
+
+var toolsMenu = new MenuItem("Tools");
+toolsMenu.Activated += (_, _) =>
+{
+    // Tools menu placeholder — future: export data, preferences
+};
+menuBar.AddItem(toolsMenu);
+
+var helpMenu = new MenuItem("Help");
+helpMenu.Activated += (_, _) =>
+{
+    // Help menu placeholder — future: about dialog, documentation
+};
+menuBar.AddItem(helpMenu);
 
 // Database tree
 var treeView = new Spectre.Console.Tui.Widgets.Controls.TreeView("Databases");
@@ -91,9 +109,15 @@ queryPanel.HeightConstraint = Constraint.Fixed(3);
 root.Add(queryPanel);
 
 var statusBar = new StatusBar();
-statusBar.AddItem("F5", "Execute");
-statusBar.AddItem("F9", "Connect");
-statusBar.AddItem("F10", "Quit  ");
+statusBar.AddItem("F5", "Execute", () =>
+{
+    // F5 Execute placeholder — future: run SQL from queryBox
+});
+statusBar.AddItem("F9", "Connect", () =>
+{
+    // F9 Connect placeholder — future: connection dialog
+});
+statusBar.AddItem("F10", "Quit  ", () => app.Quit());
 root.Add(statusBar);
 
 app.RootWidget = root;
