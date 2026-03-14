@@ -5,6 +5,7 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsPackable>true</IsPackable>
     <Description>A library that extends Spectre.Console with a full TUI (Terminal User Interface) framework.</Description>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <IsAotCompatible Condition="'$(TargetFramework)' != 'netstandard2.0'" >true</IsAotCompatible>

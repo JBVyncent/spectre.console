@@ -604,6 +604,23 @@ public sealed class DemoIntegrationTests
     }
 
     [Fact]
+    public void App_CtrlC_QuitsApplication()
+    {
+        var driver = new TestTerminalDriver(80, 24);
+        var app = new Application(driver) { TargetFps = 1000 };
+        app.RootWidget = new Label("Press Ctrl+C to quit");
+
+        // Warm-up + Ctrl+C
+        driver.EnqueueKey(ConsoleKey.Escape);
+        driver.EnqueueKey(ConsoleKey.C, '\x03', false, false, true);
+
+        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        app.Run(cts.Token);
+
+        driver.IsShutdown.Should().BeTrue("Ctrl+C should trigger clean shutdown");
+    }
+
+    [Fact]
     public void App_MouseClick_FocusesWidget()
     {
         var driver = new TestTerminalDriver(40, 10);

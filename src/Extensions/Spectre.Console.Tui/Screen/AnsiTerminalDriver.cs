@@ -20,6 +20,16 @@ internal sealed class AnsiTerminalDriver : ITerminalDriver
 
     public void Initialize()
     {
+        if (!_console.Profile.Capabilities.Interactive)
+        {
+            throw new InvalidOperationException(
+                "TUI applications require an interactive terminal. " +
+                "Cannot run in a non-interactive (piped/redirected) environment.");
+        }
+
+        // Capture Ctrl+C as input instead of killing the process
+        System.Console.TreatControlCAsInput = true;
+
         _console.WriteAnsi(writer => writer.EnterAltScreen());
         HideCursor();
     }
@@ -29,6 +39,9 @@ internal sealed class AnsiTerminalDriver : ITerminalDriver
         DisableMouse();
         ShowCursor();
         _console.WriteAnsi(writer => writer.ExitAltScreen());
+
+        // Restore default Ctrl+C behavior
+        System.Console.TreatControlCAsInput = false;
     }
 
     public void EnableMouse()
@@ -97,6 +110,12 @@ internal sealed class AnsiTerminalDriver : ITerminalDriver
     public InputEvent? ReadEvent(CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
+            return null;
+        }
+
+        // Non-blocking check — only read if a key is available
+        if (!_console.Input.IsKeyAvailable())
         {
             return null;
         }

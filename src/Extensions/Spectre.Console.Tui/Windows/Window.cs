@@ -12,20 +12,39 @@ public class Window : ContainerWidget
     private int _dragOffsetX;
     private int _dragOffsetY;
 
+    /// <summary>Gets or sets the window title text.</summary>
     public string Title { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the window can be resized.</summary>
     public bool Resizable { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the window can be moved by dragging the title bar.</summary>
     public bool Movable { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the window shows a close button.</summary>
     public bool Closable { get; set; } = true;
 
+    /// <summary>Gets or sets the style for the title bar.</summary>
     public Style TitleStyle { get; set; } = new Style(Color.White, Color.Blue);
+
+    /// <summary>Gets or sets the style for the window border when unfocused.</summary>
     public Style BorderStyle { get; set; } = new Style(Color.Grey);
+
+    /// <summary>Gets or sets the style for the window border when focused.</summary>
     public Style FocusedBorderStyle { get; set; } = new Style(Color.Cyan1);
+
+    /// <summary>Gets or sets the style for the content area.</summary>
     public Style ContentStyle { get; set; } = Style.Plain;
 
     internal int ZOrder { get; set; }
 
+    /// <summary>Occurs when the window's close button is clicked.</summary>
     public event EventHandler? Closed;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Window"/> class.
+    /// </summary>
+    /// <param name="title">The window title.</param>
     public Window(string title)
     {
         Title = title ?? string.Empty;
@@ -33,6 +52,7 @@ public class Window : ContainerWidget
         CanFocus = true;
     }
 
+    /// <inheritdoc />
     protected internal override Size MeasureContent(Size available)
     {
         // Border adds 2 to each dimension, title bar adds 1
@@ -52,6 +72,7 @@ public class Window : ContainerWidget
             Math.Min(contentHeight + 3, available.Height)); // +3 for title bar + top border + bottom border
     }
 
+    /// <inheritdoc />
     protected internal override void Arrange(Rect bounds)
     {
         base.Arrange(bounds);
@@ -78,6 +99,7 @@ public class Window : ContainerWidget
         }
     }
 
+    /// <inheritdoc />
     protected internal override void Render(IRenderSurface surface)
     {
         var borderStyle = HasFocus ? FocusedBorderStyle : BorderStyle;
@@ -150,6 +172,7 @@ public class Window : ContainerWidget
         }
     }
 
+    /// <inheritdoc />
     protected internal override bool OnMouseEvent(MouseEvent e)
     {
         var localCol = e.Column - Bounds.X;

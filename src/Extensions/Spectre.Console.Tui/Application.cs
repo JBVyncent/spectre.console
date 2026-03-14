@@ -133,6 +133,13 @@ public sealed class Application : IDisposable
 
     private void HandleKeyEvent(KeyEvent keyEvent)
     {
+        // Ctrl+C quits the application
+        if (keyEvent.Key == ConsoleKey.C && keyEvent.Control)
+        {
+            Quit();
+            return;
+        }
+
         var focused = _focusManager.Focused;
         if (focused != null && focused.OnKeyEvent(keyEvent))
         {
