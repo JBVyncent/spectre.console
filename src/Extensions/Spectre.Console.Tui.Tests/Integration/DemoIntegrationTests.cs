@@ -8,154 +8,680 @@ using Xunit;
 namespace Spectre.Console.Tui.Tests.Integration;
 
 /// <summary>
-/// End-to-end integration tests for TUI demo applications.
-/// Each test recreates the demo's widget tree, runs the Application with
-/// TestTerminalDriver, and asserts on rendered output + interaction behavior.
+/// BEHAVIORAL integration tests for TUI demo applications.
+///
+/// These tests verify user interactions, not just rendering.
+/// Every test follows: Given [setup] → When [user action] → Then [observable outcome].
+///
+/// PROCESS RULE: If a UI element displays a capability (e.g. "F5 Copy"),
+/// there MUST be a test that verifies that capability works.
+/// If the test fails, the feature is broken — not the test.
 /// </summary>
 [Trait("Category", "Integration")]
 public sealed class DemoIntegrationTests
 {
-    // ── Helper ──────────────────────────────────────────────────────
+    // ── Test Harness ─────────────────────────────────────────────────
+    // Wraps Application + TestTerminalDriver into a Playwright-like API
+    // that captures state at each interaction step.
 
-    /// <summary>
-    /// Runs the application for N input events then quits.
-    /// Returns the driver so tests can inspect the rendered buffer.
-    /// </summary>
-    private static TestTerminalDriver RunApp(
-        Widget root,
-        int width,
-        int height,
-        Action<TestTerminalDriver>? enqueueInputs = null,
-        bool mouseEnabled = true)
+    private sealed class TuiTestHarness : IDisposable
     {
-        var driver = new TestTerminalDriver(width, height);
-        var app = new Application(driver)
+        private readonly TestTerminalDriver _driver;
+        private readonly Application _app;
+
+        public TestTerminalDriver Driver => _driver;
+        public Application App => _app;
+
+        public TuiTestHarness(Widget root, int width = 80, int height = 24)
         {
-            RootWidget = root,
-            MouseEnabled = mouseEnabled,
-            TargetFps = 1000, // fast as possible for tests
-        };
-
-        // Enqueue a warm-up event (first loop iteration runs ProcessInput
-        // before layout/focus), then any test-specific inputs, then quit.
-        driver.EnqueueKey(ConsoleKey.Escape); // warm-up
-        enqueueInputs?.Invoke(driver);
-
-        // Run with short timeout — events are consumed then app exits via timeout
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
-        app.Run(cts.Token);
-
-        return driver;
-    }
-
-    private static string GetRow(TestTerminalDriver driver, int row)
-    {
-        return driver.GetText(row);
-    }
-
-    // ── FileManager Demo ────────────────────────────────────────────
-
-    [Fact]
-    public void FileManager_Renders_MenuBar_With_FileEditViewHelp()
-    {
-        var (root, _, _, _, _) = BuildFileManagerUI();
-        var driver = RunApp(root, 80, 24);
-
-        var menuRow = GetRow(driver, 0);
-        menuRow.Should().Contain("File");
-        menuRow.Should().Contain("Edit");
-        menuRow.Should().Contain("View");
-        menuRow.Should().Contain("Help");
-    }
-
-    [Fact]
-    public void FileManager_Renders_SplitterWithTwoPanels()
-    {
-        var (root, _, leftPanel, rightPanel, _) = BuildFileManagerUI();
-        var driver = RunApp(root, 80, 24);
-
-        // Left panel title should be somewhere in the rendered output
-        var foundLeftTitle = false;
-        var foundRightTitle = false;
-        for (var row = 0; row < 24; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("Left:")) foundLeftTitle = true;
-            if (text.Contains("Right:")) foundRightTitle = true;
-        }
-
-        foundLeftTitle.Should().BeTrue("left panel title should be rendered");
-        foundRightTitle.Should().BeTrue("right panel title should be rendered");
-    }
-
-    [Fact]
-    public void FileManager_Renders_StatusBar_WithFunctionKeys()
-    {
-        var (root, _, _, _, _) = BuildFileManagerUI();
-        var driver = RunApp(root, 80, 24);
-
-        var lastRow = GetRow(driver, 23);
-        lastRow.Should().Contain("F3");
-        lastRow.Should().Contain("F10");
-    }
-
-    [Fact]
-    public void FileManager_ListBox_Navigates_WithArrowKeys()
-    {
-        var (root, _, _, _, leftList) = BuildFileManagerUI();
-        var driver = RunApp(root, 80, 24, d =>
-        {
-            // Navigate down in the list
-            d.EnqueueKey(ConsoleKey.DownArrow);
-            d.EnqueueKey(ConsoleKey.DownArrow);
-        });
-
-        // The list should have rendered items and selection should have moved
-        // We verify the app didn't crash and rendered content
-        var foundItem = false;
-        for (var row = 0; row < 24; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("Item1") || text.Contains("Item2"))
+            _driver = new TestTerminalDriver(width, height);
+            _app = new Application(_driver)
             {
-                foundItem = true;
-                break;
-            }
+                RootWidget = root,
+                MouseEnabled = true,
+                TargetFps = 1000,
+            };
+
+            // Warm-up: first loop iteration runs ProcessInput before
+            // layout/focus chain is built. Burn it with Escape.
+            _driver.EnqueueKey(ConsoleKey.Escape);
         }
 
-        foundItem.Should().BeTrue("list items should be rendered");
+        /// <summary>Enqueue a key press.</summary>
+        public TuiTestHarness PressKey(ConsoleKey key, char keyChar = '\0',
+            bool shift = false, bool alt = false, bool control = false)
+        {
+            _driver.EnqueueKey(key, keyChar, shift, alt, control);
+            return this;
+        }
+
+        /// <summary>Enqueue a mouse click at screen coordinates.</summary>
+        public TuiTestHarness Click(int col, int row)
+        {
+            _driver.EnqueueInput(new MouseEvent(
+                MouseButton.Left, MouseEventType.Press, col, row, false, false, false));
+            return this;
+        }
+
+        /// <summary>Enqueue Tab presses to move focus forward.</summary>
+        public TuiTestHarness Tab(int count = 1)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                _driver.EnqueueKey(ConsoleKey.Tab);
+            }
+
+            return this;
+        }
+
+        /// <summary>Type a string as individual key presses.</summary>
+        public TuiTestHarness Type(string text)
+        {
+            foreach (var ch in text)
+            {
+                var key = char.ToUpper(ch) switch
+                {
+                    >= 'A' and <= 'Z' => (ConsoleKey)((int)ConsoleKey.A + (char.ToUpper(ch) - 'A')),
+                    >= '0' and <= '9' => (ConsoleKey)((int)ConsoleKey.D0 + (ch - '0')),
+                    ' ' => ConsoleKey.Spacebar,
+                    '*' => ConsoleKey.Multiply,
+                    _ => ConsoleKey.NoName,
+                };
+                _driver.EnqueueKey(key, ch);
+            }
+
+            return this;
+        }
+
+        /// <summary>Run the app and let all enqueued events process.</summary>
+        public TuiTestHarness Run(int timeoutMs = 500)
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(timeoutMs));
+            _app.Run(cts.Token);
+            return this;
+        }
+
+        /// <summary>Get all rendered text as a single string for searching.</summary>
+        public string GetScreenText()
+        {
+            var lines = new System.Text.StringBuilder();
+            for (var row = 0; row < _driver.Height; row++)
+            {
+                lines.AppendLine(_driver.GetText(row));
+            }
+
+            return lines.ToString();
+        }
+
+        /// <summary>Get a specific row's text.</summary>
+        public string GetRow(int row) => _driver.GetText(row);
+
+        /// <summary>Check if any row contains the text.</summary>
+        public bool ScreenContains(string text)
+        {
+            for (var row = 0; row < _driver.Height; row++)
+            {
+                if (_driver.GetText(row).Contains(text))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void Dispose() => _app.Dispose();
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // FILEMANAGER BEHAVIORAL TESTS
+    // ════════════════════════════════════════════════════════════════════
+
+    // ── Menu Behavior ───────────────────────────────────────────────
+
+    [Fact]
+    public void FileManager_Menu_File_Activate_QuitsApp()
+    {
+        // GIVEN a FileManager with File menu wired to Quit
+        var quitCalled = false;
+        var (root, app) = BuildFileManagerUI(onQuit: () => quitCalled = true);
+
+        using var harness = new TuiTestHarness(root, 80, 24);
+
+        // WHEN user navigates to File and presses Enter
+        harness
+            .PressKey(ConsoleKey.RightArrow) // select File (index 0)
+            .PressKey(ConsoleKey.Enter)      // activate File
+            .Run();
+
+        // THEN the quit action fires
+        quitCalled.Should().BeTrue(
+            "pressing Enter on 'File' menu should trigger the Activated handler which calls Quit");
     }
 
     [Fact]
-    public void FileManager_TabNavigation_MovesFocusBetweenPanels()
+    public void FileManager_Menu_Edit_Activate_HasHandler()
     {
-        var (root, _, _, _, _) = BuildFileManagerUI();
-        var driver = RunApp(root, 80, 24, d =>
-        {
-            // Tab should move focus from left panel to right panel
-            d.EnqueueKey(ConsoleKey.Tab);
-        });
+        // GIVEN a FileManager with Edit menu
+        var editActivated = false;
+        var (root, _) = BuildFileManagerUI(onEdit: () => editActivated = true);
 
-        // App should handle tab navigation without crashing
-        // and render both panels
-        var foundContent = false;
-        for (var row = 0; row < 24; row++)
-        {
-            if (GetRow(driver, row).Trim().Length > 0)
-            {
-                foundContent = true;
-                break;
-            }
-        }
+        using var harness = new TuiTestHarness(root, 80, 24);
 
-        foundContent.Should().BeTrue("content should be rendered after tab navigation");
+        // WHEN user navigates to Edit and presses Enter
+        harness
+            .PressKey(ConsoleKey.RightArrow) // select File
+            .PressKey(ConsoleKey.RightArrow) // select Edit
+            .PressKey(ConsoleKey.Enter)      // activate Edit
+            .Run();
+
+        // THEN the Edit handler fires
+        editActivated.Should().BeTrue(
+            "every menu item shown to the user must have a working handler — 'Edit' is displayed but has no action");
     }
 
-    private static (VStack root, MenuBar menu, TuiPanel left, TuiPanel right, ListBox leftList) BuildFileManagerUI()
+    [Fact]
+    public void FileManager_Menu_AltF_Shortcut_ActivatesFile()
+    {
+        // GIVEN a FileManager
+        var fileActivated = false;
+        var (root, _) = BuildFileManagerUI(onQuit: () => fileActivated = true);
+
+        using var harness = new TuiTestHarness(root, 80, 24);
+
+        // WHEN user presses Alt+F
+        harness
+            .PressKey(ConsoleKey.F, 'f', alt: true)
+            .Run();
+
+        // THEN File menu activates
+        fileActivated.Should().BeTrue(
+            "Alt+F should activate the File menu item");
+    }
+
+    // ── StatusBar F-Key Behavior ────────────────────────────────────
+
+    [Fact]
+    public void FileManager_F10_QuitsApp()
+    {
+        // GIVEN a FileManager with F10=Quit in the status bar
+        var quitCalled = false;
+        var (root, _) = BuildFileManagerUI(onF10Quit: () => quitCalled = true);
+
+        using var harness = new TuiTestHarness(root, 80, 24);
+
+        // WHEN user presses F10 (regardless of which widget has focus)
+        harness
+            .PressKey(ConsoleKey.F10)
+            .Run();
+
+        // THEN the F10 quit action fires
+        quitCalled.Should().BeTrue(
+            "F10 is displayed as 'Quit' in the status bar — pressing F10 must invoke it. " +
+            "Currently, F-keys are not routed to StatusBar actions. " +
+            "This requires Application-level F-key → StatusBar routing.");
+    }
+
+    [Fact]
+    public void FileManager_F5_CopyAction_Fires()
+    {
+        // GIVEN a FileManager with F5=Copy in the status bar
+        var copyCalled = false;
+        var (root, _) = BuildFileManagerUI(onF5Copy: () => copyCalled = true);
+
+        using var harness = new TuiTestHarness(root, 80, 24);
+
+        // WHEN user presses F5
+        harness
+            .PressKey(ConsoleKey.F5)
+            .Run();
+
+        // THEN the copy action fires
+        copyCalled.Should().BeTrue(
+            "F5 is displayed as 'Copy' in the status bar — pressing F5 must invoke it");
+    }
+
+    // ── List Navigation Behavior ────────────────────────────────────
+
+    [Fact]
+    public void FileManager_LeftList_DownArrow_ChangesSelection()
+    {
+        // GIVEN a FileManager with items in the left list
+        var (root, _) = BuildFileManagerUI();
+
+        using var harness = new TuiTestHarness(root, 80, 24);
+
+        // WHEN user presses DownArrow twice
+        harness
+            .PressKey(ConsoleKey.DownArrow)
+            .PressKey(ConsoleKey.DownArrow)
+            .Run();
+
+        // THEN selection moved (verify via widget state, not just rendering)
+        var leftList = FindWidget<ListBox>(root);
+        leftList.Should().NotBeNull("left panel should contain a ListBox");
+        leftList!.SelectedIndex.Should().BeGreaterThan(0,
+            "pressing DownArrow should move selection down in the list");
+    }
+
+    [Fact]
+    public void FileManager_Tab_MovesFocusToRightPanel()
+    {
+        // GIVEN a FileManager with two panels
+        var (root, _) = BuildFileManagerUI();
+
+        using var harness = new TuiTestHarness(root, 80, 24);
+
+        // WHEN user presses Tab to move to right panel
+        harness
+            .Tab(1)
+            .PressKey(ConsoleKey.DownArrow) // interact with right panel
+            .Run();
+
+        // THEN the right panel's list should have received the DownArrow
+        var lists = FindAllWidgets<ListBox>(root);
+        lists.Should().HaveCountGreaterThanOrEqualTo(2, "FileManager needs two list panels");
+
+        // The second list should have focus or have changed selection
+        var rightList = lists[1];
+        rightList.HasFocus.Should().BeTrue(
+            "Tab should move focus from left list to right list");
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // SYSTEMMONITOR BEHAVIORAL TESTS
+    // ════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public void SystemMonitor_Menu_File_Activate_Quits()
+    {
+        var quitCalled = false;
+        var (root, _) = BuildSystemMonitorUI(onQuit: () => quitCalled = true);
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .PressKey(ConsoleKey.RightArrow) // select File
+            .PressKey(ConsoleKey.Enter)
+            .Run();
+
+        quitCalled.Should().BeTrue(
+            "activating File menu should quit the application");
+    }
+
+    [Fact]
+    public void SystemMonitor_ProcessGrid_DownArrow_MovesSelection()
+    {
+        var (root, grid) = BuildSystemMonitorUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        // Tab to the process grid, then navigate
+        harness
+            .Tab(1) // past menubar to grid
+            .PressKey(ConsoleKey.DownArrow)
+            .PressKey(ConsoleKey.DownArrow)
+            .Run();
+
+        grid.SelectedRow.Should().Be(2,
+            "two DownArrow presses should move selection to row 2");
+    }
+
+    [Fact]
+    public void SystemMonitor_ProcessGrid_Enter_ActivatesRow()
+    {
+        var activatedRow = -1;
+        var (root, grid) = BuildSystemMonitorUI();
+        grid.RowActivated += (_, row) => activatedRow = row;
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .Tab(1)
+            .PressKey(ConsoleKey.DownArrow) // row 1
+            .PressKey(ConsoleKey.Enter)
+            .Run();
+
+        activatedRow.Should().Be(1,
+            "pressing Enter on a DataGrid row should fire RowActivated");
+    }
+
+    [Fact]
+    public void SystemMonitor_CtrlC_Quits()
+    {
+        var (root, _) = BuildSystemMonitorUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .PressKey(ConsoleKey.C, '\x03', control: true)
+            .Run();
+
+        harness.Driver.IsShutdown.Should().BeTrue(
+            "Ctrl+C should quit the application cleanly");
+    }
+
+    [Fact]
+    public void SystemMonitor_Renders_AllSections()
+    {
+        var (root, _) = BuildSystemMonitorUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+        harness.Run();
+
+        // Verify ALL sections are visible — not just one
+        harness.ScreenContains("System Information").Should().BeTrue("info panel must render");
+        harness.ScreenContains("Resources").Should().BeTrue("resources panel must render");
+        harness.ScreenContains("Processes").Should().BeTrue("process panel must render");
+        harness.ScreenContains("PID").Should().BeTrue("grid headers must render");
+        harness.ScreenContains("chrome").Should().BeTrue("grid data must render");
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // DATABASEBROWSER BEHAVIORAL TESTS
+    // ════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public void DatabaseBrowser_Menu_Connection_Activate_Quits()
+    {
+        var quitCalled = false;
+        var (root, _, _, _) = BuildDatabaseBrowserUI(onQuit: () => quitCalled = true);
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .PressKey(ConsoleKey.RightArrow) // select Connection
+            .PressKey(ConsoleKey.Enter)
+            .Run();
+
+        quitCalled.Should().BeTrue(
+            "activating Connection menu should quit the application");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_Menu_Query_Activate_HasHandler()
+    {
+        var queryActivated = false;
+        var (root, _, _, _) = BuildDatabaseBrowserUI(onQuery: () => queryActivated = true);
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .PressKey(ConsoleKey.RightArrow) // Connection
+            .PressKey(ConsoleKey.RightArrow) // Query
+            .PressKey(ConsoleKey.Enter)
+            .Run();
+
+        queryActivated.Should().BeTrue(
+            "every displayed menu item must have a working handler — 'Query' is shown but does nothing");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_TreeView_RightArrow_ExpandsNode()
+    {
+        var (root, tree, _, _) = BuildDatabaseBrowserUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        // Tab to tree, navigate down to Northwind, expand it
+        harness
+            .Tab(1) // focus tree
+            .PressKey(ConsoleKey.DownArrow)  // Northwind
+            .PressKey(ConsoleKey.RightArrow) // expand
+            .Run();
+
+        // Verify: the expanded node's children should be in the flat list
+        var northwind = tree.Root.Children[0]; // "Northwind"
+        northwind.IsExpanded.Should().BeTrue(
+            "pressing RightArrow on a tree node with children should expand it");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_TreeView_LeftArrow_CollapsesNode()
+    {
+        var (root, tree, _, _) = BuildDatabaseBrowserUI();
+
+        // Pre-expand Northwind
+        tree.Root.Children[0].IsExpanded = true;
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .Tab(1)
+            .PressKey(ConsoleKey.DownArrow)  // Northwind
+            .PressKey(ConsoleKey.LeftArrow)  // collapse
+            .Run();
+
+        tree.Root.Children[0].IsExpanded.Should().BeFalse(
+            "pressing LeftArrow on an expanded tree node should collapse it");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_TreeView_ExpandedNode_ShowsChildren_OnScreen()
+    {
+        var (root, tree, _, _) = BuildDatabaseBrowserUI();
+
+        // Pre-expand Northwind and its Tables child
+        tree.Root.Children[0].IsExpanded = true;
+        tree.Root.Children[0].Children[0].IsExpanded = true; // Tables
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+        harness.Run();
+
+        // The tree should show "Customers" as a visible child of Tables
+        harness.ScreenContains("Customers").Should().BeTrue(
+            "when Northwind > Tables is expanded, 'Customers' should be visible on screen");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_DataGrid_DownArrow_ChangesSelection()
+    {
+        var (root, _, grid, _) = BuildDatabaseBrowserUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        // Tab to grid and navigate
+        harness
+            .Tab(2) // past menu and tree to grid
+            .PressKey(ConsoleKey.DownArrow)
+            .PressKey(ConsoleKey.DownArrow)
+            .Run();
+
+        grid.SelectedRow.Should().Be(2,
+            "two DownArrow presses should move DataGrid selection to row 2");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_TextBox_AcceptsInput()
+    {
+        var (root, _, _, queryBox) = BuildDatabaseBrowserUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        // Tab to query box and type
+        harness
+            .Tab(3) // past menu, tree, grid to textbox
+            .Type("SELECT")
+            .Run();
+
+        queryBox.Text.Should().Be("SELECT",
+            "typing characters while TextBox is focused should insert them");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_F5_Execute_Fires()
+    {
+        var executeCalled = false;
+        var (root, _, _, _) = BuildDatabaseBrowserUI(onF5Execute: () => executeCalled = true);
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .PressKey(ConsoleKey.F5)
+            .Run();
+
+        executeCalled.Should().BeTrue(
+            "F5 is displayed as 'Execute' — pressing F5 must invoke it. " +
+            "Currently F-keys are not routed to StatusBar actions.");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_F10_Quit_Fires()
+    {
+        var quitCalled = false;
+        var (root, _, _, _) = BuildDatabaseBrowserUI(onF10Quit: () => quitCalled = true);
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+
+        harness
+            .PressKey(ConsoleKey.F10)
+            .Run();
+
+        quitCalled.Should().BeTrue(
+            "F10 is displayed as 'Quit' — pressing F10 must invoke it");
+    }
+
+    [Fact]
+    public void DatabaseBrowser_Renders_AllSections()
+    {
+        var (root, _, _, _) = BuildDatabaseBrowserUI();
+
+        using var harness = new TuiTestHarness(root, 100, 30);
+        harness.Run();
+
+        harness.ScreenContains("Connection").Should().BeTrue("menu bar must render");
+        harness.ScreenContains("Objects").Should().BeTrue("tree panel must render");
+        harness.ScreenContains("Data:").Should().BeTrue("data panel must render");
+        harness.ScreenContains("Query").Should().BeTrue("query panel must render");
+        harness.ScreenContains("F5").Should().BeTrue("status bar must render");
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // CROSS-CUTTING BEHAVIORAL TESTS
+    // ════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public void App_CtrlC_QuitsApplication()
+    {
+        using var harness = new TuiTestHarness(new Label("test"), 80, 24);
+
+        harness
+            .PressKey(ConsoleKey.C, '\x03', control: true)
+            .Run();
+
+        harness.Driver.IsShutdown.Should().BeTrue(
+            "Ctrl+C should trigger clean shutdown");
+    }
+
+    [Fact]
+    public void App_Tab_CyclesFocusThroughAllFocusableWidgets()
+    {
+        var stack = new VStack();
+        var btn1 = new Button("A");
+        var btn2 = new Button("B");
+        var btn3 = new Button("C");
+        stack.Add(btn1);
+        stack.Add(btn2);
+        stack.Add(btn3);
+
+        using var harness = new TuiTestHarness(stack, 40, 10);
+
+        // First focusable widget gets focus automatically
+        harness.Run();
+        btn1.HasFocus.Should().BeTrue("first widget gets auto-focus");
+
+        // Tab through all three
+        using var h2 = new TuiTestHarness(stack, 40, 10);
+        h2.Tab(1).Run();
+        btn2.HasFocus.Should().BeTrue("one Tab should focus btn2");
+
+        using var h3 = new TuiTestHarness(stack, 40, 10);
+        h3.Tab(2).Run();
+        btn3.HasFocus.Should().BeTrue("two Tabs should focus btn3");
+    }
+
+    [Fact]
+    public void App_MouseClick_FocusesWidget()
+    {
+        var stack = new VStack();
+        var btn1 = new Button("A");
+        var btn2 = new Button("B");
+        stack.Add(btn1);
+        stack.Add(btn2);
+
+        using var harness = new TuiTestHarness(stack, 40, 10);
+
+        // Click on btn2's row
+        harness
+            .Click(2, 1)
+            .Run();
+
+        btn2.HasFocus.Should().BeTrue(
+            "clicking on a widget should give it focus");
+    }
+
+    [Fact]
+    public void App_Button_Enter_FiresClicked()
+    {
+        var clicked = false;
+        var btn = new Button("OK");
+        btn.Clicked += (_, _) => clicked = true;
+
+        using var harness = new TuiTestHarness(btn, 40, 5);
+
+        harness
+            .PressKey(ConsoleKey.Enter)
+            .Run();
+
+        clicked.Should().BeTrue(
+            "pressing Enter on a focused Button must fire Clicked");
+    }
+
+    [Fact]
+    public void App_CheckBox_Space_TogglesChecked()
+    {
+        var cb = new CheckBox("Option");
+
+        using var harness = new TuiTestHarness(cb, 40, 5);
+
+        harness
+            .PressKey(ConsoleKey.Spacebar)
+            .Run();
+
+        cb.IsChecked.Should().BeTrue(
+            "pressing Space on a focused CheckBox must toggle it");
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // WIDGET TREE BUILDERS
+    // ════════════════════════════════════════════════════════════════════
+    // These mirror the actual demo Program.cs files but with deterministic
+    // test data and injectable callbacks. Any mismatch between these and
+    // the real demos is itself a bug.
+
+    private static (VStack root, Application? app) BuildFileManagerUI(
+        Action? onQuit = null,
+        Action? onEdit = null,
+        Action? onF5Copy = null,
+        Action? onF10Quit = null)
     {
         var menuBar = new MenuBar();
-        menuBar.AddItem(new MenuItem("File"));
-        menuBar.AddItem(new MenuItem("Edit"));
+
+        var fileMenu = new MenuItem("File");
+        if (onQuit != null)
+        {
+            fileMenu.Activated += (_, _) => onQuit();
+        }
+
+        menuBar.AddItem(fileMenu);
+
+        var editMenu = new MenuItem("Edit");
+        if (onEdit != null)
+        {
+            editMenu.Activated += (_, _) => onEdit();
+        }
+
+        menuBar.AddItem(editMenu);
         menuBar.AddItem(new MenuItem("View"));
         menuBar.AddItem(new MenuItem("Help"));
 
@@ -163,8 +689,8 @@ public sealed class DemoIntegrationTests
         leftList.AddItem("/..");
         leftList.AddItem("/Documents");
         leftList.AddItem("/Downloads");
-        leftList.AddItem(" Item1       4K");
-        leftList.AddItem(" Item2       8K");
+        leftList.AddItem(" readme.md      4K");
+        leftList.AddItem(" config.json    2K");
 
         var leftPanel = new TuiPanel
         {
@@ -176,7 +702,7 @@ public sealed class DemoIntegrationTests
         var rightList = new ListBox();
         rightList.AddItem("/..");
         rightList.AddItem("/Projects");
-        rightList.AddItem(" readme.md    2K");
+        rightList.AddItem(" notes.txt     1K");
 
         var rightPanel = new TuiPanel
         {
@@ -194,9 +720,10 @@ public sealed class DemoIntegrationTests
         };
 
         var statusBar = new StatusBar();
-        statusBar.AddItem("F3", "View ");
-        statusBar.AddItem("F5", "Copy ");
-        statusBar.AddItem("F10", "Quit");
+        statusBar.AddItem("F3", "View ", null);
+        statusBar.AddItem("F5", "Copy ", onF5Copy);
+        statusBar.AddItem("F6", "Move ", null);
+        statusBar.AddItem("F10", "Quit", onF10Quit);
 
         var root = new VStack();
         root.Add(menuBar);
@@ -204,113 +731,20 @@ public sealed class DemoIntegrationTests
         root.Add(splitter);
         root.Add(statusBar);
 
-        return (root, menuBar, leftPanel, rightPanel, leftList);
+        return (root, null);
     }
 
-    // ── SystemMonitor Demo ──────────────────────────────────────────
-
-    [Fact]
-    public void SystemMonitor_Renders_MenuBar()
-    {
-        var (root, _, _, _) = BuildSystemMonitorUI();
-        var driver = RunApp(root, 100, 30);
-
-        var menuRow = GetRow(driver, 0);
-        menuRow.Should().Contain("File");
-        menuRow.Should().Contain("View");
-    }
-
-    [Fact]
-    public void SystemMonitor_Renders_SystemInfoPanel()
-    {
-        var (root, _, _, _) = BuildSystemMonitorUI();
-        var driver = RunApp(root, 100, 30);
-
-        var foundSysInfo = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("System Information"))
-            {
-                foundSysInfo = true;
-                break;
-            }
-        }
-
-        foundSysInfo.Should().BeTrue("system info panel title should be visible");
-    }
-
-    [Fact]
-    public void SystemMonitor_Renders_ResourceBars()
-    {
-        var (root, _, _, _) = BuildSystemMonitorUI();
-        var driver = RunApp(root, 100, 30);
-
-        var foundResources = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("Resources"))
-            {
-                foundResources = true;
-                break;
-            }
-        }
-
-        foundResources.Should().BeTrue("resources panel should be visible");
-    }
-
-    [Fact]
-    public void SystemMonitor_Renders_ProcessGrid_WithHeaders()
-    {
-        var (root, _, _, _) = BuildSystemMonitorUI();
-        var driver = RunApp(root, 100, 30);
-
-        var foundHeaders = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("PID") && text.Contains("Name"))
-            {
-                foundHeaders = true;
-                break;
-            }
-        }
-
-        foundHeaders.Should().BeTrue("process grid headers should be visible");
-    }
-
-    [Fact]
-    public void SystemMonitor_DataGrid_Navigates_DownArrow()
-    {
-        var (root, _, processGrid, _) = BuildSystemMonitorUI();
-        var driver = RunApp(root, 100, 30, d =>
-        {
-            // Tab to get to process grid, then navigate
-            d.EnqueueKey(ConsoleKey.Tab);
-            d.EnqueueKey(ConsoleKey.Tab);
-            d.EnqueueKey(ConsoleKey.DownArrow);
-        });
-
-        // Grid data should be rendered
-        var foundData = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("chrome") || text.Contains("explorer") || text.Contains("svchost"))
-            {
-                foundData = true;
-                break;
-            }
-        }
-
-        foundData.Should().BeTrue("process data should be rendered");
-    }
-
-    private static (VStack root, MenuBar menu, DataGrid processGrid, StatusBar status) BuildSystemMonitorUI()
+    private static (VStack root, DataGrid processGrid) BuildSystemMonitorUI(
+        Action? onQuit = null)
     {
         var menuBar = new MenuBar();
-        menuBar.AddItem(new MenuItem("File"));
+        var fileMenu = new MenuItem("File");
+        if (onQuit != null)
+        {
+            fileMenu.Activated += (_, _) => onQuit();
+        }
+
+        menuBar.AddItem(fileMenu);
         menuBar.AddItem(new MenuItem("View"));
 
         var infoPanel = new TuiPanel
@@ -361,159 +795,33 @@ public sealed class DemoIntegrationTests
         var statusBar = new StatusBar { Text = "Press Ctrl+C to exit" };
         root.Add(statusBar);
 
-        return (root, menuBar, processGrid, statusBar);
+        return (root, processGrid);
     }
 
-    // ── DatabaseBrowser Demo ────────────────────────────────────────
-
-    [Fact]
-    public void DatabaseBrowser_Renders_MenuBar()
-    {
-        var (root, _, _, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30);
-
-        var menuRow = GetRow(driver, 0);
-        menuRow.Should().Contain("Connection");
-        menuRow.Should().Contain("Query");
-        menuRow.Should().Contain("Tools");
-        menuRow.Should().Contain("Help");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_Renders_TreeView_WithDatabases()
-    {
-        var (root, _, _, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30);
-
-        var foundDb = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("Databases") || text.Contains("Northwind"))
-            {
-                foundDb = true;
-                break;
-            }
-        }
-
-        foundDb.Should().BeTrue("database tree should be visible");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_Renders_DataGrid_WithCustomerData()
-    {
-        var (root, _, _, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30);
-
-        var foundData = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("ALFKI") || text.Contains("Alfreds"))
-            {
-                foundData = true;
-                break;
-            }
-        }
-
-        foundData.Should().BeTrue("customer data should be visible in the grid");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_Renders_QueryPanel_WithPlaceholder()
-    {
-        var (root, _, _, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30);
-
-        var foundQuery = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("Query"))
-            {
-                foundQuery = true;
-                break;
-            }
-        }
-
-        foundQuery.Should().BeTrue("query panel should be visible");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_Renders_StatusBar_WithFunctionKeys()
-    {
-        var (root, _, _, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30);
-
-        var lastRow = GetRow(driver, 29);
-        lastRow.Should().Contain("F5");
-        lastRow.Should().Contain("F10");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_TreeView_ExpandCollapse()
-    {
-        var (root, _, treeView, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30, d =>
-        {
-            // Navigate to tree and expand
-            d.EnqueueKey(ConsoleKey.DownArrow); // select first child
-            d.EnqueueKey(ConsoleKey.Enter); // expand/collapse
-        });
-
-        // Tree should have rendered with expand/collapse indicators ([+] or [-])
-        var foundIndicator = false;
-        for (var row = 0; row < 30; row++)
-        {
-            var text = GetRow(driver, row);
-            if (text.Contains("[+]") || text.Contains("[-]"))
-            {
-                foundIndicator = true;
-                break;
-            }
-        }
-
-        foundIndicator.Should().BeTrue("tree expand/collapse indicators ([+]/[-]) should be visible");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_TextBox_AcceptsInput()
-    {
-        var (root, _, _, queryBox, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30, d =>
-        {
-            // Tab to query box and type
-            d.EnqueueKey(ConsoleKey.Tab);
-            d.EnqueueKey(ConsoleKey.Tab);
-            d.EnqueueKey(ConsoleKey.Tab);
-            d.EnqueueKey(ConsoleKey.S, 'S');
-            d.EnqueueKey(ConsoleKey.E, 'E');
-            d.EnqueueKey(ConsoleKey.L, 'L');
-        });
-
-        queryBox.Text.Should().Be("SEL");
-    }
-
-    [Fact]
-    public void DatabaseBrowser_MouseClick_OnStatusBar()
-    {
-        var (root, _, _, _, _) = BuildDatabaseBrowserUI();
-        var driver = RunApp(root, 100, 30, d =>
-        {
-            // Click on status bar area
-            d.EnqueueInput(new MouseEvent(
-                MouseButton.Left, MouseEventType.Press, 5, 29, false, false, false));
-        });
-
-        // App should handle mouse click without crashing
-        driver.IsShutdown.Should().BeTrue("app should shut down cleanly after timeout");
-    }
-
-    private static (VStack root, MenuBar menu, Spectre.Console.Tui.Widgets.Controls.TreeView tree, TextBox queryBox, DataGrid grid) BuildDatabaseBrowserUI()
+    private static (VStack root, Spectre.Console.Tui.Widgets.Controls.TreeView tree,
+        DataGrid grid, TextBox queryBox) BuildDatabaseBrowserUI(
+        Action? onQuit = null,
+        Action? onQuery = null,
+        Action? onF5Execute = null,
+        Action? onF10Quit = null)
     {
         var menuBar = new MenuBar();
-        menuBar.AddItem(new MenuItem("Connection"));
-        menuBar.AddItem(new MenuItem("Query"));
+
+        var connMenu = new MenuItem("Connection");
+        if (onQuit != null)
+        {
+            connMenu.Activated += (_, _) => onQuit();
+        }
+
+        menuBar.AddItem(connMenu);
+
+        var queryMenu = new MenuItem("Query");
+        if (onQuery != null)
+        {
+            queryMenu.Activated += (_, _) => onQuery();
+        }
+
+        menuBar.AddItem(queryMenu);
         menuBar.AddItem(new MenuItem("Tools"));
         menuBar.AddItem(new MenuItem("Help"));
 
@@ -570,133 +878,54 @@ public sealed class DemoIntegrationTests
         root.Add(queryPanel);
 
         var statusBar = new StatusBar();
-        statusBar.AddItem("F5", "Execute");
-        statusBar.AddItem("F9", "Connect");
-        statusBar.AddItem("F10", "Quit  ");
+        statusBar.AddItem("F5", "Execute", onF5Execute);
+        statusBar.AddItem("F9", "Connect", null);
+        statusBar.AddItem("F10", "Quit  ", onF10Quit);
         root.Add(statusBar);
 
-        return (root, menuBar, treeView, queryBox, dataGrid);
+        return (root, treeView, dataGrid, queryBox);
     }
 
-    // ── Cross-Cutting Integration ───────────────────────────────────
+    // ════════════════════════════════════════════════════════════════════
+    // WIDGET TREE TRAVERSAL HELPERS
+    // ════════════════════════════════════════════════════════════════════
 
-    [Fact]
-    public void App_Quit_ShutdownCleanly()
+    private static T? FindWidget<T>(Widget root) where T : Widget
     {
-        var driver = new TestTerminalDriver(80, 24);
-        var quitCalled = false;
-        var app = new Application(driver) { TargetFps = 1000 };
-
-        var btn = new Button("Quit");
-        btn.Clicked += (_, _) => { quitCalled = true; app.Quit(); };
-        app.RootWidget = btn;
-
-        // Warm-up + Enter to click button
-        driver.EnqueueKey(ConsoleKey.Escape);
-        driver.EnqueueKey(ConsoleKey.Enter);
-
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
-        app.Run(cts.Token);
-
-        quitCalled.Should().BeTrue("button click should trigger quit");
-        driver.IsInitialized.Should().BeTrue("driver was initialized");
-        driver.IsShutdown.Should().BeTrue("driver was shut down");
-    }
-
-    [Fact]
-    public void App_CtrlC_QuitsApplication()
-    {
-        var driver = new TestTerminalDriver(80, 24);
-        var app = new Application(driver) { TargetFps = 1000 };
-        app.RootWidget = new Label("Press Ctrl+C to quit");
-
-        // Warm-up + Ctrl+C
-        driver.EnqueueKey(ConsoleKey.Escape);
-        driver.EnqueueKey(ConsoleKey.C, '\x03', false, false, true);
-
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
-        app.Run(cts.Token);
-
-        driver.IsShutdown.Should().BeTrue("Ctrl+C should trigger clean shutdown");
-    }
-
-    [Fact]
-    public void App_MouseClick_FocusesWidget()
-    {
-        var driver = new TestTerminalDriver(40, 10);
-        var app = new Application(driver) { TargetFps = 1000 };
-
-        var stack = new VStack();
-        var btn1 = new Button("A");
-        var btn2 = new Button("B");
-        stack.Add(btn1);
-        stack.Add(btn2);
-        app.RootWidget = stack;
-
-        // Warm-up, then click on btn2 area (row 1)
-        driver.EnqueueKey(ConsoleKey.Escape);
-        driver.EnqueueInput(new MouseEvent(
-            MouseButton.Left, MouseEventType.Press, 2, 1, false, false, false));
-
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
-        app.Run(cts.Token);
-
-        // btn2 should be focused after mouse click
-        btn2.HasFocus.Should().BeTrue("mouse click should focus btn2");
-    }
-
-    [Fact]
-    public void App_FullWidgetTree_RendersAllLayers()
-    {
-        var driver = new TestTerminalDriver(60, 20);
-        var app = new Application(driver) { TargetFps = 1000 };
-
-        // Build a mini app with all layer types
-        var menu = new MenuBar();
-        menu.AddItem(new MenuItem("File"));
-
-        var content = new VStack();
-        content.Add(new Label("Hello, TUI!"));
-        content.Add(new Button("Click Me"));
-        content.Add(new CheckBox("Option A"));
-
-        var panel = new TuiPanel { Title = "Main", Content = content };
-
-        var status = new StatusBar { Text = "Ready" };
-
-        var root = new VStack();
-        root.Add(menu);
-        panel.HeightConstraint = Constraint.Fill();
-        root.Add(panel);
-        root.Add(status);
-
-        app.RootWidget = root;
-
-        driver.EnqueueKey(ConsoleKey.Escape);
-
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
-        app.Run(cts.Token);
-
-        // Verify all layers rendered
-        GetRow(driver, 0).Should().Contain("File", "menu bar should render");
-
-        var foundMain = false;
-        var foundHello = false;
-        var foundButton = false;
-        var foundReady = false;
-
-        for (var row = 0; row < 20; row++)
+        if (root is T match)
         {
-            var text = GetRow(driver, row);
-            if (text.Contains("Main")) foundMain = true;
-            if (text.Contains("Hello")) foundHello = true;
-            if (text.Contains("Click Me")) foundButton = true;
-            if (text.Contains("Ready")) foundReady = true;
+            return match;
         }
 
-        foundMain.Should().BeTrue("panel title should render");
-        foundHello.Should().BeTrue("label should render");
-        foundButton.Should().BeTrue("button should render");
-        foundReady.Should().BeTrue("status bar should render");
+        foreach (var child in root.GetChildren())
+        {
+            var found = FindWidget<T>(child);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    private static List<T> FindAllWidgets<T>(Widget root) where T : Widget
+    {
+        var results = new List<T>();
+        CollectWidgets(root, results);
+        return results;
+    }
+
+    private static void CollectWidgets<T>(Widget widget, List<T> results) where T : Widget
+    {
+        if (widget is T match)
+        {
+            results.Add(match);
+        }
+
+        foreach (var child in widget.GetChildren())
+        {
+            CollectWidgets(child, results);
+        }
     }
 }
